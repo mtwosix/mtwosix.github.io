@@ -10,6 +10,7 @@
 <script src="./vendor/react-dom.production.min.js"></script>
 <script src="./js/m26-core.js"></script>
 <script src="./js/discourse.js"></script>
+<script src="./js/viewer.js"></script>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="./css/site.css">
 </head>
@@ -193,6 +194,17 @@
   var docEl = document.documentElement;
   var mode = 'cloud';
   var rendered = false;
+
+  // keep the sandbox switch alive across the page links (skip link + corner link)
+  if (M26.SANDBOX){
+    var skipA = document.querySelector('.m26-skip');
+    if (skipA) skipA.href = M26.pageUrl('archive.html');
+    var fixLinks = setInterval(function(){
+      var corner = document.querySelector('.m26-corner-link');
+      if (corner){ corner.href = M26.pageUrl('archive.html'); clearInterval(fixLinks); }
+    }, 300); // the corner link appears once the template mounts
+    setTimeout(function(){ clearInterval(fixLinks); }, 10000);
+  }
 
   // one voice per visit
   var q = M26.QUOTES[Math.floor(Math.random() * M26.QUOTES.length)];
@@ -403,7 +415,7 @@ class Component extends DCLogic {
   async loadSubmissions(){
     let text;
     try {
-      text = await M26.fetchCsv('data/submissions.csv');
+      text = await M26.fetchCsv(M26.CONFIG.submissionsCsv);
       this._setDataStatus(null);
     } catch (e) { this._setDataStatus('DATA UNAVAILABLE — RETRYING'); return; } // poll retries every 15s
     if (text === this._subCsvText) return; // unchanged — leave the cloud (and any interaction) untouched

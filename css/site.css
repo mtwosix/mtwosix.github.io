@@ -84,7 +84,19 @@
   background: var(--paper-2);
 }
 .m26-media iframe.m26-media-frame-audio { aspect-ratio: auto; height: 132px; }
-.m26-media-imglink { display: inline-block; line-height: 0; }
+.m26-media-imgbtn {
+  display: inline-block; line-height: 0; padding: 0; margin: 0;
+  background: none; border: 0; cursor: zoom-in;
+}
+.m26-media-pdfbtn {
+  display: inline-block; cursor: pointer;
+  font: 11px var(--mono); letter-spacing: .14em;
+  color: var(--ink-60); background: var(--paper-2);
+  border: 1px dashed var(--hairline);
+  padding: 14px 18px;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.m26-media-pdfbtn:hover, .m26-media-pdfbtn:focus-visible { color: var(--ink); border-color: var(--ink); }
 .m26-media-link {
   display: inline-block;
   font: 11px var(--mono); letter-spacing: .14em;
@@ -351,4 +363,81 @@ html.m26-archive-mode #m26-archive {
 }
 html.m26-archive-mode #dc-root { position: fixed; inset: 0; visibility: hidden; }
 html.m26-archive-mode #m26-outro { display: none !important; }
+
+/* ---- the media viewer (image lightbox + pdf page-chain) ------------------ */
+html.m26-viewer-lock, html.m26-viewer-lock body { overflow: hidden !important; }
+.m26-viewer {
+  position: fixed; inset: 0; z-index: 80;
+  display: flex; flex-direction: column;
+  background: rgba(10, 10, 14, .93);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease), visibility 0s linear var(--dur-slow);
+}
+.m26-viewer.m26-viewer-open {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transition: opacity var(--dur-slow) var(--ease);
+}
+.m26-viewer-close {
+  position: absolute; top: 14px; right: 16px; z-index: 2;
+  cursor: pointer; font: 17px var(--mono);
+  color: rgba(236, 233, 226, .8); background: none;
+  border: 1px solid transparent; padding: 8px 12px;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.m26-viewer-close:hover, .m26-viewer-close:focus-visible { color: #fff; border-color: rgba(236,233,226,.5); outline: none; }
+.m26-viewer-stage {
+  flex: 1; min-height: 0; overflow: auto;
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 20px 16px;
+}
+.m26-viewer-img {
+  max-width: min(1400px, 94vw); max-height: calc(100vh - 150px);
+  object-fit: contain; display: block;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .55);
+}
+.m26-viewer-pages {
+  display: flex; flex-direction: column; gap: 14px;
+  margin: 0 auto; align-self: flex-start;
+}
+.m26-viewer-stage:has(.m26-viewer-pages) { align-items: flex-start; justify-content: center; }
+.m26-viewer-page { background: #fff; box-shadow: 0 10px 34px rgba(0,0,0,.5); }
+.m26-viewer-pdfframe {
+  width: min(1000px, 92vw); height: calc(100vh - 150px);
+  border: 0; background: #fff; align-self: flex-start;
+}
+.m26-viewer-status {
+  position: absolute; top: 18px; left: 20px; margin: 0;
+  font: 10px var(--mono); letter-spacing: .2em; color: rgba(236,233,226,.6);
+}
+.m26-viewer-foot {
+  flex: none; display: flex; gap: 18px; align-items: baseline;
+  padding: 12px 20px 16px; color: #ece9e2;
+}
+.m26-viewer-meta { font: 10px var(--mono); letter-spacing: .18em; color: rgba(236,233,226,.6); white-space: nowrap; }
+.m26-viewer-caption {
+  flex: 1; min-width: 0;
+  font-family: var(--serif); font-weight: 300; font-size: 14px; line-height: 1.5;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.m26-viewer-orig {
+  font: 10px var(--mono); letter-spacing: .16em;
+  color: rgba(236,233,226,.65); text-decoration: none;
+  border-bottom: 1px dashed rgba(236,233,226,.35); padding-bottom: 2px; white-space: nowrap;
+}
+.m26-viewer-orig:hover, .m26-viewer-orig:focus-visible { color: #fff; border-bottom-color: #fff; }
+@media (max-width: 640px) {
+  .m26-viewer-foot { flex-wrap: wrap; }
+  .m26-viewer-caption { white-space: normal; }
+}
+
+/* ---- sandbox badge -------------------------------------------------------- */
+#m26-sandbox-badge {
+  position: fixed; left: 14px; bottom: 14px; z-index: 90;
+  font: 10px var(--mono); letter-spacing: .18em;
+  color: var(--paper); background: #8a5a34;
+  padding: 8px 12px; text-decoration: none;
+  border: 1px solid rgba(243, 241, 234, .4);
+}
+#m26-sandbox-badge:hover, #m26-sandbox-badge:focus-visible { background: var(--ink); }
+html.m26-viewer-lock #m26-sandbox-badge { display: none; }
 #m26-archive:focus { outline: none; }

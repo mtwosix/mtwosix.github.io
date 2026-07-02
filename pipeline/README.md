@@ -43,7 +43,7 @@ without it, images upload fine but won't display for anyone but you.
 1. **Form** — questions, mapped by the script:
    - *Name* — dropdown, one option per roster name
    - *Kind* — dropdown or short text (`note`, `sketch`, `reference`, `field note`, `project`…)
-   - *Type* — dropdown: `image`, `text`, `video`, `audio`
+   - *Type* — dropdown: `image`, `text`, `video`, `audio`, `pdf`
    - *Upload* — File upload question (optional), allow images/video/audio
    - *Caption* — paragraph text
 2. **Sheet** — in the Form: Responses → link to a Sheet.

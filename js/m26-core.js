@@ -22,6 +22,14 @@
 (function () {
   'use strict';
 
+  /* ---------------------------------------------------------------- sandbox
+     Add ?sandbox to any page URL and the whole site runs against the sample
+     dataset in data/sandbox/ (15 dummy students, five submission types each)
+     with a visible SANDBOX badge. The real site — same deploy, same code —
+     stays untouched at the plain URL. For stress-testing before and during
+     the semester; never mixes with real data. */
+  var SANDBOX = /[?&]sandbox\b/.test(location.search);
+
   /* ------------------------------------------------------------------ config
      The only numbers on the site that are calendar facts rather than data:
      the studio's start date and planned length. Everything else (student
@@ -29,14 +37,32 @@
   var CONFIG = {
     semesterStart: '2026-07-06', // Monday of week 1 — must match the studio calendar
     weeks: 18,                   // planned semester length (data past this still shows)
-    studentsCsv: 'data/students.csv',
-    submissionsCsv: 'data/submissions.csv',
+    studentsCsv: SANDBOX ? 'data/sandbox/students.csv' : 'data/students.csv',
+    submissionsCsv: SANDBOX ? 'data/sandbox/submissions.csv' : 'data/submissions.csv',
     // Public link to the submission form ("Send" link from Google Forms).
     formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfSj-YF6bUyYf6mrEWTHaxbfp3SfdeQHwdyXPlodjP_l64Z3A/viewform',
     // Apps Script web-app URL for the discourse (comments) backend — see
     // pipeline/README.md § "The discourse backend". Empty = discourse read-only.
     discourseUrl: 'https://script.google.com/macros/s/AKfycbxdM8eXg0Gq6vcVC75m71gIpIR2dAFY4vKLAXj12KzlOQbk_lmKJdbcIOBqXa7sgxP6/exec'
   };
+
+  /* Cross-page links must keep the sandbox switch alive (index ↔ archive). */
+  function pageUrl(page, hash) {
+    return page + (SANDBOX ? '?sandbox' : '') + (hash || '');
+  }
+
+  /* Visible tell that none of this is real — injected on both pages. */
+  function sandboxBadge() {
+    if (!SANDBOX) return;
+    var b = document.createElement('a');
+    b.id = 'm26-sandbox-badge';
+    b.href = location.pathname; // same page, sandbox off
+    b.textContent = 'SANDBOX — sample data · exit';
+    b.title = 'This is the test dataset. Click to return to the real site.';
+    document.body.appendChild(b);
+  }
+  if (document.readyState !== 'loading') sandboxBadge();
+  else document.addEventListener('DOMContentLoaded', sandboxBadge);
 
   /* One is shown per visit, white against the dark, on the threshold between
      the cloud and the archive. Real, attributed quotes only. */
@@ -198,10 +224,12 @@
      resolveMedia decides how a submission's attachment can be shown.
 
      Returns { mode, kind, src, href, label }
-       mode 'img'    → <img src>
+       mode 'img'    → <img src>, click opens the in-site image viewer
             'video'  → <video controls src>      (direct files)
             'audio'  → <audio controls src>      (direct files)
             'iframe' → <iframe src>              (Drive player, YouTube, Vimeo)
+            'pdf'    → card that opens the in-site page-chain reader
+                       (pdfSrc = direct file for pdf.js, or embedSrc = Drive preview)
             'link'   → can't inline — offer the original link
             'none'   → no attachment (text-only submission)                    */
   function safeUrl(raw) {
@@ -236,6 +264,10 @@
       if (type === 'video' || type === 'audio') {
         return { mode: 'iframe', kind: type, src: 'https://drive.google.com/file/d/' + id + '/preview', href: url, label: type };
       }
+      if (type === 'pdf') {
+        // cross-origin Drive files can't reach pdf.js — use Drive's own reader in the viewer
+        return { mode: 'pdf', kind: 'pdf', embedSrc: 'https://drive.google.com/file/d/' + id + '/preview', href: url, label: 'pdf' };
+      }
       // two public Drive image hosts — the thumbnail endpoint rate-limits
       // occasionally, so a googleusercontent mirror is tried before giving up
       return { mode: 'img', kind: 'image',
@@ -249,6 +281,7 @@
     if (vm) return { mode: 'iframe', kind: 'video', src: 'https://player.vimeo.com/video/' + vm[1], href: url, label: 'video' };
 
     var ext = extOf(url);
+    if (type === 'pdf' || ext === 'pdf') return { mode: 'pdf', kind: 'pdf', pdfSrc: url, href: url, label: 'pdf' };
     if (type === 'image' || IMG_EXT[ext]) return { mode: 'img', kind: 'image', src: url, href: url, label: 'image' };
     if (type === 'video' || VID_EXT[ext]) return { mode: 'video', kind: 'video', src: url, href: url, label: 'video' };
     if (type === 'audio' || AUD_EXT[ext]) return { mode: 'audio', kind: 'audio', src: url, href: url, label: 'audio' };
@@ -277,20 +310,40 @@
       img.className = 'm26-media-img';
       img.loading = 'lazy'; img.decoding = 'async';
       img.alt = sub.text ? sub.text : (sub.student + ' — ' + (sub.kind || 'submission'));
-      var a = document.createElement('a');
-      a.href = media.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      a.className = 'm26-media-imglink';
-      a.appendChild(img);
+      // clicking opens the in-site viewer — never a jump to Drive
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'm26-media-imgbtn';
+      btn.title = 'view larger';
+      btn.appendChild(img);
       // if a host fails (rate limit, sharing off), walk the alternates, then a plain link
       var srcs = [media.src].concat(media.srcAlt || []);
       var si = 0;
       img.onerror = function () {
         si++;
         if (si < srcs.length) { img.src = srcs[si]; return; }
-        if (a.parentNode === el) { el.removeChild(a); linkCard('open ' + media.label + ' ↗'); }
+        if (btn.parentNode === el) { el.removeChild(btn); linkCard('open ' + media.label + ' ↗'); }
       };
+      btn.addEventListener('click', function () {
+        if (window.M26Viewer) M26Viewer.open({
+          kind: 'image', src: img.currentSrc || img.src, href: media.href,
+          caption: sub.text || '', meta: (sub.student || '') + (sub.kind ? ' · ' + sub.kind : '')
+        });
+      });
       img.src = srcs[0];
-      el.appendChild(a);
+      el.appendChild(btn);
+    } else if (media.mode === 'pdf') {
+      var pbtn = document.createElement('button');
+      pbtn.type = 'button';
+      pbtn.className = 'm26-media-pdfbtn';
+      pbtn.textContent = 'READ PDF — opens here';
+      pbtn.addEventListener('click', function () {
+        if (window.M26Viewer) M26Viewer.open({
+          kind: 'pdf', pdfSrc: media.pdfSrc || null, embedSrc: media.embedSrc || null, href: media.href,
+          caption: sub.text || '', meta: (sub.student || '') + (sub.kind ? ' · ' + sub.kind : '')
+        });
+      });
+      el.appendChild(pbtn);
     } else if (media.mode === 'video' || media.mode === 'audio') {
       var mel = document.createElement(media.mode);
       mel.className = 'm26-media-' + media.mode;
@@ -306,7 +359,8 @@
       fr.src = media.src;
       fr.loading = 'lazy';
       fr.allow = 'autoplay; encrypted-media; picture-in-picture';
-      fr.referrerPolicy = 'no-referrer';
+      // YouTube refuses embeds without a referrer (player error 153) — send origin only
+      fr.referrerPolicy = 'origin';
       fr.setAttribute('allowfullscreen', '');
       fr.title = (sub.student || 'submission') + ' — ' + media.label;
       el.appendChild(fr);
@@ -319,6 +373,8 @@
   window.M26 = {
     CONFIG: CONFIG,
     QUOTES: QUOTES,
+    SANDBOX: SANDBOX,
+    pageUrl: pageUrl,
     parseCSV: parseCSV,
     csvToObjects: csvToObjects,
     parseDateTime: parseDateTime,

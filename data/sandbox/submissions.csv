@@ -1,0 +1,76 @@
+ID,Student,Date,Time,Kind,Type,Image,Text
+sbx-aarav-2026-07-31-text,Aarav,2026-07-31,14:50,note,text,,Sandbox text submission — checking how a caption-only entry sits in the thread and the archive.
+sbx-aarav-2026-08-01-image,Aarav,2026-08-01,10:45,note,image,uploads/sandbox/img-study-2.svg,Sandbox image submission — an abstract study drawing to test the in-site image viewer.
+sbx-aarav-2026-09-28-video,Aarav,2026-09-28,19:50,sketch,video,https://www.youtube.com/watch?v=aqz-KE-bpKQ,Sandbox video submission — embedded player test.
+sbx-aarav-2026-10-09-audio,Aarav,2026-10-09,18:40,sketch,audio,uploads/sandbox/audio-fieldnote-1.m4a,Sandbox audio submission — a synthesized field note to test inline playback.
+sbx-aarav-2026-10-30-pdf,Aarav,2026-10-30,19:40,question,pdf,uploads/sandbox/pdf-worksheet-1.pdf,Sandbox PDF submission — multi-page worksheet to test the vertical page reader.
+sbx-diya-2026-07-31-text,Diya,2026-07-31,21:00,question,text,,"Sandbox note: the bench holds both the wait and the gathering, or so we claim for testing purposes."
+sbx-diya-2026-10-02-image,Diya,2026-10-02,21:15,sketch,image,uploads/sandbox/img-study-3.svg,"Sandbox image: threshold study, drawn for layout testing."
+sbx-diya-2026-10-14-video,Diya,2026-10-14,10:15,project,video,https://youtu.be/M7lc1UVf-VE,Sandbox video: checking the week band with an embedded film.
+sbx-diya-2026-10-22-audio,Diya,2026-10-22,15:40,reference,audio,uploads/sandbox/audio-fieldnote-2.m4a,Sandbox audio: interview fragment stand-in.
+sbx-diya-2026-11-07-pdf,Diya,2026-11-07,11:00,note,pdf,uploads/sandbox/pdf-worksheet-2.pdf,Sandbox PDF: checking pagination in the in-site reader.
+sbx-kabir-2026-08-12-text,Kabir,2026-08-12,16:05,project,text,,"Sandbox question for crit: does this layout survive a really long caption? This one rambles on purpose, wrapping over several lines to stress the reading measure and the panel scroll."
+sbx-kabir-2026-09-13-image,Kabir,2026-09-13,08:00,field note,image,uploads/sandbox/img-study-4.svg,Sandbox image submission — an abstract study drawing to test the in-site image viewer.
+sbx-kabir-2026-10-08-video,Kabir,2026-10-08,17:50,reference,video,https://www.youtube.com/watch?v=aqz-KE-bpKQ,Sandbox video submission — embedded player test.
+sbx-kabir-2026-10-22-audio,Kabir,2026-10-22,21:30,question,audio,uploads/sandbox/audio-fieldnote-3.m4a,Sandbox audio submission — a synthesized field note to test inline playback.
+sbx-kabir-2026-11-06-pdf,Kabir,2026-11-06,14:40,question,pdf,uploads/sandbox/pdf-worksheet-3.pdf,Sandbox PDF submission — multi-page worksheet to test the vertical page reader.
+sbx-meera-2026-07-13-text,Meera,2026-07-13,11:40,field note,text,,Sandbox text submission — checking how a caption-only entry sits in the thread and the archive.
+sbx-meera-2026-07-31-image,Meera,2026-07-31,17:50,sketch,image,uploads/sandbox/img-study-5.svg,"Sandbox image: threshold study, drawn for layout testing."
+sbx-meera-2026-08-07-video,Meera,2026-08-07,08:05,note,video,https://vimeo.com/1084537,Sandbox video: checking the week band with an embedded film.
+sbx-meera-2026-10-26-audio,Meera,2026-10-26,10:50,project,audio,uploads/sandbox/audio-fieldnote-1.m4a,Sandbox audio: interview fragment stand-in.
+sbx-meera-2026-11-04-pdf,Meera,2026-11-04,19:00,note,pdf,uploads/sandbox/pdf-worksheet-1.pdf,Sandbox PDF: checking pagination in the in-site reader.
+sbx-rohan-2026-08-02-text,Rohan,2026-08-02,09:50,reference,text,,"Sandbox note: the bench holds both the wait and the gathering, or so we claim for testing purposes."
+sbx-rohan-2026-08-22-image,Rohan,2026-08-22,09:40,note,image,uploads/sandbox/img-study-6.svg,Sandbox image submission — an abstract study drawing to test the in-site image viewer.
+sbx-rohan-2026-08-27-video,Rohan,2026-08-27,14:45,project,video,https://www.youtube.com/watch?v=aqz-KE-bpKQ,Sandbox video submission — embedded player test.
+sbx-rohan-2026-09-20-audio,Rohan,2026-09-20,09:00,reference,audio,uploads/sandbox/audio-fieldnote-2.m4a,Sandbox audio submission — a synthesized field note to test inline playback.
+sbx-rohan-2026-10-13-pdf,Rohan,2026-10-13,09:15,note,pdf,uploads/sandbox/pdf-worksheet-2.pdf,Sandbox PDF submission — multi-page worksheet to test the vertical page reader.
+sbx-saanvi-2026-07-23-text,Saanvi,2026-07-23,13:40,reference,text,,"Sandbox question for crit: does this layout survive a really long caption? This one rambles on purpose, wrapping over several lines to stress the reading measure and the panel scroll."
+sbx-saanvi-2026-08-10-image,Saanvi,2026-08-10,16:45,project,image,uploads/ananya-sketch-01.jpg,"Sandbox image: threshold study, drawn for layout testing."
+sbx-saanvi-2026-09-30-video,Saanvi,2026-09-30,14:00,note,video,https://youtu.be/M7lc1UVf-VE,Sandbox video: checking the week band with an embedded film.
+sbx-saanvi-2026-11-05-audio,Saanvi,2026-11-05,10:00,project,audio,uploads/sandbox/audio-fieldnote-3.m4a,Sandbox audio: interview fragment stand-in.
+sbx-saanvi-2026-11-06-pdf,Saanvi,2026-11-06,09:45,note,pdf,uploads/sandbox/pdf-worksheet-3.pdf,Sandbox PDF: checking pagination in the in-site reader.
+sbx-vikram-2026-07-10-text,Vikram,2026-07-10,19:00,field note,text,,Sandbox text submission — checking how a caption-only entry sits in the thread and the archive.
+sbx-vikram-2026-07-29-image,Vikram,2026-07-29,08:20,field note,image,https://drive.google.com/open?id=1anAEEqacQfY5U7SAdHhR_6uOVKJMCd0P,Sandbox image submission — an abstract study drawing to test the in-site image viewer.
+sbx-vikram-2026-09-18-video,Vikram,2026-09-18,10:05,reference,video,https://www.youtube.com/watch?v=aqz-KE-bpKQ,Sandbox video submission — embedded player test.
+sbx-vikram-2026-09-22-audio,Vikram,2026-09-22,10:05,note,audio,uploads/sandbox/audio-fieldnote-1.m4a,Sandbox audio submission — a synthesized field note to test inline playback.
+sbx-vikram-2026-10-18-pdf,Vikram,2026-10-18,17:00,note,pdf,uploads/sandbox/pdf-worksheet-1.pdf,Sandbox PDF submission — multi-page worksheet to test the vertical page reader.
+sbx-ananya-2026-08-29-text,Ananya,2026-08-29,08:20,field note,text,,"Sandbox note: the bench holds both the wait and the gathering, or so we claim for testing purposes."
+sbx-ananya-2026-09-13-image,Ananya,2026-09-13,21:30,question,image,uploads/sandbox/img-study-1.svg,"Sandbox image: threshold study, drawn for layout testing."
+sbx-ananya-2026-10-01-video,Ananya,2026-10-01,18:50,question,video,https://vimeo.com/1084537,Sandbox video: checking the week band with an embedded film.
+sbx-ananya-2026-10-22-audio,Ananya,2026-10-22,14:00,note,audio,uploads/sandbox/audio-fieldnote-2.m4a,Sandbox audio: interview fragment stand-in.
+sbx-ananya-2026-10-31-pdf,Ananya,2026-10-31,09:15,field note,pdf,uploads/sandbox/pdf-worksheet-2.pdf,Sandbox PDF: checking pagination in the in-site reader.
+sbx-ishaan-2026-07-24-text,Ishaan,2026-07-24,17:50,field note,text,,"Sandbox question for crit: does this layout survive a really long caption? This one rambles on purpose, wrapping over several lines to stress the reading measure and the panel scroll."
+sbx-ishaan-2026-08-04-image,Ishaan,2026-08-04,14:30,question,image,uploads/sandbox/img-study-2.svg,Sandbox image submission — an abstract study drawing to test the in-site image viewer.
+sbx-ishaan-2026-08-05-video,Ishaan,2026-08-05,09:50,question,video,https://www.youtube.com/watch?v=aqz-KE-bpKQ,Sandbox video submission — embedded player test.
+sbx-ishaan-2026-08-14-audio,Ishaan,2026-08-14,09:10,question,audio,uploads/sandbox/audio-fieldnote-3.m4a,Sandbox audio submission — a synthesized field note to test inline playback.
+sbx-ishaan-2026-10-21-pdf,Ishaan,2026-10-21,08:00,sketch,pdf,uploads/sandbox/pdf-worksheet-3.pdf,Sandbox PDF submission — multi-page worksheet to test the vertical page reader.
+sbx-tara-2026-07-14-text,Tara,2026-07-14,12:30,field note,text,,Sandbox text submission — checking how a caption-only entry sits in the thread and the archive.
+sbx-tara-2026-07-31-image,Tara,2026-07-31,15:15,question,image,uploads/sandbox/img-study-3.svg,"Sandbox image: threshold study, drawn for layout testing."
+sbx-tara-2026-08-06-video,Tara,2026-08-06,15:15,note,video,https://youtu.be/M7lc1UVf-VE,Sandbox video: checking the week band with an embedded film.
+sbx-tara-2026-08-16-audio,Tara,2026-08-16,16:05,note,audio,uploads/sandbox/audio-fieldnote-1.m4a,Sandbox audio: interview fragment stand-in.
+sbx-tara-2026-08-25-pdf,Tara,2026-08-25,08:15,sketch,pdf,uploads/sandbox/pdf-worksheet-1.pdf,Sandbox PDF: checking pagination in the in-site reader.
+sbx-neel-2026-07-18-text,Neel,2026-07-18,10:00,project,text,,"Sandbox note: the bench holds both the wait and the gathering, or so we claim for testing purposes."
+sbx-neel-2026-07-24-image,Neel,2026-07-24,18:50,sketch,image,uploads/sandbox/img-study-4.svg,Sandbox image submission — an abstract study drawing to test the in-site image viewer.
+sbx-neel-2026-09-15-video,Neel,2026-09-15,20:10,project,video,https://www.youtube.com/watch?v=aqz-KE-bpKQ,Sandbox video submission — embedded player test.
+sbx-neel-2026-10-07-audio,Neel,2026-10-07,08:00,field note,audio,uploads/sandbox/audio-fieldnote-2.m4a,Sandbox audio submission — a synthesized field note to test inline playback.
+sbx-neel-2026-10-10-pdf,Neel,2026-10-10,15:50,note,pdf,uploads/sandbox/pdf-worksheet-2.pdf,Sandbox PDF submission — multi-page worksheet to test the vertical page reader.
+sbx-priya-2026-08-01-text,Priya,2026-08-01,10:15,note,text,,"Sandbox question for crit: does this layout survive a really long caption? This one rambles on purpose, wrapping over several lines to stress the reading measure and the panel scroll."
+sbx-priya-2026-08-18-image,Priya,2026-08-18,16:00,reference,image,uploads/sandbox/img-study-5.svg,"Sandbox image: threshold study, drawn for layout testing."
+sbx-priya-2026-08-28-video,Priya,2026-08-28,12:40,sketch,video,https://vimeo.com/1084537,Sandbox video: checking the week band with an embedded film.
+sbx-priya-2026-10-08-audio,Priya,2026-10-08,18:50,field note,audio,uploads/sandbox/audio-fieldnote-3.m4a,Sandbox audio: interview fragment stand-in.
+sbx-priya-2026-10-09-pdf,Priya,2026-10-09,21:45,reference,pdf,uploads/sandbox/pdf-worksheet-3.pdf,Sandbox PDF: checking pagination in the in-site reader.
+sbx-arjun-2026-08-07-text,Arjun,2026-08-07,12:20,project,text,,Sandbox text submission — checking how a caption-only entry sits in the thread and the archive.
+sbx-arjun-2026-10-11-image,Arjun,2026-10-11,21:45,note,image,uploads/sandbox/img-study-6.svg,Sandbox image submission — an abstract study drawing to test the in-site image viewer.
+sbx-arjun-2026-10-13-video,Arjun,2026-10-13,21:20,field note,video,https://www.youtube.com/watch?v=aqz-KE-bpKQ,Sandbox video submission — embedded player test.
+sbx-arjun-2026-10-14-audio,Arjun,2026-10-14,08:00,project,audio,uploads/sandbox/audio-fieldnote-1.m4a,Sandbox audio submission — a synthesized field note to test inline playback.
+sbx-arjun-2026-11-06-pdf,Arjun,2026-11-06,20:20,sketch,pdf,uploads/sandbox/pdf-worksheet-1.pdf,Sandbox PDF submission — multi-page worksheet to test the vertical page reader.
+sbx-zoya-2026-08-03-text,Zoya,2026-08-03,17:20,project,text,,"Sandbox note: the bench holds both the wait and the gathering, or so we claim for testing purposes."
+sbx-zoya-2026-08-04-image,Zoya,2026-08-04,19:40,question,image,uploads/ananya-sketch-01.jpg,"Sandbox image: threshold study, drawn for layout testing."
+sbx-zoya-2026-08-12-video,Zoya,2026-08-12,17:00,project,video,https://youtu.be/M7lc1UVf-VE,Sandbox video: checking the week band with an embedded film.
+sbx-zoya-2026-09-20-audio,Zoya,2026-09-20,19:30,sketch,audio,uploads/sandbox/audio-fieldnote-2.m4a,Sandbox audio: interview fragment stand-in.
+sbx-zoya-2026-11-07-pdf,Zoya,2026-11-07,15:20,note,pdf,uploads/sandbox/pdf-worksheet-2.pdf,Sandbox PDF: checking pagination in the in-site reader.
+sbx-dev-2026-07-07-text,Dev,2026-07-07,09:00,note,text,,"Sandbox question for crit: does this layout survive a really long caption? This one rambles on purpose, wrapping over several lines to stress the reading measure and the panel scroll."
+sbx-dev-2026-09-09-image,Dev,2026-09-09,19:05,sketch,image,https://drive.google.com/open?id=1anAEEqacQfY5U7SAdHhR_6uOVKJMCd0P,Sandbox image submission — an abstract study drawing to test the in-site image viewer.
+sbx-dev-2026-10-11-video,Dev,2026-10-11,14:05,question,video,https://www.youtube.com/watch?v=aqz-KE-bpKQ,Sandbox video submission — embedded player test.
+sbx-dev-2026-10-20-audio,Dev,2026-10-20,19:30,note,audio,uploads/sandbox/audio-fieldnote-3.m4a,Sandbox audio submission — a synthesized field note to test inline playback.
+sbx-dev-2026-11-08-pdf,Dev,2026-11-08,15:40,field note,pdf,uploads/sandbox/pdf-worksheet-3.pdf,Sandbox PDF submission — multi-page worksheet to test the vertical page reader.

@@ -43,7 +43,9 @@ ID, Student, Date, Time, Kind, Type, Image, Text
   dates (e.g. `2026-02-31`) cause the row to be skipped.
 - **Time** — optional, 24 h. `17:15`, `9:05`, and `09:05:30` are all accepted; blank means `12:00`.
 - **Kind** — free label shown on the card (`note`, `sketch`, `reference`, `field note`, `project`…).
-- **Type** — `image`, `text`, `video`, or `audio`. All four now render properly in both views.
+- **Type** — `image`, `text`, `video`, `audio`, or `pdf`. All five render in both views:
+  images open in an in-site viewer (no jump to Drive), video/audio play embedded, and PDFs
+  open in an in-site reader as a vertical chain of pages.
 - **Image** — where the attached file lives. Any of these work:
   - a repo path, e.g. `uploads/kabir-model-02.jpg`
   - a **Google Drive link** (what the form pipeline writes) — shown inline; for `video`/`audio`

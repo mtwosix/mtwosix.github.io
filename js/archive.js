@@ -319,7 +319,7 @@
     sub.appendChild(document.createTextNode('The archive. Choose a student to open their semester. '));
     if (!opts.embedded) {
       var cloudLink = el('a', 'm26-link', 'Enter the cloud →');
-      cloudLink.href = 'index.html';
+      cloudLink.href = M26.pageUrl('index.html');
       sub.appendChild(cloudLink);
     }
     head.appendChild(sub);
@@ -380,7 +380,7 @@
       links.appendChild(back);
     } else {
       var cl = el('a', 'm26-link', 'THE CLOUD →');
-      cl.href = 'index.html';
+      cl.href = M26.pageUrl('index.html');
       links.appendChild(cl);
     }
     foot.appendChild(links);

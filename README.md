@@ -24,6 +24,20 @@ Everything the site needs ships in the repo — including its two runtime librar
 
 Setup (only needed once): repo **Settings → Pages → Deploy from a branch → `main` / root**.
 
+## The sandbox (test the site without touching real data)
+
+Add `?sandbox` to either page's URL and the whole site runs against the sample dataset in
+`data/sandbox/` — 15 dummy students with five submissions each (text, image, video, audio,
+pdf) — with a visible **SANDBOX — sample data** badge. The real site at the plain URL is
+completely unaffected, so you can stress-test while the real site is live:
+
+- `…/M26_STUDIO/?sandbox` — the cloud with sample data
+- `…/M26_STUDIO/archive.html?sandbox` — the archive with sample data
+
+To simulate "a submission arrives and a point pops in": keep a sandbox tab open, edit
+`data/sandbox/submissions.csv` on github.com, add a row, commit — the new dot pulses in
+within ~15 s, exactly as a real pipeline commit would on the real site.
+
 ## Updating the content
 
 You never touch code to publish work. See **`data/README.md`** for the field-by-field guide:
