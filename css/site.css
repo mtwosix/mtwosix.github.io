@@ -1,0 +1,268 @@
+/* ============================================================================
+   M26 — shared design system for both lenses of the site.
+
+   One vocabulary across the 3D cloud and the archive: paper + ink, monospace
+   wayfinding labels, dashed hairlines (site markings, scaffolding, the
+   provisional), one colour per student carried over from the cloud's threads.
+   Motion is slow and quiet; everything respects prefers-reduced-motion.
+   ============================================================================ */
+
+:root {
+  /* palette — the cloud's own colours, promoted to tokens */
+  --paper:    #f3f1ea;
+  --paper-2:  #ece9e0;
+  --ink:      #1d1b17;
+  --ink-60:   #6c685f;
+  --ink-40:   #9a958c;
+  --night:    #06060c;
+  --hairline: rgba(29, 27, 23, .22);
+  --hairline-soft: rgba(29, 27, 23, .12);
+
+  /* type */
+  --serif: 'Spectral', Georgia, serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, monospace;
+  --sans:  ui-sans-serif, system-ui, sans-serif;
+
+  /* motion — unhurried */
+  --dur:      .45s;
+  --dur-slow: .9s;
+  --ease:     cubic-bezier(.33, 0, .2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001s !important;
+    transition-duration: .001s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- wayfinding chrome shared by both pages ------------------------------ */
+
+/* skip link — hidden until keyboard focus */
+.m26-skip {
+  position: fixed; top: 10px; left: 10px; z-index: 100;
+  transform: translateY(-300%);
+  font: 12px var(--mono); letter-spacing: .08em;
+  color: var(--paper); background: var(--ink);
+  padding: 10px 14px; text-decoration: none;
+  transition: transform var(--dur) var(--ease);
+}
+.m26-skip:focus { transform: none; outline: 2px solid var(--paper); outline-offset: -5px; }
+
+/* quiet corner link on the 3D landing */
+.m26-corner-link {
+  position: absolute; top: 26px; right: 30px;
+  pointer-events: auto;
+  font: 10px var(--mono); letter-spacing: .22em;
+  color: var(--ink-60); text-decoration: none;
+  border-bottom: 1px dashed var(--hairline);
+  padding-bottom: 3px;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.m26-corner-link:hover, .m26-corner-link:focus-visible { color: var(--ink); border-bottom-color: var(--ink); }
+
+:where(.m26-arch) a:focus-visible,
+:where(.m26-arch) button:focus-visible,
+.m26-corner-link:focus-visible {
+  outline: 1.5px solid var(--ink); outline-offset: 3px;
+}
+
+/* ---- media (used in the archive AND the cloud's expanded panel) ---------- */
+
+.m26-media { margin: 0; }
+.m26-media:empty { display: none; }
+.m26-media img,
+.m26-media video {
+  display: block; max-width: 100%; max-height: 340px;
+  border: 1px solid var(--hairline);
+  background: var(--paper-2);
+}
+.m26-media audio { display: block; width: 100%; max-width: 480px; }
+.m26-media iframe.m26-media-frame {
+  display: block; width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--hairline);
+  background: var(--paper-2);
+}
+.m26-media iframe.m26-media-frame-audio { aspect-ratio: auto; height: 132px; }
+.m26-media-imglink { display: inline-block; line-height: 0; }
+.m26-media-link {
+  display: inline-block;
+  font: 11px var(--mono); letter-spacing: .14em;
+  color: var(--ink-60); text-decoration: none;
+  border: 1px dashed var(--hairline);
+  padding: 12px 16px;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.m26-media-link:hover, .m26-media-link:focus-visible { color: var(--ink); border-color: var(--ink); }
+
+/* ============================================================================
+   The archive
+   ============================================================================ */
+
+.m26-arch {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--sans);
+  min-height: 100vh;
+  padding: clamp(22px, 5vw, 64px) clamp(18px, 6vw, 88px) 96px;
+}
+.m26-arch *, .m26-arch *::before, .m26-arch *::after { box-sizing: border-box; }
+
+.m26-arch-status { font: 12px var(--mono); letter-spacing: .14em; color: var(--ink-60); }
+
+.m26-label, .m26-eyebrow {
+  font: 10px var(--mono); letter-spacing: .26em; color: var(--ink-60);
+  text-transform: uppercase; margin: 0;
+}
+
+.m26-link, .m26-btn-link {
+  font: 11px var(--mono); letter-spacing: .18em;
+  color: var(--ink-60); text-decoration: none;
+  border: 0; border-bottom: 1px dashed var(--hairline);
+  background: none; padding: 0 0 3px; cursor: pointer;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.m26-link:hover, .m26-link:focus-visible,
+.m26-btn-link:hover, .m26-btn-link:focus-visible { color: var(--ink); border-bottom-color: var(--ink); }
+
+.m26-btn {
+  font: 11px var(--mono); letter-spacing: .18em;
+  color: var(--ink); background: none;
+  border: 1px solid var(--hairline);
+  padding: 12px 18px; cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.m26-btn:hover, .m26-btn:focus-visible { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* header */
+.m26-arch-head { max-width: 900px; }
+.m26-return { margin-bottom: 44px; }
+.m26-arch-title {
+  font-family: var(--serif); font-weight: 300;
+  font-size: clamp(30px, 5.4vw, 52px); letter-spacing: .004em;
+  margin: 14px 0 0; line-height: 1.08;
+}
+.m26-arch-sub {
+  font: 14px/1.7 var(--sans); color: var(--ink-60);
+  margin: 18px 0 0; max-width: 58ch;
+}
+
+/* layout: index rail + entries */
+.m26-index { margin-top: 56px; }
+.m26-index-list {
+  list-style: none; margin: 14px 0 0; padding: 14px 0 0;
+  border-top: 1px dashed var(--hairline);
+}
+.m26-index-list li { margin: 0; }
+.m26-index-link {
+  display: flex; align-items: baseline; gap: 10px;
+  font: 13px var(--sans); color: var(--ink);
+  text-decoration: none; padding: 7px 2px;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur) var(--ease), padding-left var(--dur) var(--ease);
+}
+.m26-index-link:hover, .m26-index-link:focus-visible {
+  border-bottom-color: var(--hairline); padding-left: 8px;
+}
+.m26-tick {
+  flex: none; width: 14px; height: 3px; align-self: center;
+  border-radius: 0;
+}
+.m26-index-count {
+  margin-left: auto; font: 10px var(--mono); letter-spacing: .1em; color: var(--ink-40);
+}
+.m26-index-name { min-width: 0; }
+
+@media (min-width: 960px) {
+  .m26-arch-body-cols { display: block; } /* (reserved) */
+  .m26-arch { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: clamp(32px, 6vw, 96px); }
+  .m26-arch-head, .m26-arch-foot { grid-column: 1 / -1; }
+  .m26-index { grid-column: 1; align-self: start; position: sticky; top: 32px; }
+  .m26-arch-main { grid-column: 2; }
+}
+
+/* per-student sections */
+.m26-arch-main { margin-top: 56px; min-width: 0; }
+.m26-student { margin: 0 0 84px; scroll-margin-top: 28px; }
+.m26-student-head {
+  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  border-top: 1px solid var(--ink);
+  padding-top: 14px;
+}
+.m26-student-name {
+  font-family: var(--serif); font-weight: 400;
+  font-size: 26px; margin: 0;
+}
+/* the student's thread colour from the cloud, as a small tell beside the name */
+.m26-student-name::before {
+  content: ''; display: inline-block; width: 22px; height: 3px;
+  background: var(--sc-soft, var(--ink)); margin-right: 14px; vertical-align: 6px;
+}
+.m26-student-meta { font: 10px var(--mono); letter-spacing: .16em; color: var(--ink-40); margin: 0; }
+
+.m26-subs { list-style: none; margin: 30px 0 0; padding: 0; }
+.m26-sub {
+  display: grid; grid-template-columns: 108px minmax(0, 1fr); gap: 20px;
+  padding: 22px 0 26px;
+  border-top: 1px dashed var(--hairline-soft);
+  border-left: 2px solid transparent;
+  transition: border-left-color var(--dur-slow) var(--ease), padding-left var(--dur-slow) var(--ease);
+}
+.m26-sub:hover { border-left-color: var(--sc-soft, var(--hairline)); padding-left: 14px; }
+
+.m26-sub-rail { display: flex; flex-direction: column; gap: 6px; }
+.m26-sub-date { font: 11px var(--mono); letter-spacing: .1em; color: var(--ink); }
+.m26-sub-week, .m26-sub-kind {
+  font: 10px var(--mono); letter-spacing: .14em; color: var(--ink-40);
+  text-transform: uppercase;
+}
+.m26-sub-body { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.m26-sub-text {
+  font-family: var(--serif); font-weight: 300;
+  font-size: 17px; line-height: 1.75;
+  margin: 0; max-width: 62ch;
+}
+.m26-sub-empty { color: var(--ink-40); font-size: 14px; }
+
+@media (max-width: 640px) {
+  .m26-sub { grid-template-columns: 1fr; gap: 10px; }
+  .m26-sub-rail { flex-direction: row; align-items: baseline; gap: 14px; }
+}
+
+/* footer */
+.m26-arch-foot {
+  margin-top: 40px; padding-top: 16px;
+  border-top: 1px solid var(--ink);
+}
+.m26-arch-count { font: 10px var(--mono); letter-spacing: .16em; color: var(--ink-60); margin: 0; }
+.m26-arch-warn { font: 11px var(--mono); color: #8a5a34; margin: 12px 0 0; max-width: 70ch; line-height: 1.6; }
+.m26-arch-links { margin: 22px 0 0; display: flex; gap: 18px; align-items: baseline; flex-wrap: wrap; }
+
+/* ============================================================================
+   index.html only — the archive section surfacing at the end of the dive
+   ============================================================================ */
+
+/* while the cloud owns the page: a fixed, non-interactive layer that fades in
+   as the dive passes the last submission (driven by --m26-reveal, 0..1) */
+#m26-archive {
+  position: fixed; inset: 0; z-index: 30;
+  overflow: hidden;
+  opacity: 0; visibility: hidden; pointer-events: none;
+}
+#m26-archive.m26-revealing {
+  visibility: visible;
+  opacity: var(--m26-reveal, 0);
+  transform: translateY(calc((1 - var(--m26-reveal, 0)) * 4vh));
+}
+
+/* once the archive owns the page: normal document flow, native scrolling */
+html.m26-archive-mode, html.m26-archive-mode body {
+  overflow: auto !important; height: auto !important;
+  background: var(--paper);
+}
+html.m26-archive-mode #m26-archive {
+  position: static; overflow: visible;
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: none;
+}
+html.m26-archive-mode #dc-root { position: fixed; inset: 0; visibility: hidden; }
+#m26-archive:focus { outline: none; }

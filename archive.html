@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Archive — Imagination Infrastructure · M26 Studio · CEPT · 2026</title>
+<meta name="description" content="The submission archive of M26 Studio's Imagination Infrastructure semester — every student, every submission, in order.">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/site.css">
+<style>
+  html, body { margin: 0; background: #f3f1ea; }
+</style>
+</head>
+<body>
+<!-- The archive is rendered from data/students.csv + data/submissions.csv by
+     js/archive.js — the same data, the same code, as the 3D cloud on index.html. -->
+<div id="m26-archive-page"></div>
+<noscript>
+  <div style="padding:48px;font:14px/1.7 ui-sans-serif,system-ui;max-width:60ch">
+    <p style="font:10px ui-monospace,monospace;letter-spacing:.26em;color:#6c685f">M26 STUDIO · CEPT · 2026</p>
+    <h1 style="font-family:Spectral,Georgia,serif;font-weight:300">Imagination Infrastructure — archive</h1>
+    <p>This page reads the studio's submission records and needs JavaScript to display them
+       (there is no animation here — it is a plain, scrollable page).</p>
+    <p>Without JavaScript you can still read the records directly:
+       <a href="data/submissions.csv">data/submissions.csv</a> ·
+       <a href="data/students.csv">data/students.csv</a></p>
+  </div>
+</noscript>
+<script src="./js/m26-core.js"></script>
+<script src="./js/archive.js"></script>
+<script>
+  M26Archive.render(document.getElementById('m26-archive-page'), { embedded: false });
+</script>
+</body>
+</html>
