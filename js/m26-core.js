@@ -35,7 +35,7 @@
     formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfSj-YF6bUyYf6mrEWTHaxbfp3SfdeQHwdyXPlodjP_l64Z3A/viewform',
     // Apps Script web-app URL for the discourse (comments) backend — see
     // pipeline/README.md § "The discourse backend". Empty = discourse read-only.
-    discourseUrl: ''
+    discourseUrl: 'https://script.google.com/macros/s/AKfycbxdM8eXg0Gq6vcVC75m71gIpIR2dAFY4vKLAXj12KzlOQbk_lmKJdbcIOBqXa7sgxP6/exec'
   };
 
   /* One is shown per visit, white against the dark, on the threshold between

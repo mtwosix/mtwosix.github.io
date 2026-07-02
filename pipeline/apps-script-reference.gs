@@ -153,10 +153,18 @@ function appendRowToGitHub(row) {
    =========================================================================== */
 
 var COMMENTS_SHEET = 'Comments';
+// The spreadsheet that holds the Comments sheet. REQUIRED unless this script
+// project is bound to that spreadsheet (Extensions → Apps Script from inside
+// it). Take the long ID from the spreadsheet's URL:
+//   https://docs.google.com/spreadsheets/d/<THIS-PART>/edit
+var COMMENTS_SPREADSHEET_ID = '';
 var MAX_AUTHOR = 60, MAX_TEXT = 2000, MAX_COMMENTS_PER_SUB = 500;
 
 function commentsSheet_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = COMMENTS_SPREADSHEET_ID
+    ? SpreadsheetApp.openById(COMMENTS_SPREADSHEET_ID)
+    : SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) throw new Error('Set COMMENTS_SPREADSHEET_ID at the top of the discourse section — this script project is not attached to a spreadsheet.');
   var sh = ss.getSheetByName(COMMENTS_SHEET);
   if (!sh) {
     sh = ss.insertSheet(COMMENTS_SHEET);

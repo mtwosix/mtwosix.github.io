@@ -70,9 +70,17 @@ To turn it on (≈3 minutes, one time):
 
 1. Make sure the discourse functions from `apps-script-reference.gs` are in your Apps Script
    project (everything below "THE DISCOURSE BACKEND").
-2. Deploy → **New deployment** → type **Web app** → *Execute as:* **Me** →
+2. Set `COMMENTS_SPREADSHEET_ID` at the top of that section to your response spreadsheet's ID
+   (the long code in its URL: `docs.google.com/spreadsheets/d/<THIS-PART>/edit`). You can skip
+   this only if the script project was opened from inside that spreadsheet.
+3. Deploy → **New deployment** → type **Web app** → *Execute as:* **Me** →
    *Who has access:* **Anyone** → Deploy. Copy the URL ending in `/exec`.
-3. Paste that URL into `js/m26-core.js` → `CONFIG.discourseUrl` and commit.
+4. Paste that URL into `js/m26-core.js` → `CONFIG.discourseUrl` and commit.
+
+**After any later code edit:** the deployed web app does NOT pick up changes by itself.
+Deploy → **Manage deployments** → ✏️ edit → *Version:* **New version** → **Deploy**. This
+keeps the same `/exec` URL. (Creating a *new deployment* instead makes a new URL, which then
+has to be updated in `js/m26-core.js`.)
 
 Until step 3 is done the site says "discourse not connected yet" and refuses to pretend —
 nothing is stored locally-only.
