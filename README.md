@@ -1,66 +1,79 @@
 # Imagination Infrastructure — M26 Studio · CEPT · 2026
 
-A living point-cloud of the studio's semester: each thread is a student, each point a piece of
-work, coloured by student and arranged in time. Scroll to travel from the isometric overview down
-into the cloud and through everyone's work.
+One dataset, two lenses:
 
-**Live site:** once GitHub Pages is turned on for this repo (see below), it's published at
-`https://<your-username>.github.io/<repo-name>/`.
+- **The cloud** (`index.html`) — a living 3D point-cloud of the semester. Each thread is a
+  student, each point a real piece of submitted work, coloured by student and arranged in time.
+  Scroll to travel from the isometric overview down into the cloud and through everyone's work.
+  Keep scrolling past the last submission and the site surfaces into…
+- **The archive** (`archive.html`, and the end of the scroll on the main page) — the same
+  submissions as an ordinary, readable page: every student, their work in chronological order,
+  images/video/audio inline, a student index to jump around. Semantic HTML, keyboard-navigable,
+  fine on phones.
 
-## Putting this on GitHub Pages
+Both views read the same two CSV files and show **only** what's in them — a student with no
+submissions has an empty section and zero dots. Nothing is invented, ever.
 
-1. Create a new repository on GitHub (public, unless you're on a paid plan that supports private
-   Pages) and upload the contents of this folder to it (drag-and-drop the files on github.com, or
-   `git init` + `git add .` + `git commit` + `git push` if you're comfortable with git).
-2. In the repo, go to **Settings → Pages**.
-3. Under **Build and deployment → Source**, choose **Deploy from a branch**.
-4. Under **Branch**, choose `main` (or whichever branch you pushed to) and folder `/ (root)**, then
-   **Save**.
-5. GitHub takes a minute or two to publish. The URL appears at the top of that same Pages settings
-   page once it's live — `https://<your-username>.github.io/<repo-name>/`.
+## Hosting (GitHub Pages — no build step)
 
-That's it — no build step, no server. `index.html` at the root is the whole site; GitHub Pages
-serves it directly.
+The site is plain static files served straight from the `main` branch root. Push to `main`,
+GitHub Pages republishes within a minute or two. There is nothing to build, bundle, or configure.
+
+Everything the site needs ships in the repo — including its two runtime libraries in `vendor/`
+— so it has **no dependency on any third-party CDN** being up.
+
+Setup (only needed once): repo **Settings → Pages → Deploy from a branch → `main` / root**.
 
 ## Updating the content
 
-You don't need to touch any code to add students or submissions. See **`data/README.md`** for the
-full guide — in short:
+You never touch code to publish work. See **`data/README.md`** for the field-by-field guide:
 
 - **`data/students.csv`** — the roster. One name per row.
-- **`data/submissions.csv`** — the real submitted work. One row per piece: student, date, a short
-  caption, and optionally an image.
-- **`uploads/`** — where submission images live.
+- **`data/submissions.csv`** — the submitted work. One row per piece. Normally written by the
+  Google Form → Apps Script pipeline (see `pipeline/`), but can also be edited by hand on
+  github.com.
+- **`uploads/`** — images referenced by relative path from submissions.csv. Submissions from
+  the form pipeline reference Google Drive links instead — both work.
 
-Edit either CSV directly on github.com (GitHub shows a spreadsheet-style editor for `.csv` files),
-or edit it locally in Excel/Numbers/Sheets and push the change. Either way, GitHub Pages rebuilds
-automatically within about a minute of a commit, and the site re-reads the CSVs on its own — no
-conversion step, nothing to send anyone.
+The live site re-reads the CSVs every ~15 seconds while someone has the page open, so new
+submissions appear on their own (with a brief arrival pulse in the cloud).
 
-## Before you make the repo public
+## The submission pipeline
 
-Everything in this folder becomes publicly downloadable once Pages is on (that's how static
-hosting works). `uploads/` currently has a few files from early project work
-(`Assignment Handout Example.pdf`, `M26_Semester Plan.xlsx`, `Studio Pitch.pdf`) alongside the
-submission image — worth a quick look to make sure nothing in there is meant to stay private
-before you push.
+Students submit through a Google Form; an Apps Script commits each response as a new row of
+`data/submissions.csv`. The script, its setup, and the rules it must follow (exact column
+schema, Drive sharing for uploaded files) are documented in **`pipeline/README.md`**.
+
+**Do not change the column names or order of `submissions.csv`** —
+`ID,Student,Date,Time,Kind,Type,Image,Text` — without updating the Apps Script to match.
 
 ## File structure
 
 ```
-index.html                    the site (this is what GitHub Pages serves)
-support.js                    runtime the site depends on — keep alongside index.html
+index.html                    the 3D cloud + the archive section at the end of the scroll
+archive.html                  the archive as a standalone, ordinary page
+support.js                    runtime the 3D page depends on — keep alongside index.html
+js/
+  m26-core.js                 shared data layer: CSV parsing, dates, colours, media links
+  archive.js                  renders the archive (used by both pages)
+css/
+  site.css                    the shared design system (type, palette, motion)
+vendor/                       React runtime files, vendored so no CDN is needed
 data/
-  students.csv                 roster — edit to add/remove/rename students
-  submissions.csv               real submitted work — edit to publish new work
-  README.md                     full field-by-field guide for both CSVs
-uploads/                        images referenced from submissions.csv (+ misc project files)
-Living Canvas 3D.dc.html        source copy used for future edits — not needed for hosting
+  students.csv                roster — add/remove/rename students here
+  submissions.csv             the submitted work — written by the form pipeline
+  README.md                   field-by-field guide for both CSVs
+pipeline/                     Google Form → GitHub pipeline: reference script + setup guide
+uploads/                      images referenced from submissions.csv
+Living Canvas 3D.dc.html      source copy of index.html used for editor tooling — keep in sync
 ```
 
-## Limits worth knowing
+## Things worth knowing
 
-- Only `Type: image` submissions render an actual picture today; `video`/`audio` show as a plain
-  caption box.
-- Everything here is client-side and static — there's no login, no moderation queue, and no
-  backend. Anyone with push access to the repo can edit the CSVs.
+- Everything here is client-side and static — no login, no server. Anyone with push access can
+  edit the CSVs; anyone on the web can read them (that's how static hosting works).
+- Caption/kind/name text from the form is treated as untrusted input and is always rendered as
+  plain text, never as HTML.
+- The CSVs are parsed tolerantly: CRLF or LF line endings, quoted commas, stray quotes, odd
+  times like `9:05` are all fine. Rows with an unparseable date, or a Student not on the
+  roster, are skipped — and the archive footer says so out loud rather than hiding it.

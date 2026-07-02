@@ -46,7 +46,9 @@
         if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQuotes = false; }
         else field += c;
       } else {
-        if (c === '"') inQuotes = true;
+        // a quote only opens a quoted field at the field's start; a stray quote
+        // mid-field (hand-typed CSV) is kept as a literal character
+        if (c === '"' && field === '') inQuotes = true;
         else if (c === ',') { row.push(field); field = ''; }
         else if (c === '\n' || c === '\r') {
           if (c === '\r' && text[i + 1] === '\n') i++;   // CRLF counts once

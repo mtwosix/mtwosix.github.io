@@ -115,6 +115,7 @@
 }
 
 .m26-link, .m26-btn-link {
+  white-space: nowrap;
   font: 11px var(--mono); letter-spacing: .18em;
   color: var(--ink-60); text-decoration: none;
   border: 0; border-bottom: 1px dashed var(--hairline);

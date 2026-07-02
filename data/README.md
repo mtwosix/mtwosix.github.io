@@ -1,10 +1,12 @@
-# Publishing new submissions & managing the roster
+# Publishing submissions & managing the roster
 
-Two CSV files run the whole thing. CSV opens directly in Excel, Numbers, or Google Sheets (just
-double-click / "Open with" — no import step), and GitHub itself renders and edits CSV as a table
-in the browser. Edit either file, save/commit, and the live site picks up the change on its own
-(checked on load and every 15s while a visitor has the page open) — nothing needs to be regenerated
-or sent to anyone.
+Two CSV files run the whole site — both the 3D cloud and the archive read exactly these.
+CSV opens directly in Excel, Numbers, or Google Sheets, and GitHub renders and edits CSV as a
+table in the browser. Edit a file, commit, and the live site picks the change up on its own
+(checked on load and every ~15 s while a visitor has the page open).
+
+Normally you don't edit `submissions.csv` at all — the Google Form pipeline appends rows
+automatically (see `../pipeline/README.md`). Hand-editing is for corrections and removals.
 
 ## `students.csv`
 
@@ -12,49 +14,56 @@ One column, one name per row:
 
 ```
 Name
-Aarav
-Diya
+Kiara
+Yuvan
 ...
 ```
 
-Add a row for a new student, delete a row to remove one, edit a cell to rename someone. The point
-cloud's colour wheel and every student's thread regenerates around whatever names are here.
+Add a row for a new student, delete a row to remove one, edit a cell to rename someone. Colours
+respace evenly across the roster and both views regenerate around whatever names are here.
+
+⚠️ If you rename a student here, their existing rows in `submissions.csv` must be renamed to
+match (matching is by exact name, case-insensitive), and the name list in the Google Form
+should be updated too — otherwise new submissions arrive under a name that no longer matches.
 
 ## `submissions.csv`
 
-One row per real submission, columns: `ID, Student, Date, Time, Kind, Type, Image, Text`.
+One row per real submission. **The column names and order are fixed** — the Apps Script writes
+this exact schema, so don't change them without updating the script:
 
-- **ID** — anything unique (e.g. `ananya-2026-11-19-a`). Leave blank and `Student+Date+Time` is
-  used instead.
-- **Student** — must match a name in `students.csv` exactly (case-insensitive). Unknown names are
-  skipped.
-- **Date** — `YYYY-MM-DD`. Places the dot along that student's thread (and in the shared week band
-  with everyone else's work from the same week). Dates can extend past the current span — the
-  cloud keeps growing.
-- **Time** — optional, `HH:MM`, 24h, defaults to `12:00`.
-- **Kind** — free text label shown on the dot's card (e.g. `note`, `sketch`, `reference`,
-  `field note`, `project`).
-- **Type** — `image`, `text`, `video`, or `audio`. Only `image` actually renders a picture right
-  now (`video`/`audio` show as a plain caption box — ask if you want those wired up too).
-- **Image** — relative path to the file, e.g. `uploads/ananya-sketch-01.jpg`. Leave blank for a
-  text-only submission.
-- **Text** — the caption / body text shown in the expanded panel.
+```
+ID, Student, Date, Time, Kind, Type, Image, Text
+```
 
-If a cell needs a comma or a quote inside it, just wrap the whole cell in quotes — every spreadsheet
-app does this for you automatically when you type a comma into a cell; you don't need to think
-about it.
+- **ID** — anything unique (the pipeline generates one). Leave blank and `Student+Date+Time`
+  is used instead. Duplicate IDs: the first row wins, later ones are ignored.
+- **Student** — must match a name in `students.csv` (case-insensitive). Rows with unknown
+  names are not shown — the archive footer lists them so mistakes are visible, not silent.
+- **Date** — `YYYY-MM-DD`. Places the work in its student's thread and week band. Impossible
+  dates (e.g. `2026-02-31`) cause the row to be skipped.
+- **Time** — optional, 24 h. `17:15`, `9:05`, and `09:05:30` are all accepted; blank means `12:00`.
+- **Kind** — free label shown on the card (`note`, `sketch`, `reference`, `field note`, `project`…).
+- **Type** — `image`, `text`, `video`, or `audio`. All four now render properly in both views.
+- **Image** — where the attached file lives. Any of these work:
+  - a repo path, e.g. `uploads/kabir-model-02.jpg`
+  - a **Google Drive link** (what the form pipeline writes) — shown inline; for `video`/`audio`
+    the Drive player is embedded. **The Drive file must be shared "Anyone with the link — Viewer"**
+    or visitors will get a fallback link instead of the picture; the pipeline script sets this
+    automatically on upload.
+  - a YouTube or Vimeo link (embedded player), or any direct file URL.
+  - Leave blank for a text-only submission.
+- **Text** — the caption / body text. Always displayed as plain text — HTML in a caption shows
+  up as typed characters, it is never executed.
 
-Reload the page (or wait ~15s) and the new dot appears in its student's colour, in the right week
-band, with a brief pulsing ring so it reads as freshly arrived.
+Commas or quotes inside a cell: wrap the cell in quotes — every spreadsheet app does this for
+you automatically. Line endings (Windows/Mac/Excel/Sheets) don't matter; all are handled.
 
-## Editing directly on GitHub (no local software needed)
+## Editing directly on GitHub
 
-Open `data/students.csv` or `data/submissions.csv` in the repo on github.com, click the pencil
-(Edit) icon — GitHub shows a spreadsheet-style table editor for CSV — add/edit/delete rows, and
-commit. GitHub Pages rebuilds automatically within about a minute and the live site reflects it.
-This is the most direct path: no Excel, no re-export, no sending anything to anyone.
+Open either file in the repo on github.com, click the pencil icon — GitHub shows a
+spreadsheet-style editor — change rows, commit. The live site reflects it within a minute or so.
 
-## Adding images
+## Adding images by hand
 
-Drop new image files into `uploads/` (any name, e.g. `uploads/kabir-model-02.jpg`), reference that
-path in a submission row's `Image` column, commit both together.
+Drop files into `uploads/` (e.g. `uploads/kabir-model-02.jpg`), reference that path in the
+row's `Image` column, commit both together.

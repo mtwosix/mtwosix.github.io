@@ -172,10 +172,8 @@
       var names = data.unmatched.map(function (r) { return r.student; })
         .filter(function (n, i, a) { return a.indexOf(n) === i; }).join(', ');
       foot.appendChild(el('p', 'm26-arch-warn',
-        data.unmatched.length + ' submission' + (data.unmatched.length === 1 ? '' : 's')
-        + ' on file ' + (data.unmatched.length === 1 ? 'is' : 'are') + ' not shown — the name '
-        + (data.unmatched.length === 1 ? 'doesn’t' : names.indexOf(',') >= 0 ? 'don’t' : 'doesn’t')
-        + ' match the roster: ' + names + '.'));
+        data.unmatched.length + ' submission' + (data.unmatched.length === 1 ? ' is' : 's are')
+        + ' on file but not shown — the Student name doesn’t match the roster: ' + names + '.'));
     }
     var links = el('p', 'm26-arch-links');
     var formA = el('a', 'm26-link', 'SUBMIT WORK →');
