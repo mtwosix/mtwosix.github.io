@@ -134,3 +134,115 @@ function appendRowToGitHub(row) {
     'This row could not be committed to GitHub:\n\n' + row +
     '\n\nIt is still in the response Sheet — re-run onFormSubmit or add it by hand.');
 }
+
+/* ===========================================================================
+   THE DISCOURSE BACKEND — persistent comments for the site, no accounts.
+
+   Deployed as a Web App (Deploy → New deployment → Web app →
+   "Execute as: Me", "Who has access: Anyone"). The resulting /exec URL goes
+   into M26.CONFIG.discourseUrl in js/m26-core.js.
+
+   Storage: a sheet named "Comments" in this same spreadsheet, columns
+   ID | Sub | Parent | Author | Timestamp | Text | OwnerHash
+   (created automatically on first use).
+
+   Identity: the visitor's browser holds a random secret; we store only its
+   SHA-256 hash. A delete request must present the matching secret — so
+   people can delete exactly their own comments, nothing else. Deleting
+   really removes the row (that's the point).
+   =========================================================================== */
+
+var COMMENTS_SHEET = 'Comments';
+var MAX_AUTHOR = 60, MAX_TEXT = 2000, MAX_COMMENTS_PER_SUB = 500;
+
+function commentsSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(COMMENTS_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(COMMENTS_SHEET);
+    sh.appendRow(['ID', 'Sub', 'Parent', 'Author', 'Timestamp', 'Text', 'OwnerHash']);
+  }
+  return sh;
+}
+
+function hashSecret_(secret) {
+  return Utilities.base64Encode(
+    Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(secret), Utilities.Charset.UTF_8));
+}
+
+function jsonOut_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/** GET → every comment, for the site to render. */
+function doGet() {
+  var values = commentsSheet_().getDataRange().getValues();
+  var comments = [];
+  for (var i = 1; i < values.length; i++) {
+    var r = values[i];
+    if (!r[0]) continue;
+    comments.push({ id: String(r[0]), sub: String(r[1]), parent: String(r[2]),
+                    author: String(r[3]), ts: String(r[4]), text: String(r[5]),
+                    ownerHash: String(r[6]) });
+  }
+  return jsonOut_({ ok: true, comments: comments });
+}
+
+/** POST (text/plain JSON body) → add or delete a comment. */
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000); // serialise concurrent posts
+  try {
+    var body = JSON.parse(e.postData.contents || '{}');
+    if (body.action === 'add') return addComment_(body);
+    if (body.action === 'delete') return deleteComment_(body);
+    return jsonOut_({ ok: false, error: 'unknown action' });
+  } catch (err) {
+    return jsonOut_({ ok: false, error: String(err && err.message || err) });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function addComment_(body) {
+  var author = String(body.author || '').trim().slice(0, MAX_AUTHOR);
+  var text = String(body.text || '').trim().slice(0, MAX_TEXT);
+  var sub = String(body.sub || '').trim().slice(0, 200);
+  var parent = String(body.parent || '').trim().slice(0, 80);
+  var secret = String(body.secret || '');
+  if (!author || !text || !sub || !secret) return jsonOut_({ ok: false, error: 'missing fields' });
+
+  var sh = commentsSheet_();
+  // soft cap per submission so a runaway script can't flood the sheet
+  var subCol = sh.getRange(2, 2, Math.max(1, sh.getLastRow() - 1), 1).getValues();
+  var count = 0;
+  for (var i = 0; i < subCol.length; i++) if (String(subCol[i][0]) === sub) count++;
+  if (count >= MAX_COMMENTS_PER_SUB) return jsonOut_({ ok: false, error: 'thread is full' });
+
+  var id = Utilities.getUuid().slice(0, 13);
+  var ts = new Date().toISOString();
+  sh.appendRow([id, sub, parent, author, ts, text, hashSecret_(secret)]);
+  return jsonOut_({ ok: true, id: id, ts: ts });
+}
+
+function deleteComment_(body) {
+  var id = String(body.id || '');
+  var hash = hashSecret_(String(body.secret || ''));
+  var sh = commentsSheet_();
+  var values = sh.getDataRange().getValues();
+  for (var i = values.length - 1; i >= 1; i--) {
+    var isTarget = String(values[i][0]) === id && String(values[i][6]) === hash;
+    var isReplyOfTarget = String(values[i][2]) === id; // replies fall with their thread
+    if (isTarget || (isReplyOfTarget && ownedBy_(values, id, hash))) sh.deleteRow(i + 1);
+  }
+  return jsonOut_({ ok: true });
+}
+
+/** true if the thread `id` belongs to the holder of `hash` */
+function ownedBy_(values, id, hash) {
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === id) return String(values[i][6]) === hash;
+  }
+  return false;
+}

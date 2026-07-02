@@ -32,8 +32,26 @@
     studentsCsv: 'data/students.csv',
     submissionsCsv: 'data/submissions.csv',
     // Public link to the submission form ("Send" link from Google Forms).
-    formUrl: 'https://docs.google.com/forms/d/1HkcAFqrrefIXHsf-Nv1D-p0jCQcHFjDizNZlnPN21SM/viewform'
+    formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfSj-YF6bUyYf6mrEWTHaxbfp3SfdeQHwdyXPlodjP_l64Z3A/viewform',
+    // Apps Script web-app URL for the discourse (comments) backend — see
+    // pipeline/README.md § "The discourse backend". Empty = discourse read-only.
+    discourseUrl: ''
   };
+
+  /* One is shown per visit, white against the dark, on the threshold between
+     the cloud and the archive. Real, attributed quotes only. */
+  var QUOTES = [
+    { text: 'Cities have the capability of providing something for everybody, only because, and only when, they are created by everybody.', name: 'Jane Jacobs' },
+    { text: 'The details are not the details. They make the design.', name: 'Charles Eames' },
+    { text: 'We shape our buildings; thereafter they shape us.', name: 'Winston Churchill' },
+    { text: 'First life, then spaces, then buildings — the other way around never works.', name: 'Jan Gehl' },
+    { text: 'Imagination is more important than knowledge. For knowledge is limited, whereas imagination embraces the entire world.', name: 'Albert Einstein' },
+    { text: 'Whatever space and time mean, place and occasion mean more.', name: 'Aldo van Eyck' },
+    { text: 'You never change things by fighting the existing reality. To change something, build a new model that makes the existing model obsolete.', name: 'Buckminster Fuller' },
+    { text: 'The society which scorns excellence in plumbing as a humble activity and tolerates shoddiness in philosophy because it is an exalted activity will have neither good plumbing nor good philosophy.', name: 'John W. Gardner' },
+    { text: 'The street is the river of life of the city, the place where we come together.', name: 'William H. Whyte' },
+    { text: 'There is no logic that can be superimposed on the city; people make it, and it is to them, not buildings, that we must fit our plans.', name: 'Jane Jacobs' }
+  ];
 
   /* ------------------------------------------------------------- CSV parsing
      Handles quoted fields, embedded commas/newlines, doubled-quote escaping,
@@ -218,7 +236,12 @@
       if (type === 'video' || type === 'audio') {
         return { mode: 'iframe', kind: type, src: 'https://drive.google.com/file/d/' + id + '/preview', href: url, label: type };
       }
-      return { mode: 'img', kind: 'image', src: 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1600', href: url, label: 'image' };
+      // two public Drive image hosts — the thumbnail endpoint rate-limits
+      // occasionally, so a googleusercontent mirror is tried before giving up
+      return { mode: 'img', kind: 'image',
+        src: 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1600',
+        srcAlt: ['https://lh3.googleusercontent.com/d/' + id + '=w1600'],
+        href: url, label: 'image' };
     }
     var yt = /(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{6,})/.exec(url);
     if (yt) return { mode: 'iframe', kind: 'video', src: 'https://www.youtube-nocookie.com/embed/' + yt[1], href: url, label: 'video' };
@@ -258,11 +281,15 @@
       a.href = media.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
       a.className = 'm26-media-imglink';
       a.appendChild(img);
-      // if the file isn't reachable (e.g. Drive sharing off), fall back to a plain link
+      // if a host fails (rate limit, sharing off), walk the alternates, then a plain link
+      var srcs = [media.src].concat(media.srcAlt || []);
+      var si = 0;
       img.onerror = function () {
+        si++;
+        if (si < srcs.length) { img.src = srcs[si]; return; }
         if (a.parentNode === el) { el.removeChild(a); linkCard('open ' + media.label + ' ↗'); }
       };
-      img.src = media.src;
+      img.src = srcs[0];
       el.appendChild(a);
     } else if (media.mode === 'video' || media.mode === 'audio') {
       var mel = document.createElement(media.mode);
@@ -291,6 +318,7 @@
 
   window.M26 = {
     CONFIG: CONFIG,
+    QUOTES: QUOTES,
     parseCSV: parseCSV,
     csvToObjects: csvToObjects,
     parseDateTime: parseDateTime,

@@ -63,6 +63,16 @@ you automatically. Line endings (Windows/Mac/Excel/Sheets) don't matter; all are
 Open either file in the repo on github.com, click the pencil icon — GitHub shows a
 spreadsheet-style editor — change rows, commit. The live site reflects it within a minute or so.
 
+## Student portraits (optional)
+
+The archive shows each student as a tile. The tile's image is chosen in this order:
+
+1. `uploads/portraits/<slug>.jpg` — a portrait, if you add one. The slug is the name,
+   lower-case, accents stripped, spaces → hyphens: *Kiara* → `kiara.jpg`,
+   *Zoë O'Brien* → `zo-o-brien.jpg`.
+2. Otherwise, the student's most recent image submission.
+3. Otherwise, their real constellation — one dot per submission in their thread colour.
+
 ## Adding images by hand
 
 Drop files into `uploads/` (e.g. `uploads/kabir-model-02.jpg`), reference that path in the

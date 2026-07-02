@@ -59,6 +59,28 @@ without it, images upload fine but won't display for anyone but you.
 6. **Test** — submit the form once; within a minute the commit appears in the repo and the
    dot appears on the live site.
 
+## The discourse backend (persistent comments)
+
+The site's discourse panel (comments on each submission in the 3D view) saves to a
+**"Comments" sheet in the same spreadsheet**, through the `doGet`/`doPost` functions at the
+bottom of `apps-script-reference.gs`. No accounts: each visitor's browser keeps a random
+secret; the sheet stores only a hash of it, and only the matching secret can delete a comment.
+
+To turn it on (≈3 minutes, one time):
+
+1. Make sure the discourse functions from `apps-script-reference.gs` are in your Apps Script
+   project (everything below "THE DISCOURSE BACKEND").
+2. Deploy → **New deployment** → type **Web app** → *Execute as:* **Me** →
+   *Who has access:* **Anyone** → Deploy. Copy the URL ending in `/exec`.
+3. Paste that URL into `js/m26-core.js` → `CONFIG.discourseUrl` and commit.
+
+Until step 3 is done the site says "discourse not connected yet" and refuses to pretend —
+nothing is stored locally-only.
+
+Moderation: you own the spreadsheet — deleting a row in the Comments sheet deletes the
+comment for everyone. If a deployment URL ever leaks spam, re-deploy (new URL) and update
+`discourseUrl`.
+
 ## Failure behaviour worth knowing
 
 - If two submissions land in the same second, GitHub can reject the second commit (the file

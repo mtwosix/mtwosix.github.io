@@ -9,6 +9,7 @@
 <script src="./vendor/react.production.min.js"></script>
 <script src="./vendor/react-dom.production.min.js"></script>
 <script src="./js/m26-core.js"></script>
+<script src="./js/discourse.js"></script>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="./css/site.css">
 </head>
@@ -95,6 +96,12 @@
         </div>
         <div style="flex:1;min-width:240px;border-left:1px solid rgba(29,27,23,.14);padding-left:26px;display:flex;flex-direction:column">
           <div style="font:10px ui-monospace,monospace;letter-spacing:.18em;color:#6c685f;margin-bottom:16px">DISCOURSE · {{ focusCommentCount }}</div>
+          <sc-if value="{{ discourseStatus }}" hint-placeholder-val="{{ false }}">
+            <div style="font:10px ui-monospace,monospace;letter-spacing:.06em;color:#8a5a34;margin:-6px 0 12px">{{ discourseStatus }}</div>
+          </sc-if>
+          <sc-if value="{{ discourseEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="font:12px/1.5 ui-sans-serif;color:#9a958c;margin-bottom:12px">No discourse yet — start it below.</div>
+          </sc-if>
           <div style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:18px">
             <sc-for list="{{ focusComments }}" as="cm" hint-placeholder-count="3">
               <div>
@@ -104,11 +111,15 @@
                     <div style="font:13px/1.55 ui-sans-serif;color:#3a372f;margin-top:3px">{{ cm.text }}</div>
                   </div>
                   <div onClick="{{ cm.toggle }}" title="continue discourse" style="flex:none;cursor:pointer;width:26px;height:26px;border-radius:50%;border:1px solid {{ cm.ringColor }};background:{{ cm.ringBg }};color:{{ cm.ringText }};display:flex;align-items:center;justify-content:center;font:10px ui-monospace,monospace">{{ cm.count }}</div>
+                  <div onClick="{{ cm.del }}" title="delete your comment" style="flex:none;cursor:pointer;width:26px;height:26px;border:1px dashed rgba(29,27,23,.35);color:#8a5a34;display:{{ cm.delDisplay }};align-items:center;justify-content:center;font:11px ui-monospace,monospace">✕</div>
                 </div>
                 <sc-if value="{{ cm.open }}" hint-placeholder-val="{{ false }}">
                   <div style="margin-top:12px;margin-left:12px;border-left:1px solid rgba(29,27,23,.16);padding-left:14px;display:flex;flex-direction:column;gap:12px">
                     <sc-for list="{{ cm.replies }}" as="rp" hint-placeholder-count="2">
-                      <div><div style="font:600 11px ui-sans-serif">{{ rp.author }}</div><div style="font:12.5px/1.5 ui-sans-serif;color:#4a473f;margin-top:2px">{{ rp.text }}</div></div>
+                      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+                        <div style="flex:1;min-width:0"><div style="font:600 11px ui-sans-serif">{{ rp.author }}</div><div style="font:12.5px/1.5 ui-sans-serif;color:#4a473f;margin-top:2px">{{ rp.text }}</div></div>
+                        <div onClick="{{ rp.del }}" title="delete your reply" style="flex:none;cursor:pointer;width:20px;height:20px;border:1px dashed rgba(29,27,23,.3);color:#8a5a34;display:{{ rp.delDisplay }};align-items:center;justify-content:center;font:10px ui-monospace,monospace">✕</div>
+                      </div>
                     </sc-for>
                     <sc-if value="{{ needName }}" hint-placeholder-val="{{ false }}">
                       <div style="display:flex;gap:6px">
@@ -158,31 +169,70 @@
 
 </x-dc>
 
-<!-- The archive — the same two CSVs as the cloud, read the ordinary way. It surfaces
-     gradually once you scroll past the last submission in the 3D dive, then the page
-     scrolls normally. Also reachable directly (and without the 3D piece) at archive.html. -->
+<!-- The threshold between the cloud and the archive: past the last submission the dive
+     runs out into darkness, one voice appears in white, the dark gives way to paper,
+     and the page descends into the students. Entirely scroll-driven — scrolling back
+     up plays it in reverse. -->
+<div id="m26-outro" aria-hidden="true">
+  <blockquote class="m26-outro-quote">
+    <p id="m26-outro-text"></p>
+    <footer id="m26-outro-name"></footer>
+  </blockquote>
+</div>
+
+<!-- The archive — the same two CSVs as the cloud, read the ordinary way. Also reachable
+     directly (and without the 3D piece) at archive.html. -->
 <section id="m26-archive" aria-label="Submission archive" tabindex="-1"></section>
 <script src="./js/archive.js"></script>
 <script>
 (function(){
   'use strict';
   var section = document.getElementById('m26-archive');
+  var outro = document.getElementById('m26-outro');
+  var outroQuote = outro.querySelector('.m26-outro-quote');
   var docEl = document.documentElement;
   var mode = 'cloud';
   var rendered = false;
+
+  // one voice per visit
+  var q = M26.QUOTES[Math.floor(Math.random() * M26.QUOTES.length)];
+  document.getElementById('m26-outro-text').textContent = q.text;
+  document.getElementById('m26-outro-name').textContent = '— ' + q.name;
 
   function renderArchive(){
     rendered = true;
     M26Archive.render(section, { embedded: true, onReturn: toCloud });
   }
 
-  // the cloud reports how far past the last submission the dive has gone (0..1);
-  // the archive surfaces with it
+  var lerp = function (a, b, t) { return a + (b - a) * t; };
+  var ramp = function (f, a, b) { return Math.max(0, Math.min(1, (f - a) / (b - a))); };
+  var ease = function (x) { return x * x * (3 - 2 * x); };
+
+  // the cloud reports 0..1 progress through the threshold; everything below derives from it
   window.addEventListener('m26:handoff', function(e){
     var f = e.detail.frac;
-    if (f > 0 && !rendered) renderArchive();
-    section.style.setProperty('--m26-reveal', f.toFixed(3));
-    section.classList.toggle('m26-revealing', f > 0);
+    if (f <= 0){
+      outro.style.display = 'none';
+      section.classList.remove('m26-revealing');
+      return;
+    }
+    if (!rendered) renderArchive();
+
+    var seal = ease(ramp(f, 0.00, 0.15));  // darkness seals over the cloud
+    var qin  = ease(ramp(f, 0.10, 0.34));  // the quote arrives in white
+    var xf   = ease(ramp(f, 0.55, 0.80));  // dark gives way to paper, white inks in
+    var down = ease(ramp(f, 0.80, 1.00));  // the page descends into the students
+
+    outro.style.display = 'flex';
+    outro.style.background = 'rgba(' + Math.round(lerp(6, 243, xf)) + ',' + Math.round(lerp(6, 241, xf))
+      + ',' + Math.round(lerp(12, 234, xf)) + ',' + seal.toFixed(3) + ')';
+    outroQuote.style.color = 'rgb(' + Math.round(lerp(240, 29, xf)) + ',' + Math.round(lerp(239, 27, xf))
+      + ',' + Math.round(lerp(233, 23, xf)) + ')';
+    outroQuote.style.opacity = (qin * (1 - down)).toFixed(3);
+    outroQuote.style.transform = 'translateY(' + ((1 - qin) * 30 - down * 52).toFixed(1) + 'px)';
+
+    section.classList.toggle('m26-revealing', down > 0);
+    section.style.setProperty('--m26-arrive', down.toFixed(4));
   });
 
   function toArchive(){
@@ -249,7 +299,7 @@ class Component extends DCLogic {
   replyLastRef = React.createRef();
   mediaRef = React.createRef();
   dataStatusRef = React.createRef();
-  _uc = 0; entryT = 0; travel = null;
+  entryT = 0; travel = null;
 
   mx = 0; my = 0; mpx = null; mpy = null; _moved = false;
   scroll = 0; targetScroll = 0;
@@ -261,7 +311,6 @@ class Component extends DCLogic {
   rc = { x: 0, y: 0, z: -1360 }; look = { x: 0, y: 0 }; camZcur = 1600;
   ENTRY = 1400; ORTHO = 0.34;  DELAY = 380; DUR = 950; HOLD = 900;
   _bph1 = Math.random()*6.283185; _bph2 = Math.random()*6.283185;
-  extra = {};
 
   rnd(i){ const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
   hue(si, l){ const s = this.students[si]; return `hsl(${s ? s.h : 0}, 78%, ${l || 66}%)`; }
@@ -285,9 +334,11 @@ class Component extends DCLogic {
     cap.appendChild(document.createTextNode(' · ' + p.kind + ' · ' + p.dateStr));
   }
 
-  // total virtual scroll length: entry + cohort dwell + a dive deep enough to pass the
-  // last real submission (derived from the data, not a fixed number)
-  maxScroll(){ return this.ENTRY + this.HOLD + 900 + Math.max(0, ((this._maxWeek||1)-1))*160 + 500; }
+  // where the dive passes the last real submission (derived from the data, not a fixed number)
+  cloudEnd(){ return this.ENTRY + this.HOLD + 900 + Math.max(0, ((this._maxWeek||1)-1))*160 + 500; }
+  // …then the outro: darkness → a quote in white → cream → the archive. Scroll-driven, reversible.
+  OUTRO = 2600;
+  maxScroll(){ return this.cloudEnd() + this.OUTRO; }
 
   // CSV parsing + row interpretation live in js/m26-core.js (window.M26), shared with the
   // archive view so both views read the two CSVs identically. There is deliberately no
@@ -314,12 +365,11 @@ class Component extends DCLogic {
     this.WEEKS = WEEKS; this.wc = wc;
 
     // empty cloud — no fabricated points or critique. Real work arrives via loadSubmissions();
-    // real, visitor-typed discourse lives in this.extra (postComment / postReply).
+    // real, visitor-typed discourse lives in the shared backend (js/discourse.js).
     this.pts = [];
     this.routes = this.students.map(() => []);
     this.routeIdx = {};
     this.comments = [];
-    this.extra = {};
     this._subSeen = new Set();
     this._subCsvText = null;
   }
@@ -370,7 +420,7 @@ class Component extends DCLogic {
       const cl = this.clusterFor(row.week);
       const id = pts.length, s = id*3+5;
       seen.add(row.key);
-      pts.push({ id, student: row.studentIndex, week: row.week, t: row.t,
+      pts.push({ id, student: row.studentIndex, week: row.week, t: row.t, subKey: row.key,
         x: cl.x + (this.rnd(s)-0.5)*300, y: cl.y + (this.rnd(s+1)-0.5)*300, z: -(row.week-1)*160 + (this.rnd(s+2)-0.5)*110,
         baseR: 4.4, phase: this.rnd(s+6)*6.28, spd: 0.6+this.rnd(s+7)*0.9,
         kind: row.kind, subType: row.type,
@@ -391,7 +441,6 @@ class Component extends DCLogic {
     if (!firstLoad){
       this.focus = null; this.expanded = false; this.selectedStudent = null;
       this.hoverId = null; this.hoverComment = null; this.previewIdx = null; this.travel = null;
-      this.extra = {};
       if (this.previewRef && this.previewRef.current) this.previewRef.current.style.display = 'none';
       this.setState({ focus: null, expanded: false });
     }
@@ -408,6 +457,11 @@ class Component extends DCLogic {
     this.loadRoster();
     this.loadSubmissions();
     this._subPoll = setInterval(() => { this.loadRoster(); this.loadSubmissions(); }, 15000);
+    // persistent discourse (Google-Sheet-backed; see js/discourse.js + pipeline/README.md)
+    M26Discourse.load().then(() => this.forceUpdate());
+    this._discPoll = setInterval(() => {
+      M26Discourse.load().then(() => { if (this.state.focus != null) this.forceUpdate(); });
+    }, 45000);
     // cached soft sprite for cheap bokeh discs (drawImage ≫ per-point radial gradient)
     const spr = document.createElement('canvas'); spr.width = spr.height = 64;
     const sctx = spr.getContext('2d');
@@ -522,16 +576,16 @@ class Component extends DCLogic {
       if (this.handoff){ this._raf = requestAnimationFrame(loop); return; } // archive owns the page — idle cheaply
       const t = performance.now();
       this.scroll += (this.targetScroll - this.scroll)*0.09;
-      // end-of-cloud handoff: as the dive passes the last real submission, tell the page so the
-      // archive can surface; at 1, scrolling is handed to the document entirely
+      // end-of-cloud outro: past the last real submission the page reports 0..1 progress through
+      // the quote threshold; the controller below the canvas choreographs it. At 1, scrolling is
+      // handed to the document entirely.
       {
-        const maxS = this.maxScroll();
-        const hf = this.focus != null ? 0 : Math.max(0, Math.min(1, (this.scroll - (maxS - 520)) / 470));
-        if (Math.abs(hf - (this._handFrac || 0)) > 0.002){
+        const hf = this.focus != null ? 0 : Math.max(0, Math.min(1, (this.scroll - this.cloudEnd()) / this.OUTRO));
+        if (Math.abs(hf - (this._handFrac || 0)) > 0.0015){
           this._handFrac = hf;
           window.dispatchEvent(new CustomEvent('m26:handoff', { detail: { frac: hf } }));
         }
-        if (hf >= 1 && !this.handoff) this.enterArchive();
+        if (hf >= 0.999 && !this.handoff) this.enterArchive();
       }
       const entryT = ease(Math.min(1, this.scroll/this.ENTRY));
       this.entryT = entryT;
@@ -782,7 +836,7 @@ class Component extends DCLogic {
     this._raf = requestAnimationFrame(loop);
   }
 
-  componentWillUnmount(){ cancelAnimationFrame(this._raf); clearInterval(this._subPoll); const wrap=this.wrapRef.current; if(wrap){ wrap.removeEventListener('wheel',this._wheel); wrap.removeEventListener('mousemove',this._move); wrap.removeEventListener('click',this._click); wrap.removeEventListener('touchstart',this._tStart); wrap.removeEventListener('touchmove',this._tMove); wrap.removeEventListener('touchend',this._tEnd); } window.removeEventListener('resize',this._resize); window.removeEventListener('keydown',this._key); if (window.__m26Cloud === this._bridge) delete window.__m26Cloud; }
+  componentWillUnmount(){ cancelAnimationFrame(this._raf); clearInterval(this._subPoll); clearInterval(this._discPoll); const wrap=this.wrapRef.current; if(wrap){ wrap.removeEventListener('wheel',this._wheel); wrap.removeEventListener('mousemove',this._move); wrap.removeEventListener('click',this._click); wrap.removeEventListener('touchstart',this._tStart); wrap.removeEventListener('touchmove',this._tMove); wrap.removeEventListener('touchend',this._tEnd); } window.removeEventListener('resize',this._resize); window.removeEventListener('keydown',this._key); if (window.__m26Cloud === this._bridge) delete window.__m26Cloud; }
 
   // media (image / video / audio) for the expanded panel is rendered imperatively via the
   // shared M26 renderer — plain createElement/textContent, no HTML string paths
@@ -806,8 +860,8 @@ class Component extends DCLogic {
   exitArchive = () => {
     if (!this.handoff) return;
     this.handoff = false;
-    // resume just above the end of the dive so scrolling up travels back through the cloud
-    this.targetScroll = Math.max(0, this.maxScroll() - 760);
+    // resume in the quote scene so scrolling up plays the threshold backwards into the cloud
+    this.targetScroll = Math.max(0, this.cloudEnd() + this.OUTRO*0.35);
     this.scroll = Math.max(this.scroll, this.targetScroll);
     window.dispatchEvent(new CustomEvent('m26:mode', { detail: { mode: 'cloud' } }));
   };
@@ -822,31 +876,61 @@ class Component extends DCLogic {
   startTravel = (toId) => { if (toId == null || toId === this.focus) return; this.travel = { from: this.focus, to: toId, start: performance.now(), dur: 880, tp: 0 }; this.focus = toId; this.setState({ focus: toId, openThread: null }); };
   goNext = () => this.startTravel(this.nextId);
   goPrev = () => this.startTravel(this.prevId);
-  findComment(id){ for (const c of this.comments) if (c.id === id) return c; for (const k in this.extra){ for (const c of this.extra[k]) if (c.id === id) return c; } return null; }
   commitName(fn, ln){ fn=(fn||'').trim(); ln=(ln||'').trim(); if(!fn) return; const cap = s => s.charAt(0).toUpperCase()+s.slice(1); const name = cap(fn) + (ln ? ' '+ln[0].toUpperCase()+'.' : ''); try { localStorage.setItem('m26_name', name); } catch(e){} this.setState({ userName: name }); }
   submitName = () => { this.commitName(this.firstRef.current && this.firstRef.current.value, this.lastRef.current && this.lastRef.current.value); };
   submitReplyName = () => { this.commitName(this.replyFirstRef.current && this.replyFirstRef.current.value, this.replyLastRef.current && this.replyLastRef.current.value); };
-  postComment = () => { if (!this.state.userName) return; const el=this.expandInputRef.current; if(!el) return; const v=el.value.trim(); if(!v) return; const f=this.state.focus; if(f==null) return; (this.extra[f]=this.extra[f]||[]).unshift({ id:'u'+(++this._uc), author:this.state.userName, text:v, replies:[] }); el.value=''; this.forceUpdate(); };
-  postReply = (id) => { if (!this.state.userName) return; const el=this.replyInputRef.current; if(!el) return; const v=el.value.trim(); if(!v) return; const c=this.findComment(id); if(!c) return; c.replies.push({ author:this.state.userName, text:v }); el.value=''; this.forceUpdate(); };
+
+  // ---- discourse: posts/deletes go to the shared backend and persist for everyone ----
+  _sendComment(inputEl, parentId){
+    if (!this.state.userName || !inputEl) return;
+    const v = inputEl.value.trim(); if (!v) return;
+    const f = this.state.focus; if (f == null || !this.pts[f]) return;
+    const p = this.pts[f];
+    inputEl.value = '';
+    this._discBusy = true; this._discMsg = ''; this.forceUpdate();
+    M26Discourse.post({ sub: p.subKey, parent: parentId || '', author: this.state.userName, text: v })
+      .then(() => { this._discBusy = false; this.forceUpdate(); })
+      .catch(err => { this._discBusy = false; this._discMsg = err.message; inputEl.value = v; this.forceUpdate(); });
+  }
+  postComment = () => this._sendComment(this.expandInputRef.current, '');
+  postReply = (id) => this._sendComment(this.replyInputRef.current, id);
+  delComment = (id) => {
+    M26Discourse.remove(id)
+      .then(() => this.forceUpdate())
+      .catch(err => { this._discMsg = err.message; this.forceUpdate(); });
+  };
 
   renderVals(){
     this.build();
     const f = this.state.focus;
     const uName = this.state.userName;
     let v = { wrapRef:this.wrapRef, canvasRef:this.canvasRef, phRef:this.phRef, phCapRef:this.phCapRef, cohortCount: (this.students ? this.students.length : 0), landingRef:this.landingRef, previewRef:this.previewRef, previewAuthorRef:this.previewAuthorRef, previewTextRef:this.previewTextRef, expandInputRef:this.expandInputRef, replyInputRef:this.replyInputRef, firstRef:this.firstRef, lastRef:this.lastRef, replyFirstRef:this.replyFirstRef, replyLastRef:this.replyLastRef, mediaRef:this.mediaRef, dataStatusRef:this.dataStatusRef, nextArrowRef:this.nextArrowRef, prevArrowRef:this.prevArrowRef, titleRef:this.titleRef, subRef:this.subRef, subInnerRef:this.subInnerRef, cohortRef:this.cohortRef, expand:this.expand, closeExpand:this.closeExpand, exitFocus:this.exitFocus, postComment:this.postComment, postReply:this.postReply, goNext:this.goNext, goPrev:this.goPrev, submitName:this.submitName, submitReplyName:this.submitReplyName, showCard: f!=null && !this.state.expanded, expanded: this.state.expanded, hasName: !!uName, needName: !uName, userName: uName, postingAs: uName ? ('posting as ' + uName) : '' };
-    if (f != null){
+    if (f != null && this.pts[f]){
       const p = this.pts[f];
-      const list = (this.extra[f]||[]).concat(this.comments.filter(c => c.parent===f));
+      const all = M26Discourse.forSub(p.subKey);
+      const tops = all.filter(c => !c.parent).sort((a,b) => a.ts < b.ts ? 1 : -1);   // newest first
+      const kidsOf = id => all.filter(c => c.parent === id).sort((a,b) => a.ts > b.ts ? 1 : -1);
       const ot = this.state.openThread;
-      const mapC = c => ({ id:c.id, author:c.author, text:c.text, replies:c.replies||[], count:(c.replies||[]).length, open: ot===c.id,
-        ringColor: ot===c.id ? '#1d1b17' : 'rgba(29,27,23,.4)', ringText: ot===c.id ? '#f6f4ee' : '#6c685f', ringBg: ot===c.id ? '#1d1b17' : 'transparent',
-        toggle: () => this.setState(s => ({ openThread: s.openThread===c.id ? null : c.id })),
-        postReply: () => this.postReply(c.id) });
+      const mapC = c => {
+        const replies = kidsOf(c.id).map(r => ({ author:r.author, text:r.text,
+          del: () => this.delComment(r.id), delDisplay: r.mine ? 'inline-flex' : 'none' }));
+        return { id:c.id, author:c.author, text:c.text, replies, count: replies.length, open: ot===c.id,
+          ringColor: ot===c.id ? '#1d1b17' : 'rgba(29,27,23,.4)', ringText: ot===c.id ? '#f6f4ee' : '#6c685f', ringBg: ot===c.id ? '#1d1b17' : 'transparent',
+          toggle: () => this.setState(s => ({ openThread: s.openThread===c.id ? null : c.id })),
+          postReply: () => this.postReply(c.id),
+          del: () => this.delComment(c.id), delDisplay: c.mine ? 'flex' : 'none' };
+      };
       v.focusName = p.name; v.focusKind = p.kind; v.focusDate = p.dateStr; v.focusType = p.subType; v.focusText = p.subText;
-      v.focusComments = list.length ? list.map(mapC) : [{ id:'_', author:'—', text:'No discourse yet — start it below.', replies:[], count:0, open:false, ringColor:'transparent', ringText:'transparent', ringBg:'transparent', toggle:()=>{}, postReply:()=>{} }];
-      v.focusCommentCount = list.length;
+      v.focusComments = tops.map(mapC);
+      v.focusCommentCount = all.length;
+      v.discourseEmpty = all.length === 0 && M26Discourse.state.connected && !M26Discourse.state.error;
+      v.discourseStatus = !M26Discourse.state.connected ? 'discourse not connected yet — comments can’t be saved'
+        : M26Discourse.state.error ? 'discourse unreachable — ' + M26Discourse.state.error
+        : this._discBusy ? 'saving…'
+        : (this._discMsg || '');
     } else {
       v.focusName=''; v.focusKind=''; v.focusDate=''; v.focusType=''; v.focusText=''; v.focusComments=[]; v.focusCommentCount=0;
+      v.discourseEmpty=false; v.discourseStatus='';
     }
     return v;
   }

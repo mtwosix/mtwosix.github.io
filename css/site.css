@@ -147,57 +147,121 @@
   margin: 18px 0 0; max-width: 58ch;
 }
 
-/* layout: index rail + entries */
-.m26-index { margin-top: 56px; }
-.m26-index-list {
-  list-style: none; margin: 14px 0 0; padding: 14px 0 0;
+/* ---- the field of students -------------------------------------------- */
+.m26-arch-main { margin-top: 64px; min-width: 0; }
+.m26-grid {
+  list-style: none; margin: 0; padding: 22px 0 0;
   border-top: 1px dashed var(--hairline);
+  display: grid; gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 }
-.m26-index-list li { margin: 0; }
-.m26-index-link {
-  display: flex; align-items: baseline; gap: 10px;
-  font: 13px var(--sans); color: var(--ink);
-  text-decoration: none; padding: 7px 2px;
-  border-bottom: 1px solid transparent;
-  transition: border-color var(--dur) var(--ease), padding-left var(--dur) var(--ease);
+.m26-grid li { margin: 0; min-width: 0; }
+.m26-tile {
+  display: flex; flex-direction: column; width: 100%;
+  padding: 0; margin: 0; text-align: left; cursor: pointer;
+  background: none; border: 0; color: var(--ink);
 }
-.m26-index-link:hover, .m26-index-link:focus-visible {
-  border-bottom-color: var(--hairline); padding-left: 8px;
+.m26-tile-visual {
+  display: block; aspect-ratio: 1 / 1; overflow: hidden;
+  border: 1px solid var(--hairline);
+  background: var(--paper-2);
+  transition: border-color var(--dur-slow) var(--ease);
 }
-.m26-tick {
-  flex: none; width: 14px; height: 3px; align-self: center;
-  border-radius: 0;
+.m26-tile-visual img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(.45) contrast(.96);
+  transform: scale(1.001);
+  transition: filter var(--dur-slow) var(--ease), transform 1.6s var(--ease);
 }
-.m26-index-count {
-  margin-left: auto; font: 10px var(--mono); letter-spacing: .1em; color: var(--ink-40);
+.m26-tile-const { display: block; width: 100%; height: 100%; }
+.m26-tile:hover .m26-tile-visual, .m26-tile:focus-visible .m26-tile-visual {
+  border-color: var(--sc-soft, var(--ink));
 }
-.m26-index-name { min-width: 0; }
+.m26-tile:hover .m26-tile-visual img, .m26-tile:focus-visible .m26-tile-visual img {
+  filter: none; transform: scale(1.03);
+}
+.m26-tile-label {
+  display: flex; flex-direction: column; gap: 4px; padding: 12px 2px 0;
+  border-left: 2px solid transparent;
+  transition: border-color var(--dur-slow) var(--ease), padding-left var(--dur-slow) var(--ease);
+}
+.m26-tile:hover .m26-tile-label, .m26-tile:focus-visible .m26-tile-label {
+  border-left-color: var(--sc-soft, var(--ink)); padding-left: 10px;
+}
+.m26-tile-name { font-family: var(--serif); font-weight: 400; font-size: 21px; }
+.m26-tile-meta { font: 10px var(--mono); letter-spacing: .16em; color: var(--ink-40); text-transform: uppercase; }
 
-@media (min-width: 960px) {
-  .m26-arch { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: clamp(32px, 6vw, 96px); }
-  .m26-arch-head, .m26-arch-foot { grid-column: 1 / -1; }
-  .m26-index { grid-column: 1; align-self: start; position: sticky; top: 32px; }
-  .m26-arch-main { grid-column: 2; }
+/* ---- the student panel -------------------------------------------------- */
+html.m26-lock, html.m26-lock body { overflow: hidden !important; }
+.m26-panel-backdrop {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(29, 27, 23, .34);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease), visibility 0s linear var(--dur-slow);
 }
+.m26-panel-backdrop.m26-panel-open {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transition: opacity var(--dur-slow) var(--ease);
+}
+.m26-panel {
+  position: fixed; z-index: 61;
+  inset: 4vh 4vw; overflow: auto;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--sans);
+  border: 1px solid var(--ink);
+  padding: clamp(18px, 3.4vw, 44px);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateY(26px);
+  transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease),
+              visibility 0s linear var(--dur-slow);
+}
+.m26-panel.m26-panel-open {
+  opacity: 1; visibility: visible; pointer-events: auto; transform: none;
+  transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+}
+@media (max-width: 640px) { .m26-panel { inset: 0; border: 0; } }
 
-/* per-student sections */
-.m26-arch-main { margin-top: 56px; min-width: 0; }
-.m26-student { margin: 0 0 84px; scroll-margin-top: 28px; }
-.m26-student-head {
-  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
-  border-top: 1px solid var(--ink);
-  padding-top: 14px;
+.m26-panel-head {
+  position: relative;
+  display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--ink);
+  padding: 0 44px 16px 0;
 }
-.m26-student-name {
-  font-family: var(--serif); font-weight: 400;
-  font-size: 26px; margin: 0;
+.m26-panel-title { flex: 1 1 auto; min-width: 0; }
+.m26-panel-nav { display: flex; gap: 18px; align-items: center; padding-top: 10px; }
+.m26-panel-close {
+  position: absolute; top: -6px; right: -6px;
+  cursor: pointer;
+  font: 15px var(--mono); color: var(--ink-60);
+  background: none; border: 1px solid transparent; padding: 6px 10px;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
-/* the student's thread colour from the cloud, as a small tell beside the name */
+.m26-panel-close:hover, .m26-panel-close:focus-visible { color: var(--ink); border-color: var(--hairline); }
+
+.m26-student-name { font-family: var(--serif); font-weight: 400; font-size: 26px; margin: 0; }
 .m26-student-name::before {
   content: ''; display: inline-block; width: 22px; height: 3px;
   background: var(--sc-soft, var(--ink)); margin-right: 14px; vertical-align: 6px;
 }
-.m26-student-meta { font: 10px var(--mono); letter-spacing: .16em; color: var(--ink-40); margin: 0; }
+.m26-student-meta { font: 10px var(--mono); letter-spacing: .16em; color: var(--ink-40); margin: 8px 0 0; }
+
+.m26-panel-filters { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.m26-chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.m26-chips .m26-label { min-width: 42px; }
+.m26-chip {
+  cursor: pointer;
+  font: 10px var(--mono); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-60); background: none;
+  border: 1px dashed var(--hairline);
+  padding: 7px 12px;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+              background var(--dur) var(--ease);
+}
+.m26-chip:hover { color: var(--ink); border-color: var(--ink); }
+.m26-chip[aria-pressed="true"] {
+  color: var(--paper); background: var(--ink); border: 1px solid var(--ink);
+}
+.m26-panel-body { margin-top: 10px; }
 
 .m26-subs { list-style: none; margin: 30px 0 0; padding: 0; }
 .m26-sub {
@@ -241,17 +305,38 @@
    index.html only — the archive section surfacing at the end of the dive
    ============================================================================ */
 
-/* while the cloud owns the page: a fixed, non-interactive layer that fades in
-   as the dive passes the last submission (driven by --m26-reveal, 0..1) */
+/* the threshold scene: fixed layer over the canvas where the quote lives.
+   All colour/opacity/motion is driven per-frame by the controller in index.html. */
+#m26-outro {
+  position: fixed; inset: 0; z-index: 28;
+  display: none; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.m26-outro-quote {
+  margin: 0; padding: 0 clamp(24px, 8vw, 120px);
+  max-width: 34ch; opacity: 0; will-change: transform, opacity;
+}
+.m26-outro-quote p {
+  font-family: var(--serif); font-weight: 300; font-style: italic;
+  font-size: clamp(21px, 3.2vw, 34px); line-height: 1.55;
+  margin: 0;
+}
+.m26-outro-quote footer {
+  margin-top: 26px;
+  font: 11px var(--mono); letter-spacing: .22em; font-style: normal;
+  opacity: .75;
+}
+
+/* while the cloud owns the page: the archive waits below the fold and rises with
+   the last phase of the threshold (driven by --m26-arrive, 0..1) */
 #m26-archive {
   position: fixed; inset: 0; z-index: 30;
   overflow: hidden;
-  opacity: 0; visibility: hidden; pointer-events: none;
+  visibility: hidden; pointer-events: none;
 }
 #m26-archive.m26-revealing {
   visibility: visible;
-  opacity: var(--m26-reveal, 0);
-  transform: translateY(calc((1 - var(--m26-reveal, 0)) * 4vh));
+  transform: translateY(calc((1 - var(--m26-arrive, 0)) * 100vh));
 }
 
 /* once the archive owns the page: normal document flow, native scrolling */
@@ -265,4 +350,5 @@ html.m26-archive-mode #m26-archive {
   transform: none;
 }
 html.m26-archive-mode #dc-root { position: fixed; inset: 0; visibility: hidden; }
+html.m26-archive-mode #m26-outro { display: none !important; }
 #m26-archive:focus { outline: none; }
