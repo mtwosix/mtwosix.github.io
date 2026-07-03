@@ -213,6 +213,7 @@
   var q = M26.QUOTES[Math.floor(Math.random() * M26.QUOTES.length)];
   document.getElementById('m26-outro-text').textContent = q.text;
   document.getElementById('m26-outro-name').textContent = '— ' + q.name;
+  if (q.text.length > 140) outroQuote.classList.add('m26-outro-long');
 
   function renderArchive(){
     rendered = true;
@@ -257,6 +258,8 @@
     docEl.classList.add('m26-archive-mode');
     window.scrollTo(0, 0);
     section.focus({ preventScroll: true });
+    // scrollbars may have appeared — let the canvas re-measure the viewport
+    window.dispatchEvent(new Event('resize'));
   }
   function toCloud(){
     if (mode === 'cloud') return;
@@ -268,6 +271,8 @@
     section.style.setProperty('--m26-arrive', '0');
     window.scrollTo(0, 0);
     if (window.__m26Cloud) window.__m26Cloud.exitArchive();
+    // scrollbars just vanished — re-measure so the canvas fills the widened viewport
+    window.dispatchEvent(new Event('resize'));
   }
   window.addEventListener('m26:mode', function(e){
     if (e.detail.mode === 'archive') toArchive(); else toCloud();
@@ -466,7 +471,7 @@ class Component extends DCLogic {
     // a rebuild reassigns point ids — clear any interaction pointing at a now-stale index
     if (!firstLoad){
       this.focus = null; this.expanded = false; this.selectedStudent = null;
-      this.hoverId = null; this.hoverComment = null; this.previewIdx = null; this.travel = null;
+      this.hoverId = null; this.hoverComment = null; this.previewIdx = null; this.travel = null; this._armed = null;
       if (this.previewRef && this.previewRef.current) this.previewRef.current.style.display = 'none';
       this.setState({ focus: null, expanded: false });
     }
@@ -582,13 +587,30 @@ class Component extends DCLogic {
     this._tMove = (e) => {
       if (e.touches.length!==1) return; const r=wrap.getBoundingClientRect(),tc=e.touches[0];
       const x=tc.clientX-r.left, y=tc.clientY-r.top;
-      if (Math.abs(x-tStartX)+Math.abs(y-tStartY) > 8) tMoved=true;
+      if (Math.abs(x-tStartX)+Math.abs(y-tStartY) > 14){
+        if (!tMoved && this._coarse){ this._armed = null; this.hoverId = null; if (this.phRef.current) this.phRef.current.style.display='none'; }
+        tMoved=true;
+      }
       this.mx=(x/r.width)*2-1; this.my=(y/r.height)*2-1; this.mpx=x; this.mpy=y; this._moved=true;
       if (this.handoff) return;
       if (this.focus == null){ e.preventDefault(); const dy=tLastY-tc.clientY; this.targetScroll=Math.max(0, Math.min(this.maxScroll(), this.targetScroll + dy*3.6)); }
       tLastY=tc.clientY;
     };
-    this._tEnd = (e) => { if (this.handoff) return; const dt=performance.now()-tStartT; if (!tMoved && dt<500){ e.preventDefault(); this.mpx=tStartX; this.mpy=tStartY; this._hitAt(tStartX,tStartY); this._click(); } };
+    // touch: scrolling never selects; in the deep cloud the FIRST tap on a dot arms it
+    // (it shines and shows its caption), a second tap on the same dot opens it
+    this._tEnd = (e) => {
+      if (this.handoff) return;
+      const dt = performance.now()-tStartT;
+      if (tMoved || dt >= 400) return;
+      e.preventDefault();
+      this.mpx = tStartX; this.mpy = tStartY;
+      this._hitAt(tStartX, tStartY);
+      if (this._coarse && this.focus == null && this.entryT >= 0.82){
+        if (this.hoverId != null && this._armed !== this.hoverId){ this._armed = this.hoverId; return; }
+        this._armed = null;
+      }
+      this._click();
+    };
     wrap.addEventListener('touchstart', this._tStart, { passive:true });
     wrap.addEventListener('touchmove', this._tMove, { passive:false });
     wrap.addEventListener('touchend', this._tEnd, { passive:false });
@@ -641,6 +663,15 @@ class Component extends DCLogic {
         this.focusBlend += (0 - this.focusBlend)*0.06;
         rcT = this.center; lookT = { x:0, y:0 }; camZT = lerp(1600,700,entryT) - dollyExtra;
         rotYT = lerp(-0.65, mRY, entryT); rotXT = lerp(0.58, mRX, entryT);
+      }
+      // arrival key: 0 while flying a route, easing to 1 once the camera settles — drives
+      // the focus type, the arrows, and the encircling ring so nothing jumps
+      if (this.focus != null && !traveling){ if (!this._uiT) this._uiT = t; }
+      else this._uiT = 0;
+      const uiK = this._uiT ? ease(Math.min(1, (t - this._uiT)/620)) : 0;
+      {
+        const fui = document.querySelector('.m26-focus-ui');
+        if (fui) fui.style.opacity = uiK.toFixed(3);
       }
       const sm = traveling ? 1 : 0.05, smZ = traveling ? 1 : 0.06;
       this.rc.x += (rcT.x-this.rc.x)*sm; this.rc.y += (rcT.y-this.rc.y)*sm; this.rc.z += (rcT.z-this.rc.z)*sm;
@@ -770,7 +801,12 @@ class Component extends DCLogic {
       const lc = lerp3([92,88,80],[150,155,185], entryT);
       const hueL = lerp(46,66,entryT);
       ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
-      ctx.fillStyle = 'rgb('+bg.join(',')+')'; ctx.fillRect(0,0,W,H);
+      const bgStr = 'rgb('+bg.join(',')+')';
+      ctx.fillStyle = bgStr; ctx.fillRect(0,0,W,H);
+      // keep the wrap behind the canvas the same colour — if the viewport ever outgrows the
+      // canvas bitmap (scrollbars toggling, browser chrome collapsing), the gap shows the
+      // scene colour instead of a pale rectangle
+      if (this._lastBg !== bgStr){ this._lastBg = bgStr; wrap.style.background = bgStr; }
 
       if (entryT > 0.02){ const vg = ctx.createRadialGradient(cx,cy*0.9,0,cx,cy,Math.max(W,H)*0.72); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,'+(0.5*entryT).toFixed(3)+')'); ctx.fillStyle=vg; ctx.fillRect(0,0,W,H); }
 
@@ -797,6 +833,18 @@ class Component extends DCLogic {
         ctx.beginPath(); ctx.arc(p.sx, p.sy, p.rad*1.6 + (1-k)*26, 0, 6.2832); ctx.stroke();
       }
       ctx.globalAlpha = 1;
+
+      // touch: an armed dot (first tap) shines in its student's colour until the second tap
+      if (this._armed != null && this.focus == null && this.pts[this._armed] && this.pts[this._armed].vis){
+        const ap = this.pts[this._armed];
+        const acol = this.hue(ap.student, 68);
+        const pulse = 1 + 0.12*Math.sin(t*0.004);
+        ctx.globalAlpha = 0.95; ctx.fillStyle = acol; ctx.shadowBlur = 18; ctx.shadowColor = acol;
+        ctx.beginPath(); ctx.arc(ap.sx, ap.sy, ap.rad*1.6, 0, 6.2832); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.globalAlpha = 0.7; ctx.strokeStyle = acol; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.arc(ap.sx, ap.sy, ap.rad*2.6*pulse, 0, 6.2832); ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
 
       // cohort dwell highlight — mark only each student's STARTING point so we read them as the students
       if (allLit > 0.02 && this.focus == null){
@@ -846,11 +894,13 @@ class Component extends DCLogic {
           ctx.globalAlpha = 0.7*this.focusBlend; ctx.fillStyle = col;
           for (let i=0;i<route.length;i++){ const pp=this.pts[route[i]]; if(!pp.vis||route[i]===this.focus) continue; ctx.beginPath(); ctx.arc(pp.sx,pp.sy,Math.max(1.4,pp.rad*0.8),0,6.2832); ctx.fill(); }
           ctx.globalAlpha = 1;
-          // spotlight the focused dot
-          ctx.strokeStyle = col; ctx.globalAlpha = 0.5*this.focusBlend; ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.arc(fp.sx, fp.sy, fp.rad*2.6 + 6*Math.sin(t*0.002), 0, 6.2832); ctx.stroke();
-          ctx.globalAlpha = this.focusBlend; ctx.fillStyle = col; ctx.shadowBlur = 22; ctx.shadowColor = col;
-          ctx.beginPath(); ctx.arc(fp.sx, fp.sy, fp.rad*1.25, 0, 6.2832); ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+          // the encircling ring lets go during flight and slowly grows back on arrival (uiK)
+          if (uiK > 0.02){
+            ctx.strokeStyle = col; ctx.globalAlpha = 0.5*this.focusBlend*uiK; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(fp.sx, fp.sy, (fp.rad*1.3 + fp.rad*1.3*uiK) + 6*Math.sin(t*0.002)*uiK, 0, 6.2832); ctx.stroke();
+            ctx.globalAlpha = this.focusBlend*uiK; ctx.fillStyle = col; ctx.shadowBlur = 22*uiK; ctx.shadowColor = col;
+            ctx.beginPath(); ctx.arc(fp.sx, fp.sy, fp.rad*1.25, 0, 6.2832); ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+          }
         }
       }
 
@@ -861,7 +911,7 @@ class Component extends DCLogic {
         this.prevId = idx > 0 ? route[idx-1] : null;
         // fixed compass: left = back in time, right = forward — matching the elevation axis
         const arrowGap = Math.min(120, W*0.16);
-        const place = (el, id, dir) => { if (!el) return; if (id == null){ el.style.display='none'; return; } const px=fp.sx+dir*arrowGap, py=fp.sy; el.style.transform='translate('+px+'px,'+py+'px) translate(-50%,-50%)'+(dir<0?' rotate(180deg)':''); el.style.opacity=Math.min(1,(this.focusBlend-0.5)*2.2); el.style.display='flex'; };
+        const place = (el, id, dir) => { if (!el) return; if (id == null || uiK < 0.05){ el.style.display='none'; return; } const px=fp.sx+dir*arrowGap, py=fp.sy; el.style.transform='translate('+px+'px,'+py+'px) translate(-50%,-50%)'+(dir<0?' rotate(180deg)':''); el.style.opacity=Math.min(1,(this.focusBlend-0.5)*2.2)*uiK; el.style.display='flex'; };
         place(this.nextArrowRef.current, this.nextId, 1);
         place(this.prevArrowRef.current, this.prevId, -1);
       } else { this.nextId=null; this.prevId=null; if(this.nextArrowRef.current) this.nextArrowRef.current.style.display='none'; if(this.prevArrowRef.current) this.prevArrowRef.current.style.display='none'; }
@@ -914,7 +964,10 @@ class Component extends DCLogic {
     if (this.previewRef.current) this.previewRef.current.style.display='none';
     this.setState({ focus: null, expanded: false, openThread: null });
   };
-  startTravel = (toId) => { if (toId == null || toId === this.focus) return; this.travel = { from: this.focus, to: toId, start: performance.now(), dur: 880, tp: 0 }; this.focus = toId; this.setState({ focus: toId, openThread: null }); };
+  // flight to the previous/next point on the route: the ring lets go, the camera eases
+  // along the route, and on arrival the ring grows back around the new point (the type
+  // fades with it — see the uiK block in the render loop)
+  startTravel = (toId) => { if (toId == null || toId === this.focus || this.travel) return; this.travel = { from: this.focus, to: toId, start: performance.now(), dur: 1150, tp: 0 }; this.focus = toId; this.setState({ focus: toId, openThread: null }); };
   goNext = () => this.startTravel(this.nextId);
   goPrev = () => this.startTravel(this.prevId);
   commitName(fn, ln){ fn=(fn||'').trim(); ln=(ln||'').trim(); if(!fn) return; const cap = s => s.charAt(0).toUpperCase()+s.slice(1); const name = cap(fn) + (ln ? ' '+ln[0].toUpperCase()+'.' : ''); try { localStorage.setItem('m26_name', name); } catch(e){} this.setState({ userName: name }); }

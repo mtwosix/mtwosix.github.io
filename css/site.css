@@ -91,15 +91,11 @@
 }
 
 /* ---- focus view — type set around the still point at screen centre ------- */
-@keyframes m26-focus-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: none; }
-}
 .m26-focus-ui {
   position: absolute; inset: 0;
   pointer-events: none;
   color: #ece9e2;
-  animation: m26-focus-in .9s var(--ease) both;
+  opacity: 0; /* the render loop fades this in on arrival and out during route flights */
 }
 .m26-focus-name {
   position: absolute;
@@ -243,98 +239,26 @@
   margin: 18px 0 0; max-width: 58ch;
 }
 
-/* ---- the field of students -------------------------------------------- */
-.m26-arch-main { margin-top: 64px; min-width: 0; }
-.m26-grid {
-  list-style: none; margin: 0; padding: 22px 0 0;
-  border-top: 1px dashed var(--hairline);
-  display: grid; gap: 22px;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-}
-.m26-grid li { margin: 0; min-width: 0; }
-.m26-tile {
-  display: flex; flex-direction: column; width: 100%;
-  padding: 0; margin: 0; text-align: left; cursor: pointer;
-  background: none; border: 0; color: var(--ink);
-}
-.m26-tile-visual {
-  display: block; aspect-ratio: 1 / 1; overflow: hidden;
-  border: 1px solid var(--hairline);
-  background: var(--paper-2);
-  transition: border-color var(--dur-slow) var(--ease);
-}
-.m26-tile-visual img {
-  display: block; width: 100%; height: 100%; object-fit: cover;
-  filter: grayscale(.45) contrast(.96);
-  transform: scale(1.001);
-  transition: filter var(--dur-slow) var(--ease), transform 1.6s var(--ease);
-}
-.m26-tile-const { display: block; width: 100%; height: 100%; }
-.m26-tile:hover .m26-tile-visual, .m26-tile:focus-visible .m26-tile-visual {
-  border-color: var(--sc-soft, var(--ink));
-}
-.m26-tile:hover .m26-tile-visual img, .m26-tile:focus-visible .m26-tile-visual img {
-  filter: none; transform: scale(1.03);
-}
-.m26-tile-label {
-  display: flex; flex-direction: column; gap: 4px; padding: 12px 2px 0;
-  border-left: 2px solid transparent;
-  transition: border-color var(--dur-slow) var(--ease), padding-left var(--dur-slow) var(--ease);
-}
-.m26-tile:hover .m26-tile-label, .m26-tile:focus-visible .m26-tile-label {
-  border-left-color: var(--sc-soft, var(--ink)); padding-left: 10px;
-}
-.m26-tile-name { font-family: var(--serif); font-weight: 400; font-size: 21px; }
-.m26-tile-meta { font: 10px var(--mono); letter-spacing: .16em; color: var(--ink-40); text-transform: uppercase; }
-
-/* ---- the student drawer — opens in place under the tiles, page keeps
-        its ordinary scroll (no modal, no backdrop, no trapped focus) ------- */
-.m26-drawer-item { grid-column: 1 / -1; min-width: 0; }
-.m26-drawer {
-  display: grid; grid-template-rows: 0fr;
-  opacity: 0;
-  transition: grid-template-rows var(--dur-slow) var(--ease), opacity var(--dur-slow) var(--ease);
-}
-.m26-drawer.m26-open { grid-template-rows: 1fr; opacity: 1; }
-.m26-drawer-inner { overflow: hidden; min-height: 0; }
-.m26-drawer-box {
-  border: 1px solid var(--ink);
-  border-left: 3px solid var(--sc, var(--ink));
+/* ---- the rail — sticky filters over the register ------------------------- */
+.m26-rail {
+  position: sticky; top: 0; z-index: 40;
   background: var(--paper);
-  padding: clamp(16px, 3vw, 36px);
-  margin: 4px 0 10px;
-  scroll-margin-top: 18px;
+  margin-top: 44px;
+  padding: 12px 0 10px;
+  border-bottom: 1px dashed var(--hairline);
 }
+.m26-rail-row {
+  display: flex; align-items: center; gap: 8px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 4px 0;
+}
+.m26-rail-row::-webkit-scrollbar { display: none; }
+.m26-rail-row .m26-label { flex: none; min-width: 40px; }
 
-.m26-panel-head {
-  position: relative;
-  display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap;
-  border-bottom: 1px solid var(--ink);
-  padding: 0 44px 16px 0;
-}
-.m26-panel-title { flex: 1 1 auto; min-width: 0; }
-.m26-panel-nav { display: flex; gap: 18px; align-items: center; padding-top: 10px; }
-.m26-panel-close {
-  position: absolute; top: -6px; right: -6px;
-  cursor: pointer;
-  font: 15px var(--mono); color: var(--ink-60);
-  background: none; border: 1px solid transparent; padding: 6px 10px;
-  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
-}
-.m26-panel-close:hover, .m26-panel-close:focus-visible { color: var(--ink); border-color: var(--hairline); }
-
-.m26-student-name { font-family: var(--serif); font-weight: 400; font-size: 26px; margin: 0; }
-.m26-student-name::before {
-  content: ''; display: inline-block; width: 22px; height: 3px;
-  background: var(--sc-soft, var(--ink)); margin-right: 14px; vertical-align: 6px;
-}
-.m26-student-meta { font: 10px var(--mono); letter-spacing: .16em; color: var(--ink-40); margin: 8px 0 0; }
-
-.m26-panel-filters { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
-.m26-chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.m26-chips .m26-label { min-width: 42px; }
 .m26-chip {
-  cursor: pointer;
+  flex: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
   font: 10px var(--mono); letter-spacing: .14em; text-transform: uppercase;
   color: var(--ink-60); background: none;
   border: 1px dashed var(--hairline);
@@ -346,7 +270,39 @@
 .m26-chip[aria-pressed="true"] {
   color: var(--paper); background: var(--ink); border: 1px solid var(--ink);
 }
-.m26-panel-body { margin-top: 10px; }
+.m26-chip-student { text-transform: none; font-size: 12px; font-family: var(--sans); letter-spacing: .02em; }
+.m26-chip-count { font: 9px var(--mono); color: inherit; opacity: .55; }
+.m26-tick { flex: none; width: 12px; height: 3px; }
+
+/* ---- the register — the semester, week by week --------------------------- */
+.m26-register { margin-top: 8px; min-width: 0; }
+.m26-week-mark {
+  display: flex; align-items: baseline; gap: 16px;
+  margin: 56px 0 6px; font-weight: 400;
+  scroll-margin-top: 90px;
+}
+.m26-week-mark::after {
+  content: ''; flex: 1; align-self: center;
+  border-top: 1px dashed var(--hairline-soft);
+}
+.m26-week-no { font: 11px var(--mono); letter-spacing: .3em; color: var(--ink); }
+.m26-week-dates { font: 10px var(--mono); letter-spacing: .16em; color: var(--ink-40); }
+
+.m26-sub-student {
+  display: inline-flex; align-items: center; gap: 10px;
+  cursor: pointer; background: none; border: 0; padding: 0;
+  font-family: var(--serif); font-size: 19px; color: var(--ink);
+  border-bottom: 1px dashed transparent;
+  transition: border-color var(--dur) var(--ease);
+}
+.m26-sub-student:hover, .m26-sub-student:focus-visible { border-bottom-color: var(--hairline); }
+
+/* when one thread is pulled, its colour takes over the rules */
+.m26-register-thread .m26-sub { border-left-color: var(--sc-soft); padding-left: 14px; }
+.m26-register-tally {
+  margin: 48px 0 0;
+  font: 10px var(--mono); letter-spacing: .2em; color: var(--ink-40); text-transform: uppercase;
+}
 
 .m26-subs { list-style: none; margin: 30px 0 0; padding: 0; }
 .m26-sub {
@@ -398,14 +354,17 @@
   pointer-events: none;
 }
 .m26-outro-quote {
-  margin: 0; padding: 0 clamp(24px, 8vw, 120px);
-  max-width: 34ch; opacity: 0; will-change: transform, opacity;
+  margin: 0; padding: 0 22px;
+  max-width: min(38ch, 88vw); opacity: 0; will-change: transform, opacity;
 }
 .m26-outro-quote p {
   font-family: var(--serif); font-weight: 300; font-style: italic;
-  font-size: clamp(21px, 3.2vw, 34px); line-height: 1.55;
+  font-size: clamp(17px, 2.7vw, 32px); line-height: 1.6;
   margin: 0;
+  text-wrap: balance; /* no two-word orphan lines */
 }
+/* the longer voices sit a step smaller so they never tower */
+.m26-outro-quote.m26-outro-long p { font-size: clamp(15px, 2.1vw, 25px); }
 .m26-outro-quote footer {
   margin-top: 26px;
   font: 11px var(--mono); letter-spacing: .22em; font-style: normal;
@@ -417,6 +376,7 @@
 #m26-archive {
   position: fixed; inset: 0; z-index: 30;
   overflow: hidden;
+  background: var(--paper);
   visibility: hidden; pointer-events: none;
 }
 #m26-archive.m26-revealing {
@@ -516,15 +476,12 @@ html.m26-viewer-lock, html.m26-viewer-lock body { overflow: hidden !important; }
   }
   /* the archive breathes on a phone */
   .m26-arch { padding: 22px 18px 84px; }
-  .m26-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
-  .m26-tile-name { font-size: 17px; }
-  .m26-tile-meta { font-size: 9px; letter-spacing: .12em; }
   .m26-arch-sub { font-size: 13px; }
-  .m26-panel-head { padding-right: 34px; }
-  .m26-panel-nav { gap: 12px; }
-  .m26-student-name { font-size: 22px; }
+  .m26-rail { margin-top: 30px; }
+  .m26-week-mark { margin-top: 40px; }
   .m26-sub { padding: 18px 0 20px; }
   .m26-sub:hover { padding-left: 0; }
+  .m26-sub-student { font-size: 17px; }
   .m26-return { margin-bottom: 28px; }
 }
 
