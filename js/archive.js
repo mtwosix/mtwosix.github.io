@@ -101,86 +101,101 @@
     return wrap;
   }
 
-  /* ------------------------------------------------------------ the panel
-     One overlay for the whole page, created on demand, attached to <body>
-     (never inside #m26-archive — that element is transformed during the
-     threshold, which would break position:fixed). */
-  var panel = null, backdrop = null, lastFocus = null, openedSlug = null;
+  /* ------------------------------------------------------------ the drawer
+     Choosing a student opens their work IN PLACE, in a row of the same grid,
+     directly under their tile — the page keeps its ordinary scroll. One
+     drawer exists; it moves to whichever tile was chosen. No modal, no
+     backdrop, no trapped focus: Esc or ✕ or re-tapping the tile closes it. */
+  var drawerLi = null, drawerWrap = null, drawerBox = null, openedSlug = null, openerTile = null, escBound = false;
+  var tileBySlug = {}; // rebuilt with each render
 
-  function ensurePanel() {
-    if (panel) return;
-    backdrop = el('div', 'm26-panel-backdrop');
-    backdrop.addEventListener('click', closePanel);
-    panel = el('div', 'm26-panel');
-    panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-modal', 'true');
-    panel.setAttribute('aria-label', 'Student work');
-    document.body.appendChild(backdrop);
-    document.body.appendChild(panel);
-    document.addEventListener('keydown', function (e) {
-      if (!openedSlug) return;
-      if (e.key === 'Escape') { e.stopPropagation(); closePanel(); }
-      if (e.key === 'Tab') { // keep focus inside the dialog
-        var focusables = panel.querySelectorAll('a[href], button:not([disabled])');
-        if (!focusables.length) return;
-        var first = focusables[0], last = focusables[focusables.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
-    }, true);
+  function ensureDrawer() {
+    if (drawerLi && document.contains(drawerLi)) return;
+    drawerLi = el('li', 'm26-drawer-item');
+    drawerWrap = el('div', 'm26-drawer');
+    var inner = el('div', 'm26-drawer-inner');
+    drawerBox = el('div', 'm26-drawer-box');
+    drawerBox.setAttribute('role', 'region');
+    inner.appendChild(drawerBox);
+    drawerWrap.appendChild(inner);
+    drawerLi.appendChild(drawerWrap);
+    if (!escBound) {
+      escBound = true;
+      document.addEventListener('keydown', function (e) {
+        if (openedSlug && e.key === 'Escape') closeDrawer();
+      });
+    }
   }
 
-  function closePanel() {
+  function closeDrawer() {
     if (!openedSlug) return;
     openedSlug = null;
-    panel.classList.remove('m26-panel-open');
-    backdrop.classList.remove('m26-panel-open');
-    document.documentElement.classList.remove('m26-lock');
+    drawerWrap.classList.remove('m26-open');
+    if (openerTile) openerTile.setAttribute('aria-expanded', 'false');
+    var returnTo = openerTile;
+    openerTile = null;
     if (location.hash.indexOf('#s-') === 0) history.replaceState(null, '', location.pathname + location.search);
-    if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
-    lastFocus = null;
+    if (returnTo && document.contains(returnTo)) returnTo.focus();
+    setTimeout(function () { // lift out of the grid once the fold-up has run
+      if (!openedSlug && drawerLi && drawerLi.parentNode) drawerLi.parentNode.removeChild(drawerLi);
+    }, 750);
   }
 
-  function openPanel(students, slug, fromEl) {
-    var idx = students.findIndex(function (s) { return s.slug === slug; });
+  function openDrawer(students, slug, tileBtn) {
+    var idx = -1;
+    for (var i = 0; i < students.length; i++) if (students[i].slug === slug) { idx = i; break; }
     if (idx < 0) return;
-    ensurePanel();
-    if (fromEl) lastFocus = fromEl;
+    if (openedSlug === slug) { closeDrawer(); return; } // tapping the open tile folds it away
+    ensureDrawer();
+    if (openerTile) openerTile.setAttribute('aria-expanded', 'false');
     openedSlug = slug;
+    openerTile = tileBtn || null;
+    if (openerTile) openerTile.setAttribute('aria-expanded', 'true');
     history.replaceState(null, '', '#s-' + slug);
-    fillPanel(students, idx);
-    panel.classList.add('m26-panel-open');
-    backdrop.classList.add('m26-panel-open');
-    document.documentElement.classList.add('m26-lock');
-    var closeBtn = panel.querySelector('.m26-panel-close');
-    if (closeBtn) closeBtn.focus();
+    fillDrawer(students, idx);
+    var li = tileBtn && tileBtn.closest ? tileBtn.closest('li') : null;
+    var grid = li ? li.parentNode : document.querySelector('.m26-grid');
+    if (!grid) return;
+    if (li && li.nextSibling) grid.insertBefore(drawerLi, li.nextSibling);
+    else grid.appendChild(drawerLi);
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      drawerWrap.classList.add('m26-open');
+      var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      drawerBox.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' });
+    }); });
   }
 
-  function fillPanel(students, idx) {
+  function fillDrawer(students, idx) {
     var s = students[idx];
     var filter = { kind: null, type: null }; // null = all
-    panel.textContent = '';
-    panel.style.setProperty('--sc', s.color);
-    panel.style.setProperty('--sc-soft', s.colorSoft);
-    panel.scrollTop = 0;
+    drawerBox.textContent = '';
+    drawerBox.setAttribute('aria-label', s.name);
+    drawerBox.style.setProperty('--sc', s.color);
+    drawerBox.style.setProperty('--sc-soft', s.colorSoft);
 
-    /* head: prev / name / next / close */
+    /* head: name / prev / next / close */
     var head = el('header', 'm26-panel-head');
     var nav = el('div', 'm26-panel-nav');
     var prev = students[(idx - 1 + students.length) % students.length];
     var next = students[(idx + 1) % students.length];
+    var go = function (target) {
+      return function () {
+        openedSlug = null; // bypass the toggle-close
+        openDrawer(students, target.slug, tileBySlug[target.slug]);
+      };
+    };
     var prevBtn = el('button', 'm26-btn-link', '← ' + prev.name);
     prevBtn.type = 'button';
-    prevBtn.addEventListener('click', function () { openedSlug = prev.slug; history.replaceState(null, '', '#s-' + prev.slug); fillPanel(students, (idx - 1 + students.length) % students.length); });
+    prevBtn.addEventListener('click', go(prev));
     var nextBtn = el('button', 'm26-btn-link', next.name + ' →');
     nextBtn.type = 'button';
-    nextBtn.addEventListener('click', function () { openedSlug = next.slug; history.replaceState(null, '', '#s-' + next.slug); fillPanel(students, (idx + 1) % students.length); });
+    nextBtn.addEventListener('click', go(next));
     nav.appendChild(prevBtn);
     nav.appendChild(nextBtn);
     var closeBtn = el('button', 'm26-panel-close', '✕');
     closeBtn.type = 'button';
     closeBtn.setAttribute('aria-label', 'Close');
-    closeBtn.addEventListener('click', closePanel);
+    closeBtn.addEventListener('click', closeDrawer);
     var title = el('div', 'm26-panel-title');
     title.appendChild(el('h2', 'm26-student-name', s.name));
     title.appendChild(el('p', 'm26-student-meta',
@@ -190,7 +205,7 @@
     head.appendChild(title);
     head.appendChild(nav);
     head.appendChild(closeBtn);
-    panel.appendChild(head);
+    drawerBox.appendChild(head);
 
     /* filters — only the kinds/types this student actually has */
     var kinds = [], types = [];
@@ -228,9 +243,9 @@
       var filters = el('div', 'm26-panel-filters');
       if (kinds.length > 1) filters.appendChild(chipRow('KIND', kinds, 'kind'));
       if (types.length > 1) filters.appendChild(chipRow('TYPE', types, 'type'));
-      panel.appendChild(filters);
+      drawerBox.appendChild(filters);
     }
-    panel.appendChild(listHost);
+    drawerBox.appendChild(listHost);
 
     function renderList() {
       listHost.textContent = '';
@@ -273,6 +288,8 @@
   /* ------------------------------------------------------------- page build */
   function render(container, opts) {
     opts = opts || {};
+    // a re-render rebuilds the grid — any open drawer went with it
+    openedSlug = null; openerTile = null; drawerLi = null; tileBySlug = {};
     container.classList.add('m26-arch');
     container.textContent = '';
     container.appendChild(el('p', 'm26-arch-status', 'reading the archive…'));
@@ -349,7 +366,9 @@
           s.subs.length ? s.subs.length + (s.subs.length === 1 ? ' work · ' : ' works · ') + months
                         : 'no submissions yet'));
         tile.appendChild(label);
-        tile.addEventListener('click', function () { openPanel(students, s.slug, tile); });
+        tile.setAttribute('aria-expanded', 'false');
+        tileBySlug[s.slug] = tile;
+        tile.addEventListener('click', function () { openDrawer(students, s.slug, tile); });
         li.appendChild(tile);
         grid.appendChild(li);
       });
@@ -389,9 +408,9 @@
     /* deep link: #s-slug opens that student directly */
     var m = /^#s-(.+)$/.exec(location.hash);
     if (m && students.some(function (s) { return s.slug === m[1]; }) && !openedSlug) {
-      openPanel(students, m[1], null);
+      openDrawer(students, m[1], tileBySlug[m[1]]);
     }
   }
 
-  window.M26Archive = { render: render, closePanel: closePanel };
+  window.M26Archive = { render: render, closeDrawer: closeDrawer };
 })();

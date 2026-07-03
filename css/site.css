@@ -68,6 +68,90 @@
   outline: 1.5px solid var(--ink); outline-offset: 3px;
 }
 
+/* ---- hover caption in the cloud — pure type on a hairline chip ----------- */
+.m26-hoverph {
+  position: absolute; top: 0; left: 0;
+  will-change: transform; pointer-events: none;
+}
+.m26-hoverph-chip {
+  background: rgba(8, 8, 14, .84);
+  border-left: 2px solid #fff;
+  padding: 9px 14px 10px;
+  backdrop-filter: blur(5px);
+  white-space: nowrap;
+}
+.m26-hoverph-name {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 16px; line-height: 1.1;
+}
+.m26-hoverph-meta {
+  margin-top: 4px;
+  font: 9px var(--mono); letter-spacing: .22em; text-transform: uppercase;
+  color: #a9acc4;
+}
+
+/* ---- focus view — type set around the still point at screen centre ------- */
+@keyframes m26-focus-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.m26-focus-ui {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  color: #ece9e2;
+  animation: m26-focus-in .9s var(--ease) both;
+}
+.m26-focus-name {
+  position: absolute;
+  right: calc(50% + 84px); bottom: calc(50% + 34px);
+  max-width: 38vw;
+  text-align: right;
+  font-family: var(--serif); font-weight: 300; font-style: italic;
+  font-size: clamp(30px, 5vw, 62px); line-height: 1.02;
+  letter-spacing: .01em;
+}
+.m26-focus-week {
+  position: absolute;
+  left: calc(50% + 86px); bottom: calc(50% + 44px);
+  font: 10px var(--mono); letter-spacing: .3em; text-transform: uppercase;
+  color: #8d90ab;
+}
+.m26-focus-meta {
+  position: absolute;
+  left: calc(50% + 86px); top: calc(50% + 40px);
+  font: 11px var(--mono); letter-spacing: .18em; text-transform: uppercase;
+  line-height: 2;
+}
+.m26-focus-meta2 { color: #8d90ab; }
+.m26-focus-actions {
+  position: absolute;
+  right: calc(50% + 86px); top: calc(50% + 44px);
+  text-align: right;
+}
+.m26-focus-expand {
+  display: inline-block; pointer-events: auto; cursor: pointer;
+  font: 11px var(--mono); letter-spacing: .22em;
+  color: #ece9e2;
+  border-bottom: 1px dashed rgba(236, 233, 226, .45);
+  padding-bottom: 4px;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.m26-focus-expand:hover { color: #fff; border-bottom-color: #fff; }
+.m26-focus-close {
+  position: absolute; top: 26px; right: 30px;
+  pointer-events: auto; cursor: pointer;
+  font: 10px var(--mono); letter-spacing: .26em;
+  color: #8d90ab;
+  transition: color var(--dur) var(--ease);
+}
+.m26-focus-close:hover { color: #ece9e2; }
+@media (max-width: 720px) {
+  .m26-focus-name { right: auto; left: 18px; bottom: calc(50% + 96px); text-align: left; max-width: 80vw; font-size: clamp(26px, 8vw, 38px); }
+  .m26-focus-week { left: 18px; bottom: calc(50% + 66px); }
+  .m26-focus-meta { left: 18px; top: auto; bottom: 110px; }
+  .m26-focus-actions { right: 18px; top: auto; bottom: 110px; }
+}
+
 /* ---- media (used in the archive AND the cloud's expanded panel) ---------- */
 
 .m26-media { margin: 0; }
@@ -203,35 +287,24 @@
 .m26-tile-name { font-family: var(--serif); font-weight: 400; font-size: 21px; }
 .m26-tile-meta { font: 10px var(--mono); letter-spacing: .16em; color: var(--ink-40); text-transform: uppercase; }
 
-/* ---- the student panel -------------------------------------------------- */
-html.m26-lock, html.m26-lock body { overflow: hidden !important; }
-.m26-panel-backdrop {
-  position: fixed; inset: 0; z-index: 60;
-  background: rgba(29, 27, 23, .34);
-  opacity: 0; visibility: hidden; pointer-events: none;
-  transition: opacity var(--dur-slow) var(--ease), visibility 0s linear var(--dur-slow);
+/* ---- the student drawer — opens in place under the tiles, page keeps
+        its ordinary scroll (no modal, no backdrop, no trapped focus) ------- */
+.m26-drawer-item { grid-column: 1 / -1; min-width: 0; }
+.m26-drawer {
+  display: grid; grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows var(--dur-slow) var(--ease), opacity var(--dur-slow) var(--ease);
 }
-.m26-panel-backdrop.m26-panel-open {
-  opacity: 1; visibility: visible; pointer-events: auto;
-  transition: opacity var(--dur-slow) var(--ease);
-}
-.m26-panel {
-  position: fixed; z-index: 61;
-  inset: 4vh 4vw; overflow: auto;
-  background: var(--paper); color: var(--ink);
-  font-family: var(--sans);
+.m26-drawer.m26-open { grid-template-rows: 1fr; opacity: 1; }
+.m26-drawer-inner { overflow: hidden; min-height: 0; }
+.m26-drawer-box {
   border: 1px solid var(--ink);
-  padding: clamp(18px, 3.4vw, 44px);
-  opacity: 0; visibility: hidden; pointer-events: none;
-  transform: translateY(26px);
-  transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease),
-              visibility 0s linear var(--dur-slow);
+  border-left: 3px solid var(--sc, var(--ink));
+  background: var(--paper);
+  padding: clamp(16px, 3vw, 36px);
+  margin: 4px 0 10px;
+  scroll-margin-top: 18px;
 }
-.m26-panel.m26-panel-open {
-  opacity: 1; visibility: visible; pointer-events: auto; transform: none;
-  transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
-}
-@media (max-width: 640px) { .m26-panel { inset: 0; border: 0; } }
 
 .m26-panel-head {
   position: relative;
@@ -428,6 +501,31 @@ html.m26-viewer-lock, html.m26-viewer-lock body { overflow: hidden !important; }
 @media (max-width: 640px) {
   .m26-viewer-foot { flex-wrap: wrap; }
   .m26-viewer-caption { white-space: normal; }
+}
+
+/* ---- mobile — room to breathe --------------------------------------------- */
+@media (max-width: 720px) {
+  /* the expanded submission panel becomes a single column, full-bleed */
+  .m26-xpanel { inset: 0 !important; border: 0 !important; }
+  .m26-x-head { padding: 16px 18px !important; }
+  .m26-x-cols { flex-direction: column !important; padding: 18px !important; gap: 24px !important; }
+  .m26-x-side {
+    min-width: 0 !important;
+    border-left: 0 !important; padding-left: 0 !important;
+    border-top: 1px solid rgba(29, 27, 23, .14); padding-top: 20px;
+  }
+  /* the archive breathes on a phone */
+  .m26-arch { padding: 22px 18px 84px; }
+  .m26-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+  .m26-tile-name { font-size: 17px; }
+  .m26-tile-meta { font-size: 9px; letter-spacing: .12em; }
+  .m26-arch-sub { font-size: 13px; }
+  .m26-panel-head { padding-right: 34px; }
+  .m26-panel-nav { gap: 12px; }
+  .m26-student-name { font-size: 22px; }
+  .m26-sub { padding: 18px 0 20px; }
+  .m26-sub:hover { padding-left: 0; }
+  .m26-return { margin-bottom: 28px; }
 }
 
 /* ---- sandbox badge -------------------------------------------------------- */

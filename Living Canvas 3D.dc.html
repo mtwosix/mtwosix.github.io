@@ -32,10 +32,9 @@
 <!-- overlay chrome (pointer-none except interactive cards) -->
 <div style="position:fixed;inset:0;pointer-events:none;z-index:20">
 
-  <!-- hover placeholder (fragment) -->
-  <div ref="{{ phRef }}" style="position:absolute;top:0;left:0;display:none;will-change:transform">
-    <div style="width:48px;height:34px;background:rgba(14,14,22,.85);background-image:linear-gradient(to top right,transparent calc(50% - .6px),rgba(220,222,240,.55) calc(50% - .6px),rgba(220,222,240,.55) calc(50% + .6px),transparent calc(50% + .6px)),linear-gradient(to bottom right,transparent calc(50% - .6px),rgba(220,222,240,.55) calc(50% - .6px),rgba(220,222,240,.55) calc(50% + .6px),transparent calc(50% + .6px));border:1px solid rgba(200,205,235,.5);margin:0 auto"></div>
-    <div ref="{{ phCapRef }}" style="margin-top:6px;white-space:nowrap;font:10px/1.3 ui-monospace,monospace;color:#d6d8ea;background:rgba(10,10,18,.78);border:1px solid rgba(120,125,160,.3);padding:3px 7px;text-align:center;backdrop-filter:blur(4px)"></div>
+  <!-- hover caption — pure type, no decoration -->
+  <div ref="{{ phRef }}" class="m26-hoverph" style="display:none">
+    <div ref="{{ phCapRef }}" class="m26-hoverph-chip"></div>
   </div>
 
   <!-- comment preview bubble -->
@@ -66,36 +65,40 @@
     </div>
   </div>
 
-  <!-- focus info card -->
+  <!-- focus view — type set around the still point at the centre of the screen:
+       name upper-left, week/position upper-right, kind/date/type lower-right,
+       expand lower-left; close in the screen corner -->
   <sc-if value="{{ showCard }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute;left:42px;top:50%;transform:translateY(-50%);width:248px;pointer-events:auto;background:rgba(8,8,14,.62);backdrop-filter:blur(8px);border:1px solid rgba(120,125,160,.26);padding:22px;color:#ece9e2">
-      <div style="width:160px;height:108px;background-color:rgba(255,255,255,.04);background-image:linear-gradient(to top right,transparent calc(50% - .7px),rgba(220,222,240,.5) calc(50% - .7px),rgba(220,222,240,.5) calc(50% + .7px),transparent calc(50% + .7px)),linear-gradient(to bottom right,transparent calc(50% - .7px),rgba(220,222,240,.5) calc(50% - .7px),rgba(220,222,240,.5) calc(50% + .7px),transparent calc(50% + .7px));border:1px solid rgba(200,205,235,.4)"></div>
-      <div style="margin-top:16px;font:600 19px ui-sans-serif">{{ focusName }}</div>
-      <div style="margin-top:7px;font:10px ui-monospace,monospace;letter-spacing:.14em;color:#9a958c">{{ focusKind }} · {{ focusDate }}</div>
-      <div style="margin-top:3px;font:10px ui-monospace,monospace;letter-spacing:.14em;color:#9a958c">{{ focusType }} submission</div>
-      <div style="display:flex;gap:9px;margin-top:20px">
-        <div onClick="{{ expand }}" style="cursor:pointer;font:11px ui-monospace,monospace;letter-spacing:.1em;padding:10px 16px;background:#ece9e2;color:#0a0a10">EXPAND ↗</div>
-        <div onClick="{{ exitFocus }}" style="cursor:pointer;font:11px ui-monospace,monospace;padding:10px 13px;border:1px solid rgba(236,233,226,.5)">✕</div>
+    <div class="m26-focus-ui">
+      <div class="m26-focus-name" style="color:{{ focusColor }}">{{ focusName }}</div>
+      <div class="m26-focus-week">W{{ focusWeek }} · {{ focusPos }}</div>
+      <div class="m26-focus-meta">
+        <div>{{ focusKind }} · {{ focusDate }}</div>
+        <div class="m26-focus-meta2">{{ focusType }} submission</div>
       </div>
+      <div class="m26-focus-actions">
+        <div onClick="{{ expand }}" class="m26-focus-expand">EXPAND ↗</div>
+      </div>
+      <div onClick="{{ exitFocus }}" class="m26-focus-close">✕ CLOSE</div>
     </div>
   </sc-if>
 
   <!-- expanded submission box -->
   <sc-if value="{{ expanded }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute;inset:4% 5%;background:#f6f4ee;border:1px solid #1d1b17;box-shadow:0 30px 90px rgba(0,0,0,.45);pointer-events:auto;display:flex;flex-direction:column;color:#1d1b17">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:22px 30px;border-bottom:1px solid rgba(29,27,23,.16)">
+    <div class="m26-xpanel" style="position:absolute;inset:4% 5%;background:#f6f4ee;border:1px solid #1d1b17;box-shadow:0 30px 90px rgba(0,0,0,.45);pointer-events:auto;display:flex;flex-direction:column;color:#1d1b17">
+      <div class="m26-x-head" style="display:flex;justify-content:space-between;align-items:flex-start;padding:22px 30px;border-bottom:1px solid rgba(29,27,23,.16)">
         <div>
           <div style="font:600 22px ui-sans-serif">{{ focusName }}</div>
           <div style="font:11px ui-monospace,monospace;letter-spacing:.14em;color:#6c685f;margin-top:6px">{{ focusKind }} · {{ focusType }} · {{ focusDate }}</div>
         </div>
         <div onClick="{{ closeExpand }}" style="cursor:pointer;font:17px ui-monospace,monospace;color:#6c685f;padding:2px 4px">✕</div>
       </div>
-      <div style="flex:1;overflow:auto;padding:28px 30px;display:flex;gap:32px">
+      <div class="m26-x-cols" style="flex:1;overflow:auto;padding:28px 30px;display:flex;gap:32px">
         <div style="flex:1.5;min-width:0">
           <div ref="{{ mediaRef }}" class="m26-media"></div>
           <div style="font:15px/1.75 ui-sans-serif;margin-top:20px;max-width:62ch">{{ focusText }}</div>
         </div>
-        <div style="flex:1;min-width:240px;border-left:1px solid rgba(29,27,23,.14);padding-left:26px;display:flex;flex-direction:column">
+        <div class="m26-x-side" style="flex:1;min-width:240px;border-left:1px solid rgba(29,27,23,.14);padding-left:26px;display:flex;flex-direction:column">
           <div style="font:10px ui-monospace,monospace;letter-spacing:.18em;color:#6c685f;margin-bottom:16px">DISCOURSE · {{ focusCommentCount }}</div>
           <sc-if value="{{ discourseStatus }}" hint-placeholder-val="{{ false }}">
             <div style="font:10px ui-monospace,monospace;letter-spacing:.06em;color:#8a5a34;margin:-6px 0 12px">{{ discourseStatus }}</div>
@@ -259,6 +262,10 @@
     if (mode === 'cloud') return;
     mode = 'cloud';
     docEl.classList.remove('m26-archive-mode');
+    // drop the archive out immediately — it must never re-cover the screen on the way
+    // out (this was the white rectangle at the top when scrolling back up)
+    section.classList.remove('m26-revealing');
+    section.style.setProperty('--m26-arrive', '0');
     window.scrollTo(0, 0);
     if (window.__m26Cloud) window.__m26Cloud.exitArchive();
   }
@@ -317,7 +324,8 @@ class Component extends DCLogic {
   scroll = 0; targetScroll = 0;
   rotX = 0.58; rotY = -0.65; tRotX = 0.58; tRotY = -0.65;
   hoverId = null; hoverComment = null; previewIdx = null;
-  focus = null; expanded = false; focusBlend = 0; turn = 0; nextId = null; prevId = null; selectedStudent = null;
+  focus = null; expanded = false; focusBlend = 0; nextId = null; prevId = null; selectedStudent = null;
+  _coarse = (typeof matchMedia !== 'undefined') && matchMedia('(pointer: coarse)').matches;
   revStudent = null; hoverStart = null; revFrac = 0; revAlpha = 0; revLitSet = new Set();
   focal = 820; center = { x: 0, y: 0, z: -1360 };
   rc = { x: 0, y: 0, z: -1360 }; look = { x: 0, y: 0 }; camZcur = 1600;
@@ -339,18 +347,24 @@ class Component extends DCLogic {
   _setHoverCap(p){
     const cap = this.phCapRef.current; if (!cap) return;
     cap.textContent = '';
-    const b = document.createElement('b');
-    b.style.color = this.hue(p.student, 60);
-    b.textContent = p.name;
-    cap.appendChild(b);
-    cap.appendChild(document.createTextNode(' · ' + p.kind + ' · ' + p.dateStr));
+    cap.style.borderLeftColor = this.hue(p.student, 62);
+    const name = document.createElement('div');
+    name.className = 'm26-hoverph-name';
+    name.style.color = this.hue(p.student, 72);
+    name.textContent = p.name;
+    const meta = document.createElement('div');
+    meta.className = 'm26-hoverph-meta';
+    meta.textContent = p.kind + ' · ' + p.dateStr;
+    cap.appendChild(name);
+    cap.appendChild(meta);
   }
 
   // where the dive passes the last real submission (derived from the data, not a fixed number)
   cloudEnd(){ return this.ENTRY + this.HOLD + 900 + Math.max(0, ((this._maxWeek||1)-1))*160 + 500; }
   // …then the outro: darkness → a quote in white → cream → the archive. Scroll-driven, reversible.
-  OUTRO = 2600;
-  maxScroll(){ return this.cloudEnd() + this.OUTRO; }
+  // Touch screens get a much shorter span — a couple of swipes, not a slog.
+  outroLen(){ return this._coarse ? 1250 : 2600; }
+  maxScroll(){ return this.cloudEnd() + this.outroLen(); }
 
   // CSV parsing + row interpretation live in js/m26-core.js (window.M26), shared with the
   // archive view so both views read the two CSVs identically. There is deliberately no
@@ -538,7 +552,7 @@ class Component extends DCLogic {
         return;
       }
       if (this.focus == null && this.hoverId != null){
-        this.focus = this.hoverId; this.expanded = false; this.turn = 0; this.previewIdx = null; this.travel = null;
+        this.focus = this.hoverId; this.expanded = false; this.previewIdx = null; this.travel = null;
         this.previewRef.current.style.display = 'none';
         this.setState({ focus: this.focus, expanded: false });
         return;
@@ -571,7 +585,7 @@ class Component extends DCLogic {
       if (Math.abs(x-tStartX)+Math.abs(y-tStartY) > 8) tMoved=true;
       this.mx=(x/r.width)*2-1; this.my=(y/r.height)*2-1; this.mpx=x; this.mpy=y; this._moved=true;
       if (this.handoff) return;
-      if (this.focus == null){ e.preventDefault(); const dy=tLastY-tc.clientY; this.targetScroll=Math.max(0, Math.min(this.maxScroll(), this.targetScroll + dy*2.2)); }
+      if (this.focus == null){ e.preventDefault(); const dy=tLastY-tc.clientY; this.targetScroll=Math.max(0, Math.min(this.maxScroll(), this.targetScroll + dy*3.6)); }
       tLastY=tc.clientY;
     };
     this._tEnd = (e) => { if (this.handoff) return; const dt=performance.now()-tStartT; if (!tMoved && dt<500){ e.preventDefault(); this.mpx=tStartX; this.mpy=tStartY; this._hitAt(tStartX,tStartY); this._click(); } };
@@ -592,7 +606,7 @@ class Component extends DCLogic {
       // the quote threshold; the controller below the canvas choreographs it. At 1, scrolling is
       // handed to the document entirely.
       {
-        const hf = this.focus != null ? 0 : Math.max(0, Math.min(1, (this.scroll - this.cloudEnd()) / this.OUTRO));
+        const hf = this.focus != null ? 0 : Math.max(0, Math.min(1, (this.scroll - this.cloudEnd()) / this.outroLen()));
         if (Math.abs(hf - (this._handFrac || 0)) > 0.0015){
           this._handFrac = hf;
           window.dispatchEvent(new CustomEvent('m26:handoff', { detail: { frac: hf } }));
@@ -609,7 +623,7 @@ class Component extends DCLogic {
       let rcT, lookT, camZT, rotYT, rotXT, traveling = false;
       if (this.focus != null){
         const fp = this.pts[this.focus];
-        this.turn += 0.0045; this.focusBlend += (1 - this.focusBlend)*0.05;
+        this.focusBlend += (1 - this.focusBlend)*0.05;
         let pos = fp;
         if (this.travel){
           const raw = Math.min(1, (t - this.travel.start)/this.travel.dur);
@@ -618,8 +632,11 @@ class Component extends DCLogic {
           pos = { x: lerp(a.x,b.x,tp), y: lerp(a.y,b.y,tp), z: lerp(a.z,b.z,tp) };
           if (raw >= 1) this.travel = null;
         }
-        rcT = pos; lookT = { x: pos.x - 70, y: pos.y - 20 }; camZT = pos.z + 300;
-        rotYT = this.turn; rotXT = 0.16 + Math.sin(this.turn*0.6)*0.06;
+        // elevation view: camera square to the timeline, the point held motionless at the
+        // exact centre of the screen — no turntable. World-z is time, and with the camera
+        // rotated -90° it reads along screen-x: past to the left, future to the right.
+        rcT = pos; lookT = { x: pos.x, y: pos.y }; camZT = pos.z + 340;
+        rotYT = -1.5707963; rotXT = 0;
       } else {
         this.focusBlend += (0 - this.focusBlend)*0.06;
         rcT = this.center; lookT = { x:0, y:0 }; camZT = lerp(1600,700,entryT) - dollyExtra;
@@ -637,7 +654,7 @@ class Component extends DCLogic {
       // as if breathing — two slow off-beat waves so it never feels mechanical; fades out once the dive begins.
       const breatheFade = Math.max(0, 1 - persp/0.45);
       const bt = t*0.001;
-      const globalBreathe = 1 + breatheFade*0.017*(Math.sin(bt*(6.283185/10.5)+this._bph1) + 0.55*Math.sin(bt*(6.283185/16.2)+this._bph2))/1.55;
+      const globalBreathe = 1 + breatheFade*0.034*(Math.sin(bt*(6.283185/10.5)+this._bph1) + 0.55*Math.sin(bt*(6.283185/16.2)+this._bph2))/1.55;
       const proj = (mx,my,mz) => { let dx=mx-RC.x,dy=my-RC.y,dz=mz-RC.z; let x1=dx*cosY+dz*sinY,z1=-dx*sinY+dz*cosY; let y1=dy*cosX-z1*sinX; z1=dy*sinX+z1*cosX; const wx=RC.x+x1,wy=RC.y+y1,wz=RC.z+z1; const relZ=camZ-wz; const perspS=this.focal/Math.max(40,relZ); const eff=(this.ORTHO+(perspS-this.ORTHO)*persp)*globalBreathe; return { sx:cx+(wx-LK.x)*eff, sy:cy+(wy-LK.y)*eff, relZ, eff, camx:wx-LK.x, camy:wy-LK.y, skip: persp>0.45 && relZ<8 }; };
       const NEAR = 34; // near plane for line clipping
       const effOf = d => (this.ORTHO + (this.focal/Math.max(40,d) - this.ORTHO)*persp)*globalBreathe;
@@ -680,9 +697,18 @@ class Component extends DCLogic {
         ctx.globalAlpha=alpha; ctx.beginPath(); seg(a,b); ctx.stroke();
       };
 
+      // watery ebb and flow: each point drifts on its own slow pair of waves — strongest in
+      // the white iso (points visibly spread apart and gather), present again around a
+      // focused point (which itself stays perfectly still at the centre)
+      const wobAmp = Math.max(26*breatheFade, 9*this.focusBlend);
       const order = [];
       for (const p of this.pts){
-        const pr = proj(p.x,p.y,p.z);
+        let wobX = 0, wobY = 0;
+        if (wobAmp > 0.1 && p.id !== this.focus){
+          wobX = Math.sin(t*0.00023*p.spd + p.phase*2.3)*wobAmp;
+          wobY = Math.sin(t*0.00017*p.spd + p.phase)*wobAmp;
+        }
+        const pr = proj(p.x + wobX, p.y + wobY, p.z);
         // always update sx/sy + camera-space coords so segments never draw stale
         p.sx=pr.sx; p.sy=pr.sy; p.relZ=pr.relZ; p.ccx=pr.camx; p.ccy=pr.camy; p.cdepth=pr.relZ;
         p.blur = persp>0.05 ? blurOf(pr.relZ) : 0;
@@ -833,9 +859,11 @@ class Component extends DCLogic {
         const fp = this.pts[this.focus]; const route = this.routes[fp.student]; const idx = this.routeIdx[this.focus];
         this.nextId = idx < route.length - 1 ? route[idx+1] : null;
         this.prevId = idx > 0 ? route[idx-1] : null;
-        const place = (el, id) => { if (!el) return; if (id == null){ el.style.display='none'; return; } const tp=this.pts[id]; const ang=Math.atan2(tp.sy-fp.sy, tp.sx-fp.sx); const px=fp.sx+Math.cos(ang)*72, py=fp.sy+Math.sin(ang)*72; el.style.transform='translate('+px+'px,'+py+'px) translate(-50%,-50%) rotate('+ang+'rad)'; el.style.opacity=Math.min(1,(this.focusBlend-0.5)*2.2); el.style.display='flex'; };
-        place(this.nextArrowRef.current, this.nextId);
-        place(this.prevArrowRef.current, this.prevId);
+        // fixed compass: left = back in time, right = forward — matching the elevation axis
+        const arrowGap = Math.min(120, W*0.16);
+        const place = (el, id, dir) => { if (!el) return; if (id == null){ el.style.display='none'; return; } const px=fp.sx+dir*arrowGap, py=fp.sy; el.style.transform='translate('+px+'px,'+py+'px) translate(-50%,-50%)'+(dir<0?' rotate(180deg)':''); el.style.opacity=Math.min(1,(this.focusBlend-0.5)*2.2); el.style.display='flex'; };
+        place(this.nextArrowRef.current, this.nextId, 1);
+        place(this.prevArrowRef.current, this.prevId, -1);
       } else { this.nextId=null; this.prevId=null; if(this.nextArrowRef.current) this.nextArrowRef.current.style.display='none'; if(this.prevArrowRef.current) this.prevArrowRef.current.style.display='none'; }
 
       // comment preview bubble follows its dot
@@ -872,15 +900,16 @@ class Component extends DCLogic {
   exitArchive = () => {
     if (!this.handoff) return;
     this.handoff = false;
-    // resume in the quote scene so scrolling up plays the threshold backwards into the cloud
-    this.targetScroll = Math.max(0, this.cloudEnd() + this.OUTRO*0.35);
-    this.scroll = Math.max(this.scroll, this.targetScroll);
+    // land directly on the dark quote scene — below the "archive descends" band, so the
+    // archive never re-covers the screen on the way out (the white-rectangle bug)
+    this.targetScroll = Math.max(0, this.cloudEnd() + this.outroLen()*0.35);
+    this.scroll = this.targetScroll + 90; // a breath of ease-in, still inside the quote scene
     window.dispatchEvent(new CustomEvent('m26:mode', { detail: { mode: 'cloud' } }));
   };
   exitFocus = () => {
-    // come to rest via the SHORT path — don't unwind every turntable rotation
+    // come to rest via the SHORT path
     this.rotY = Math.atan2(Math.sin(this.rotY), Math.cos(this.rotY));
-    this.turn = this.rotY; this.travel = null;
+    this.travel = null;
     this.focus = null; this.expanded = false; this.previewIdx = null;
     if (this.previewRef.current) this.previewRef.current.style.display='none';
     this.setState({ focus: null, expanded: false, openThread: null });
@@ -933,6 +962,10 @@ class Component extends DCLogic {
           del: () => this.delComment(c.id), delDisplay: c.mine ? 'flex' : 'none' };
       };
       v.focusName = p.name; v.focusKind = p.kind; v.focusDate = p.dateStr; v.focusType = p.subType; v.focusText = p.subText;
+      v.focusColor = this.hue(p.student, 72);
+      v.focusWeek = p.week;
+      const _rt = this.routes[p.student] || [], _ri = this.routeIdx[p.id];
+      v.focusPos = (_ri != null ? (_ri + 1) : 1) + ' of ' + Math.max(1, _rt.length);
       v.focusComments = tops.map(mapC);
       v.focusCommentCount = all.length;
       v.discourseEmpty = all.length === 0 && M26Discourse.state.connected && !M26Discourse.state.error;
@@ -942,6 +975,7 @@ class Component extends DCLogic {
         : (this._discMsg || '');
     } else {
       v.focusName=''; v.focusKind=''; v.focusDate=''; v.focusType=''; v.focusText=''; v.focusComments=[]; v.focusCommentCount=0;
+      v.focusColor=''; v.focusWeek=''; v.focusPos='';
       v.discourseEmpty=false; v.discourseStatus='';
     }
     return v;
