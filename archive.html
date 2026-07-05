@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Archive — Imagination Infrastructure · M26 Studio · CEPT · 2026</title>
 <meta name="description" content="The submission archive of M26 Studio's Imagination Infrastructure semester — every student, every submission, in order.">
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./css/site.css">
 <style>
   html, body { margin: 0; background: #f3f1ea; }
 </style>
 </head>
 <body>
-<!-- The archive is rendered from data/students.csv + data/submissions.csv by
-     js/archive.js — the same data, the same code, as the 3D cloud on index.html. -->
+<!-- The archive is rendered as THE LEDGER from data/students.csv + data/submissions.csv
+     (+ optional data/profiles.json) by js/archive-ledger.js — same data, same code, as the
+     3D cloud on index.html. -->
 <div id="m26-archive-page"></div>
 <noscript>
   <div style="padding:48px;font:14px/1.7 ui-sans-serif,system-ui;max-width:60ch">
@@ -28,9 +29,9 @@
 </noscript>
 <script src="./js/m26-core.js"></script>
 <script src="./js/viewer.js"></script>
-<script src="./js/archive.js"></script>
+<script src="./js/archive-ledger.js"></script>
 <script>
-  M26Archive.render(document.getElementById('m26-archive-page'), { embedded: false });
+  M26ArchiveLedger.render(document.getElementById('m26-archive-page'), { embedded: false });
 </script>
 </body>
 </html>

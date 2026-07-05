@@ -153,6 +153,9 @@
   function colorFor(rosterIndex, rosterCount, lightness) {
     return 'hsl(' + hueFor(rosterIndex, rosterCount) + ', 78%, ' + (lightness || 66) + '%)';
   }
+  // one stable glyph per student — shared identity across the cloud and the archive
+  var STU_SYMBOLS = ['@','#','&','%','$','*','+','=','§','¶','?','×','÷','~','^','¤','Ø','µ','¥','£'];
+  function STU_GLYPH(i) { i = i | 0; return STU_SYMBOLS[((i % STU_SYMBOLS.length) + STU_SYMBOLS.length) % STU_SYMBOLS.length]; }
   function slugFor(name) {
     return String(name).toLowerCase().normalize('NFKD')
       .replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'student';
@@ -384,6 +387,7 @@
     weekOf: weekOf,
     hueFor: hueFor,
     colorFor: colorFor,
+    STU_GLYPH: STU_GLYPH,
     slugFor: slugFor,
     loadRosterNames: loadRosterNames,
     fetchCsv: fetchCsv,

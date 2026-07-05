@@ -1,0 +1,76 @@
+{
+  "_readme": "Optional student profiles for the archive dossier. Key each entry by the student SLUG (name lower-cased, accents stripped, spaces -> hyphens: 'Zoya' -> 'zoya', 'Zoë O'Brien' -> 'zo-o-brien'). Every field is optional; anything left blank falls back to a placeholder. photo = a repo path (uploads/portraits/<slug>.jpg) or any image URL. links = instagram / linkedin / behance / website / email (email may be a bare address). This is sandbox demo content.",
+
+  "aarav": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Works between drawing and model, testing how a threshold can hold both a pause and a crowd. Interested in the quiet infrastructure of everyday movement.",
+    "links": { "instagram": "https://instagram.com/aarav.studio", "linkedin": "https://linkedin.com/in/aarav", "behance": "https://behance.net/aarav", "website": "https://aarav.work", "email": "aarav@m26.studio" }
+  },
+  "diya": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Collects thresholds — benches, steps, ledges — and asks what each one asks of the body. Field notes and slow section drawings.",
+    "links": { "instagram": "https://instagram.com/diya.draws", "linkedin": "https://linkedin.com/in/diya", "website": "https://diya.space", "email": "diya@m26.studio" }
+  },
+  "kabir": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Long-caption thinker. Builds arguments the size of a paragraph and then tries to draw them in one line.",
+    "links": { "instagram": "https://instagram.com/kabir.makes", "behance": "https://behance.net/kabir", "email": "kabir@m26.studio" }
+  },
+  "meera": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Sound and section. Records the room before she draws it, so the plan remembers how it felt to stand there.",
+    "links": { "instagram": "https://instagram.com/meera.field", "linkedin": "https://linkedin.com/in/meera", "website": "https://meera.audio" }
+  },
+  "rohan": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "",
+    "links": { "instagram": "https://instagram.com/rohan.rk", "email": "rohan@m26.studio" }
+  },
+  "saanvi": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Maps the in-between: the twenty metres nobody designs. Interested in edges, verges and the accidental public.",
+    "links": { "linkedin": "https://linkedin.com/in/saanvi", "behance": "https://behance.net/saanvi", "website": "https://saanvi.city" }
+  },
+  "vikram": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Structure as narrative. Likes a drawing that admits how it was made.",
+    "links": { "instagram": "https://instagram.com/vikram.section" }
+  },
+  "ananya": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Between reference and reverie — builds a reading list into every project and lets it wander.",
+    "links": { "instagram": "https://instagram.com/ananya.ref", "linkedin": "https://linkedin.com/in/ananya", "behance": "https://behance.net/ananya", "email": "ananya@m26.studio" }
+  },
+  "ishaan": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "",
+    "links": {}
+  },
+  "tara": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Time-based drawing — the same corner, redrawn every week, until the change becomes the subject.",
+    "links": { "instagram": "https://instagram.com/tara.weekly", "website": "https://tara.works" }
+  },
+  "neel": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Model-maker. Believes the fastest way to understand a space is to build it badly, twice.",
+    "links": { "instagram": "https://instagram.com/neel.builds", "behance": "https://behance.net/neel" }
+  },
+  "priya": {
+    "photo": "",
+    "role": "Architecture · M26",
+    "bio": "Writes the brief she wishes she'd been given, then answers it. Interested in care as a design constraint.",
+    "links": { "linkedin": "https://linkedin.com/in/priya", "website": "https://priya.studio", "email": "priya@m26.studio" }
+  }
+}

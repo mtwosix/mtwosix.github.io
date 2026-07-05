@@ -1,0 +1,11 @@
+{
+  "_readme": "Optional student profiles for the archive dossier — the LIVE roster. Key each entry by the student SLUG: name lower-cased, accents stripped, spaces -> hyphens ('Zoya' -> 'zoya', 'Zoë O'Brien' -> 'zo-o-brien'). Every field is optional; anything left blank falls back to a graceful placeholder, so you can add students incrementally. Fields: role (short line under the name), bio (a sentence or two), photo (a repo path like 'uploads/portraits/<slug>.jpg' or any https image URL — omit for an auto-generated constellation), links: { instagram, linkedin, behance, website, email } (email may be a bare address). Nothing here is invented from the CSVs; profiles are purely additive. Add one block per student, e.g.:",
+  "_example": {
+    "jane-doe": {
+      "photo": "uploads/portraits/jane-doe.jpg",
+      "role": "Architecture · M26",
+      "bio": "One or two sentences in the student's own voice.",
+      "links": { "instagram": "https://instagram.com/…", "linkedin": "https://linkedin.com/in/…", "behance": "https://behance.net/…", "website": "https://…", "email": "jane@…" }
+    }
+  }
+}

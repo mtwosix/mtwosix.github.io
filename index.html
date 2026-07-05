@@ -20,9 +20,11 @@
 <helmet>
 <style>
   *{box-sizing:border-box}
+  @keyframes m26blink{0%,55%{opacity:1}56%,100%{opacity:0}}
+  @keyframes m26tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
   html,body{margin:0;height:100%;overflow:hidden;background:#f3f1ea;font-family:ui-sans-serif,system-ui,sans-serif}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 </helmet>
 
 <div ref="{{ wrapRef }}" style="position:fixed;inset:0;background:#f3f1ea;cursor:default;touch-action:none">
@@ -40,29 +42,29 @@
   <!-- comment preview bubble -->
   <div ref="{{ previewRef }}" style="position:absolute;top:0;left:0;display:none;max-width:248px;will-change:transform">
     <div style="background:rgba(10,10,16,.85);border:1px solid rgba(120,125,160,.32);padding:9px 12px;backdrop-filter:blur(5px)">
-      <div ref="{{ previewAuthorRef }}" style="font:600 10px ui-monospace,monospace;letter-spacing:.1em;color:#bfc2da"></div>
+      <div ref="{{ previewAuthorRef }}" style="font:600 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.1em;color:#bfc2da"></div>
       <div ref="{{ previewTextRef }}" style="font:12px/1.45 ui-sans-serif;color:#e6e7f0;margin-top:4px"></div>
     </div>
   </div>
 
   <!-- cohort dwell caption -->
   <div ref="{{ cohortRef }}" style="position:absolute;top:7.5%;left:0;right:0;text-align:center;opacity:0;will-change:opacity">
-    <div style="font:11px ui-monospace,monospace;letter-spacing:.3em;color:#cdcfe4">THE COHORT · {{ cohortCount }} STUDENTS</div>
-    <div style="margin-top:7px;font:10px ui-monospace,monospace;letter-spacing:.2em;color:#8d90ab">each thread a student — scroll to travel their works</div>
+    <div style="font:11px 'Space Mono',ui-monospace,monospace;letter-spacing:.3em;color:#cdcfe4">[ THE COHORT · {{ cohortCount }} STUDENTS ]</div>
+    <div style="margin-top:7px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#8d90ab">each thread a student — scroll to travel their works</div>
   </div>
 
   <!-- landing chrome -->
   <div ref="{{ landingRef }}" style="position:absolute;inset:0;color:#171512">
-    <div style="position:absolute;top:9%;left:0;right:0;text-align:center">
-      <div ref="{{ titleRef }}" style="display:inline-block;font-family:'Spectral',Georgia,serif;font-weight:300;font-size:48px;letter-spacing:.004em;color:#1d1b17;white-space:nowrap">Imagination Infrastructure</div>
-      <div ref="{{ subRef }}" style="display:block;margin-top:15px;font:11px ui-monospace,monospace;letter-spacing:.26em;color:#6c685f"><span ref="{{ subInnerRef }}" style="display:inline-block">M26 STUDIO · CEPT · 2026</span></div>
-      <div ref="{{ dataStatusRef }}" style="display:none;margin-top:12px;font:10px ui-monospace,monospace;letter-spacing:.18em;color:#8a8678"></div>
+    <div style="position:absolute;inset:24px;border:1px dashed rgba(29,27,23,.32)"></div>
+    <div style="position:absolute;top:50%;left:0;right:0;text-align:center;transform:translateY(-52%)">
+      <div ref="{{ titleRef }}" style="display:inline-block;font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:clamp(38px,6vw,84px);line-height:1.04;letter-spacing:-.02em;color:#1d1b17"><div style="white-space:nowrap"><sc-for list="{{ titleL1 }}" as="c" hint-placeholder-count="13"><span data-ic style="display:inline-block;color:{{ c.color }}">{{ c.ch }}</span></sc-for></div><div style="white-space:nowrap"><sc-for list="{{ titleL2 }}" as="c" hint-placeholder-count="14"><span data-ic style="display:inline-block;color:{{ c.color }}">{{ c.ch }}</span></sc-for></div></div>
+      <div ref="{{ subRef }}" style="display:block;margin-top:22px;font:11px 'Space Mono',ui-monospace,monospace;letter-spacing:.26em;color:#6c685f"><span ref="{{ subInnerRef }}" style="display:inline-block">M26 STUDIO · CEPT · 2026</span></div>
+      <div ref="{{ dataStatusRef }}" style="display:none;margin-top:12px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.18em;color:#8a8678"></div>
     </div>
     <a href="archive.html" class="m26-corner-link">ARCHIVE →</a>
-    <div style="position:absolute;bottom:38px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:9px">
-      <svg width="22" height="40" viewBox="0 0 22 40" fill="none" stroke="#171512" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><line x1="11" y1="2" x2="11" y2="30"></line><polyline points="3.5,21 11,31 18.5,21"></polyline></svg>
-      <div style="font:11px ui-monospace,monospace;letter-spacing:.24em;color:#171512">SCROLL</div>
-    </div>
+    <div style="position:absolute;bottom:9px;left:26px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;color:#6c685f">ROT <span ref="{{ rotReadRef }}">+0.58 / −0.65</span> · FOCAL 820</div>
+    <div style="position:absolute;bottom:9px;right:26px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;color:#6c685f">PTS <span ref="{{ ptsReadRef }}">000</span> · POLL 15S · <span style="color:hsl(122,55%,34%)">LIVE ●</span></div>
+    <div style="position:absolute;bottom:44px;left:0;right:0;text-align:center;font:700 11px 'Space Mono',ui-monospace,monospace;letter-spacing:.3em;color:#171512">SCROLL<span style="display:inline-block;animation:m26blink 1.1s steps(1) infinite">▍</span></div>
   </div>
 
   <!-- focus view — type set around the still point at the centre of the screen:
@@ -77,65 +79,86 @@
         <div class="m26-focus-meta2">{{ focusType }} submission</div>
       </div>
       <div class="m26-focus-actions">
-        <div onClick="{{ expand }}" class="m26-focus-expand">EXPAND ↗</div>
+        <div onClick="{{ expand }}" class="m26-focus-expand">[ EXPAND ↗ ]</div>
       </div>
-      <div onClick="{{ exitFocus }}" class="m26-focus-close">✕ CLOSE</div>
+      <div style="position:absolute;bottom:0;left:0;right:0;border-top:1px solid rgba(191,194,218,.22);background:rgba(6,6,12,.5);overflow:hidden">
+        <div style="display:inline-block;white-space:nowrap;will-change:transform;animation:m26tick 30s linear infinite;padding:9px 0;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.18em;color:#8d90ab"><span style="padding-right:70px">{{ tickerText }}</span><span style="padding-right:70px">{{ tickerText }}</span></div>
+      </div>
+      <div onClick="{{ exitFocus }}" class="m26-focus-close">[ ✕ CLOSE ]</div>
     </div>
   </sc-if>
 
   <!-- expanded submission box -->
   <sc-if value="{{ expanded }}" hint-placeholder-val="{{ false }}">
-    <div class="m26-xpanel" style="position:absolute;inset:4% 5%;background:#f6f4ee;border:1px solid #1d1b17;box-shadow:0 30px 90px rgba(0,0,0,.45);pointer-events:auto;display:flex;flex-direction:column;color:#1d1b17">
-      <div class="m26-x-head" style="display:flex;justify-content:space-between;align-items:flex-start;padding:22px 30px;border-bottom:1px solid rgba(29,27,23,.16)">
-        <div>
-          <div style="font:600 22px ui-sans-serif">{{ focusName }}</div>
-          <div style="font:11px ui-monospace,monospace;letter-spacing:.14em;color:#6c685f;margin-top:6px">{{ focusKind }} · {{ focusType }} · {{ focusDate }}</div>
+    <div class="m26-xpanel" style="position:absolute;inset:4% 5%;background:#f6f4ee;border:2px solid #1d1b17;box-shadow:0 30px 90px rgba(0,0,0,.45);pointer-events:auto;display:flex;flex-direction:column;color:#1d1b17;overflow:hidden">
+      <div aria-hidden="true" style="position:absolute;top:7px;left:7px;width:15px;height:15px;border-top:2px solid #8a5a34;border-left:2px solid #8a5a34;z-index:4;pointer-events:none"></div>
+      <div aria-hidden="true" style="position:absolute;top:7px;right:7px;width:15px;height:15px;border-top:2px solid #8a5a34;border-right:2px solid #8a5a34;z-index:4;pointer-events:none"></div>
+      <div aria-hidden="true" style="position:absolute;bottom:7px;left:7px;width:15px;height:15px;border-bottom:2px solid #8a5a34;border-left:2px solid #8a5a34;z-index:4;pointer-events:none"></div>
+      <div aria-hidden="true" style="position:absolute;bottom:7px;right:7px;width:15px;height:15px;border-bottom:2px solid #8a5a34;border-right:2px solid #8a5a34;z-index:4;pointer-events:none"></div>
+      <div style="overflow:hidden;white-space:nowrap;font:10px 'Space Mono',ui-monospace,monospace;color:rgba(29,27,23,.3);padding:8px 14px 0;user-select:none" aria-hidden="true">▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓</div>
+      <div class="m26-x-head" style="display:flex;align-items:stretch;gap:20px;padding:20px 28px;border-bottom:1px solid rgba(29,27,23,.16)">
+        <div style="flex:none;width:72px;height:72px;border:1px solid #1d1b17;background:#fff;display:flex;align-items:center;justify-content:center;font:700 38px 'Space Mono',ui-monospace,monospace;color:{{ focusColor }}">{{ focusSym }}</div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center">
+          <div style="font:700 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.22em;color:#8a5a34">WEEK {{ focusWeek }} · ENTRY {{ focusPos }}</div>
+          <div style="font:700 clamp(22px,2.3vw,30px) 'Space Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.01em;line-height:1.05;margin-top:6px">{{ focusName }}</div>
         </div>
-        <div onClick="{{ closeExpand }}" style="cursor:pointer;font:17px ui-monospace,monospace;color:#6c685f;padding:2px 4px">✕</div>
+        <div onClick="{{ closeExpand }}" style="flex:none;cursor:pointer;font:700 11px 'Space Mono',ui-monospace,monospace;letter-spacing:.12em;color:#6c685f;white-space:nowrap">[ ✕ CLOSE ]</div>
       </div>
-      <div class="m26-x-cols" style="flex:1;overflow:auto;padding:28px 30px;display:flex;gap:32px">
+      <div style="display:flex;border-bottom:1px solid rgba(29,27,23,.16)">
+        <div style="flex:1;padding:11px 28px;border-right:1px solid rgba(29,27,23,.12)"><div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#9a958c">KIND</div><div style="font:700 12px 'Space Mono',ui-monospace,monospace;text-transform:uppercase;margin-top:5px">{{ focusKind }}</div></div>
+        <div style="flex:1;padding:11px 20px;border-right:1px solid rgba(29,27,23,.12)"><div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#9a958c">TYPE</div><div style="font:700 12px 'Space Mono',ui-monospace,monospace;text-transform:uppercase;margin-top:5px">{{ focusType }}</div></div>
+        <div style="flex:1;padding:11px 20px"><div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#9a958c">LOGGED</div><div style="font:700 12px 'Space Mono',ui-monospace,monospace;text-transform:uppercase;margin-top:5px">{{ focusDate }}</div></div>
+      </div>
+      <div class="m26-x-cols" style="flex:1;overflow:auto;padding:26px 28px;display:flex;gap:34px">
         <div style="flex:1.5;min-width:0">
+          <div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.24em;color:#8a5a34;margin-bottom:12px">◈ ARTIFACT</div>
           <div ref="{{ mediaRef }}" class="m26-media"></div>
-          <div style="font:15px/1.75 ui-sans-serif;margin-top:20px;max-width:62ch">{{ focusText }}</div>
+          <div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.24em;color:#8a5a34;margin:26px 0 10px">TRANSCRIPT</div>
+          <div style="font:300 16px/1.8 Spectral,Georgia,serif;max-width:60ch">{{ focusText }}</div>
         </div>
-        <div class="m26-x-side" style="flex:1;min-width:240px;border-left:1px solid rgba(29,27,23,.14);padding-left:26px;display:flex;flex-direction:column">
-          <div style="font:10px ui-monospace,monospace;letter-spacing:.18em;color:#6c685f;margin-bottom:16px">DISCOURSE · {{ focusCommentCount }}</div>
+        <div class="m26-x-side" style="flex:1;min-width:250px;border-left:1px dashed rgba(29,27,23,.3);padding-left:26px;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <div style="font:700 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em">◍ DISCOURSE</div>
+            <div style="font:700 10px 'Space Mono',ui-monospace,monospace;color:#8a5a34">[{{ focusCommentCount }}]</div>
+          </div>
+          <div aria-hidden="true" style="font:10px 'Space Mono',ui-monospace,monospace;color:rgba(29,27,23,.22);overflow:hidden;white-space:nowrap;margin:8px 0 16px">░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓</div>
           <sc-if value="{{ discourseStatus }}" hint-placeholder-val="{{ false }}">
-            <div style="font:10px ui-monospace,monospace;letter-spacing:.06em;color:#8a5a34;margin:-6px 0 12px">{{ discourseStatus }}</div>
+            <div style="font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.06em;color:#8a5a34;margin:-6px 0 12px">{{ discourseStatus }}</div>
           </sc-if>
           <sc-if value="{{ discourseEmpty }}" hint-placeholder-val="{{ false }}">
-            <div style="font:12px/1.5 ui-sans-serif;color:#9a958c;margin-bottom:12px">No discourse yet — start it below.</div>
+            <div style="font:11px/1.6 'Space Mono',ui-monospace,monospace;letter-spacing:.04em;color:#9a958c;margin-bottom:14px">// no signal yet — open the channel below</div>
           </sc-if>
           <div style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:18px">
             <sc-for list="{{ focusComments }}" as="cm" hint-placeholder-count="3">
-              <div>
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+              <div style="position:relative;padding-left:14px">
+                <div aria-hidden="true" style="position:absolute;left:0;top:3px;bottom:3px;width:2px;background:rgba(138,90,52,.45)"></div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
                   <div style="flex:1;min-width:0">
-                    <div style="font:600 12px ui-sans-serif">{{ cm.author }}</div>
-                    <div style="font:13px/1.55 ui-sans-serif;color:#3a372f;margin-top:3px">{{ cm.text }}</div>
+                    <div style="font:700 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a5a34">{{ cm.author }}</div>
+                    <div style="font:14px/1.55 Spectral,Georgia,serif;color:#2a2820;margin-top:4px">{{ cm.text }}</div>
                   </div>
-                  <div onClick="{{ cm.toggle }}" title="continue discourse" style="flex:none;cursor:pointer;width:26px;height:26px;border-radius:50%;border:1px solid {{ cm.ringColor }};background:{{ cm.ringBg }};color:{{ cm.ringText }};display:flex;align-items:center;justify-content:center;font:10px ui-monospace,monospace">{{ cm.count }}</div>
-                  <div onClick="{{ cm.del }}" title="delete your comment" style="flex:none;cursor:pointer;width:26px;height:26px;border:1px dashed rgba(29,27,23,.35);color:#8a5a34;display:{{ cm.delDisplay }};align-items:center;justify-content:center;font:11px ui-monospace,monospace">✕</div>
+                  <div onClick="{{ cm.toggle }}" title="continue discourse" style="flex:none;cursor:pointer;height:22px;min-width:34px;padding:0 7px;border:1px solid {{ cm.ringColor }};background:{{ cm.ringBg }};color:{{ cm.ringText }};display:flex;align-items:center;justify-content:center;gap:3px;font:10px 'Space Mono',ui-monospace,monospace">↷ {{ cm.count }}</div>
+                  <div onClick="{{ cm.del }}" title="delete your comment" style="flex:none;cursor:pointer;width:26px;height:26px;border:1px dashed rgba(29,27,23,.35);color:#8a5a34;display:{{ cm.delDisplay }};align-items:center;justify-content:center;font:11px 'Space Mono',ui-monospace,monospace">✕</div>
                 </div>
                 <sc-if value="{{ cm.open }}" hint-placeholder-val="{{ false }}">
                   <div style="margin-top:12px;margin-left:12px;border-left:1px solid rgba(29,27,23,.16);padding-left:14px;display:flex;flex-direction:column;gap:12px">
                     <sc-for list="{{ cm.replies }}" as="rp" hint-placeholder-count="2">
                       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-                        <div style="flex:1;min-width:0"><div style="font:600 11px ui-sans-serif">{{ rp.author }}</div><div style="font:12.5px/1.5 ui-sans-serif;color:#4a473f;margin-top:2px">{{ rp.text }}</div></div>
-                        <div onClick="{{ rp.del }}" title="delete your reply" style="flex:none;cursor:pointer;width:20px;height:20px;border:1px dashed rgba(29,27,23,.3);color:#8a5a34;display:{{ rp.delDisplay }};align-items:center;justify-content:center;font:10px ui-monospace,monospace">✕</div>
+                        <div style="flex:1;min-width:0"><div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:#8a5a34">↳ {{ rp.author }}</div><div style="font:13px/1.5 Spectral,Georgia,serif;color:#3a372f;margin-top:2px">{{ rp.text }}</div></div>
+                        <div onClick="{{ rp.del }}" title="delete your reply" style="flex:none;cursor:pointer;width:20px;height:20px;border:1px dashed rgba(29,27,23,.3);color:#8a5a34;display:{{ rp.delDisplay }};align-items:center;justify-content:center;font:10px 'Space Mono',ui-monospace,monospace">✕</div>
                       </div>
                     </sc-for>
                     <sc-if value="{{ needName }}" hint-placeholder-val="{{ false }}">
                       <div style="display:flex;gap:6px">
                         <input ref="{{ replyFirstRef }}" placeholder="First name" style="flex:1;min-width:0;font:12px ui-sans-serif;padding:8px 10px;border:1px solid rgba(29,27,23,.28);background:#fff;color:#1d1b17;outline:none" />
                         <input ref="{{ replyLastRef }}" placeholder="Last name" style="flex:1;min-width:0;font:12px ui-sans-serif;padding:8px 10px;border:1px solid rgba(29,27,23,.28);background:#fff;color:#1d1b17;outline:none" />
-                        <div onClick="{{ submitReplyName }}" title="save name" style="cursor:pointer;font:12px ui-monospace,monospace;padding:8px 12px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">→</div>
+                        <div onClick="{{ submitReplyName }}" title="save name" style="cursor:pointer;font:12px 'Space Mono',ui-monospace,monospace;padding:8px 12px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">→</div>
                       </div>
                     </sc-if>
                     <sc-if value="{{ hasName }}" hint-placeholder-val="{{ true }}">
                       <div style="display:flex;gap:7px">
                         <input ref="{{ replyInputRef }}" placeholder="reply as {{ userName }}…" style="flex:1;font:12px ui-sans-serif;padding:8px 10px;border:1px solid rgba(29,27,23,.28);background:#fff;color:#1d1b17;outline:none" />
-                        <div onClick="{{ cm.postReply }}" style="cursor:pointer;font:10px ui-monospace,monospace;padding:8px 11px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">REPLY</div>
+                        <div onClick="{{ cm.postReply }}" style="cursor:pointer;font:10px 'Space Mono',ui-monospace,monospace;padding:8px 11px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">REPLY</div>
                       </div>
                     </sc-if>
                   </div>
@@ -144,18 +167,19 @@
             </sc-for>
           </div>
           <sc-if value="{{ needName }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:16px;font:10px ui-monospace,monospace;letter-spacing:.04em;color:#9a958c">first time here — add your name to join the discourse (shown as “First L.”)</div>
+            <div style="margin-top:16px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.04em;color:#9a958c">first time here — add your name to join the discourse (shown as “First L.”)</div>
             <div style="display:flex;gap:8px;margin-top:8px">
               <input ref="{{ firstRef }}" placeholder="First name" style="flex:1;min-width:0;font:13px ui-sans-serif;padding:10px 12px;border:1px solid rgba(29,27,23,.3);background:#fff;color:#1d1b17;outline:none" />
               <input ref="{{ lastRef }}" placeholder="Last name" style="flex:1;min-width:0;font:13px ui-sans-serif;padding:10px 12px;border:1px solid rgba(29,27,23,.3);background:#fff;color:#1d1b17;outline:none" />
-              <div onClick="{{ submitName }}" title="save name" style="cursor:pointer;font:13px ui-monospace,monospace;padding:10px 15px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">→</div>
+              <div onClick="{{ submitName }}" title="save name" style="cursor:pointer;font:13px 'Space Mono',ui-monospace,monospace;padding:10px 15px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">→</div>
             </div>
           </sc-if>
           <sc-if value="{{ hasName }}" hint-placeholder-val="{{ true }}">
-            <div style="margin-top:16px;font:10px ui-monospace,monospace;letter-spacing:.04em;color:#9a958c">{{ postingAs }}</div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <input ref="{{ expandInputRef }}" placeholder="add to the discourse…" style="flex:1;font:13px ui-sans-serif;padding:10px 12px;border:1px solid rgba(29,27,23,.3);background:#fff;color:#1d1b17;outline:none" />
-              <div onClick="{{ postComment }}" style="cursor:pointer;font:11px ui-monospace,monospace;letter-spacing:.1em;padding:10px 15px;background:#1d1b17;color:#f6f4ee;align-self:stretch;display:flex;align-items:center">POST</div>
+            <div style="margin-top:16px;font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:#9a958c">{{ postingAs }}</div>
+            <div style="display:flex;margin-top:8px;border:1px solid #1d1b17;background:#fff">
+              <span style="font:700 14px 'Space Mono',ui-monospace,monospace;color:#8a5a34;padding:0 4px 0 12px;display:flex;align-items:center">&gt;</span>
+              <input ref="{{ expandInputRef }}" placeholder="add to the discourse…" style="flex:1;font:13px 'Space Mono',ui-monospace,monospace;padding:11px 8px;border:0;background:transparent;color:#1d1b17;outline:none" />
+              <div onClick="{{ postComment }}" style="cursor:pointer;font:700 11px 'Space Mono',ui-monospace,monospace;letter-spacing:.12em;padding:11px 16px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">POST →</div>
             </div>
           </sc-if>
         </div>
@@ -164,10 +188,10 @@
   </sc-if>
 </div>
 
-<div ref="{{ nextArrowRef }}" onClick="{{ goNext }}" style="position:fixed;top:0;left:0;display:none;z-index:25;pointer-events:auto;cursor:pointer;width:38px;height:38px;align-items:center;justify-content:center;border:1px solid rgba(236,233,226,.6);border-radius:50%;background:rgba(8,8,14,.5);backdrop-filter:blur(4px)">
+<div ref="{{ nextArrowRef }}" onClick="{{ goNext }}" style="position:fixed;top:0;left:0;display:none;z-index:25;pointer-events:auto;cursor:pointer;width:38px;height:38px;align-items:center;justify-content:center;border:1px solid rgba(236,233,226,.6);background:rgba(6,6,12,.55);backdrop-filter:blur(4px)">
   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#ece9e2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="13" y2="8"></line><polyline points="8,3 13,8 8,13"></polyline></svg>
 </div>
-<div ref="{{ prevArrowRef }}" onClick="{{ goPrev }}" style="position:fixed;top:0;left:0;display:none;z-index:25;pointer-events:auto;cursor:pointer;width:38px;height:38px;align-items:center;justify-content:center;border:1px solid rgba(236,233,226,.6);border-radius:50%;background:rgba(8,8,14,.5);backdrop-filter:blur(4px)">
+<div ref="{{ prevArrowRef }}" onClick="{{ goPrev }}" style="position:fixed;top:0;left:0;display:none;z-index:25;pointer-events:auto;cursor:pointer;width:38px;height:38px;align-items:center;justify-content:center;border:1px solid rgba(236,233,226,.6);background:rgba(6,6,12,.55);backdrop-filter:blur(4px)">
   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#ece9e2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="13" y2="8"></line><polyline points="8,3 13,8 8,13"></polyline></svg>
 </div>
 
@@ -178,6 +202,7 @@
      and the page descends into the students. Entirely scroll-driven — scrolling back
      up plays it in reverse. -->
 <div id="m26-outro" aria-hidden="true">
+  <div id="m26-outro-dither"></div>
   <blockquote class="m26-outro-quote">
     <p id="m26-outro-text"></p>
     <footer id="m26-outro-name"></footer>
@@ -187,13 +212,14 @@
 <!-- The archive — the same two CSVs as the cloud, read the ordinary way. Also reachable
      directly (and without the 3D piece) at archive.html. -->
 <section id="m26-archive" aria-label="Submission archive" tabindex="-1"></section>
-<script src="./js/archive.js"></script>
+<script src="./js/archive-ledger.js"></script>
 <script>
 (function(){
   'use strict';
   var section = document.getElementById('m26-archive');
   var outro = document.getElementById('m26-outro');
   var outroQuote = outro.querySelector('.m26-outro-quote');
+  var outroDither = outro.querySelector('#m26-outro-dither');
   var docEl = document.documentElement;
   var mode = 'cloud';
   var rendered = false;
@@ -217,7 +243,7 @@
 
   function renderArchive(){
     rendered = true;
-    M26Archive.render(section, { embedded: true, onReturn: toCloud });
+    M26ArchiveLedger.render(section, { embedded: true, onReturn: toCloud });
   }
 
   var lerp = function (a, b, t) { return a + (b - a) * t; };
@@ -246,6 +272,8 @@
       + ',' + Math.round(lerp(233, 23, xf)) + ')';
     outroQuote.style.opacity = (qin * (1 - down)).toFixed(3);
     outroQuote.style.transform = 'translateY(' + ((1 - qin) * 30 - down * 52).toFixed(1) + 'px)';
+    // the dither field is densest in full dark, dissolving as paper inks in
+    if (outroDither) outroDither.style.opacity = (seal * (1 - xf) * 0.5).toFixed(3);
 
     section.classList.toggle('m26-revealing', down > 0);
     section.style.setProperty('--m26-arrive', down.toFixed(4));
@@ -323,6 +351,8 @@ class Component extends DCLogic {
   replyLastRef = React.createRef();
   mediaRef = React.createRef();
   dataStatusRef = React.createRef();
+  rotReadRef = React.createRef();
+  ptsReadRef = React.createRef();
   entryT = 0; travel = null;
 
   mx = 0; my = 0; mpx = null; mpy = null; _moved = false;
@@ -334,11 +364,92 @@ class Component extends DCLogic {
   revStudent = null; hoverStart = null; revFrac = 0; revAlpha = 0; revLitSet = new Set();
   focal = 820; center = { x: 0, y: 0, z: -1360 };
   rc = { x: 0, y: 0, z: -1360 }; look = { x: 0, y: 0 }; camZcur = 1600;
-  ENTRY = 1400; ORTHO = 0.34;  DELAY = 380; DUR = 950; HOLD = 900;
+  ENTRY = 1400; ORTHO = 0.34;  DELAY = 380; DUR = 950; HOLD = 0;
+  // middle stage: the masthead disperses (DISPERSE_LEN of scroll) with the camera held at the
+  // iso view, then the routes grow in (GROW_LEN) still held — only then does the camera release
+  // into its rotation + dive
+  DISPERSE_LEN = 700; GROW_LEN = 2200;
   _bph1 = Math.random()*6.283185; _bph2 = Math.random()*6.283185;
 
   rnd(i){ const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
   hue(si, l){ const s = this.students[si]; return `hsl(${s ? s.h : 0}, 78%, ${l || 66}%)`; }
+  _stg(si){ const S=['#','&','%','$','*','+','=','§','¶','?','×','÷','~','^','¤','Ø','µ','¥','£','@']; si=si|0; return S[((si%S.length)+S.length)%S.length]; }
+
+  // ascii air — pre-rendered dither-glyph textures (ink for the paper iso, fog for the deep);
+  // two drawImage calls per frame, rebuilt on resize / once the webfont lands
+  // fluid breathing void — an offscreen glyph field rebuilt ~22fps: slow drifting waves + a
+  // concentric ripple + a central hole whose radius breathes, so it grows and contracts like
+  // clouds/water. Declutters (thins) as the dive begins (entryT), then the caller fades it out.
+  _paintAir(t, entryT, W, H){
+    let c = this._air;
+    if (!c || c.width !== W || c.height !== H){ c = this._air = document.createElement('canvas'); c.width = W; c.height = H; this._airCW = 0; }
+    const g = c.getContext('2d');
+    if (!this._airCW){ g.font = '400 12px "Space Mono", ui-monospace, monospace'; this._airCW = (g.measureText('0000000000').width/10) || 7.3; }
+    const cw = this._airCW, lh = 15;
+    const cols = Math.ceil(W/cw)+1, rows = Math.ceil(H/lh)+1;
+    g.clearRect(0,0,W,H);
+    g.font = '400 12px "Space Mono", ui-monospace, monospace';
+    g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = '#1d1b17'; g.globalAlpha = 1;
+    const RAMP = ' ·:-=+*#%@', N = RAMP.length;
+    const tf = t*0.001;
+    const voidR = 0.30 + 0.17*Math.sin(tf*0.5), ampB = 0.9 + 0.14*Math.sin(tf*0.33);
+    const dRaw = Math.max(0, Math.min(1, entryT/0.5)); const dCut = dRaw*dRaw*(3-2*dRaw)*0.62;
+    const ccx = (cols-1)/2, ccy = (rows-1)/2, halfH = ccy*lh;
+    for (let r=0;r<rows;r++){ const ay=(r-ccy)*lh; let line='';
+      for (let c2=0;c2<cols;c2++){ const ax=(c2-ccx)*cw;
+        const d=Math.hypot(ax,ay)/halfH, de=Math.hypot(ax/(halfH*1.55),ay/halfH);
+        let w=Math.sin(ax*0.011+tf*0.55)+Math.sin(ay*0.015-tf*0.42)+Math.sin((ax+ay)*0.008+tf*0.7)+Math.sin(d*6-tf*0.9); w*=0.25;
+        const edge=Math.max(0,1-Math.pow(de*0.86,2.4)), hole=Math.exp(-(d/voidR)*(d/voidR)*1.5);
+        const v=(0.46+w*0.5)*ampB*edge - hole*0.72 - dCut;
+        line += v<=0.02 ? ' ' : RAMP[Math.min(N-1,(v*N)|0)];
+      }
+      g.fillText(line, 0, r*lh + lh*0.5);
+    }
+  }
+
+  _mkFields(W, H){
+    this._fieldW = W; this._fieldH = H;
+    const make = (col) => {
+      const f = document.createElement('canvas');
+      f.width = W + 80; f.height = H + 80;
+      const fx = f.getContext('2d');
+      fx.font = '700 11px "Space Mono", ui-monospace, monospace';
+      fx.textAlign = 'center'; fx.textBaseline = 'middle';
+      const gl = '·:;=+*#';
+      const step = 27;
+      for (let y = step/2; y < f.height; y += step){
+        for (let x = step/2; x < f.width; x += step){
+          const n = this.rnd(x*13.77 + y*7.31);
+          if (n < 0.62) continue;
+          const ch = gl[Math.min(gl.length-1, Math.floor((n-0.62)/0.38*gl.length))];
+          fx.globalAlpha = 0.25 + 0.75*this.rnd(x*3.1 + y*1.7);
+          fx.fillStyle = col;
+          fx.fillText(ch, x, y);
+        }
+      }
+      return f;
+    };
+    this._fieldInk = make('#1d1b17');
+    this._fieldFog = make('#bfc2da');
+  }
+
+  // scramble-resolve: glyph noise settles into the real text, left to right (textContent only —
+  // CSV values stay untrusted plain text)
+  _scrambleTo(el, final){
+    if (typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches){ el.textContent = final; return; }
+    const chars = '░▒▓@#%*+=:·';
+    const t0 = performance.now(), dur = 300, n = final.length;
+    const step = () => {
+      if (!el.isConnected) return;
+      const k = Math.min(1, (performance.now() - t0) / dur);
+      const res = Math.floor(k * n);
+      let s = final.slice(0, res);
+      for (let i = res; i < n; i++) s += final[i] === ' ' ? ' ' : chars[(Math.random()*chars.length)|0];
+      el.textContent = s;
+      if (k < 1) requestAnimationFrame(step);
+    };
+    step();
+  }
 
   // quiet status line under the subtitle — only ever shown when a CSV fetch fails
   _setDataStatus(msg){
@@ -356,20 +467,41 @@ class Component extends DCLogic {
     const name = document.createElement('div');
     name.className = 'm26-hoverph-name';
     name.style.color = this.hue(p.student, 72);
-    name.textContent = p.name;
     const meta = document.createElement('div');
     meta.className = 'm26-hoverph-meta';
-    meta.textContent = p.kind + ' · ' + p.dateStr;
     cap.appendChild(name);
     cap.appendChild(meta);
+    this._scrambleTo(name, p.name);
+    this._scrambleTo(meta, p.kind + ' · ' + p.dateStr);
   }
 
   // where the dive passes the last real submission (derived from the data, not a fixed number)
-  cloudEnd(){ return this.ENTRY + this.HOLD + 900 + Math.max(0, ((this._maxWeek||1)-1))*160 + 500; }
+  cloudEnd(){ return this.ENTRY + this.HOLD + 900 + Math.max(0, ((this._maxWeek||1)-1))*160 + 500 + this.DISPERSE_LEN + this.GROW_LEN; }
   // …then the outro: darkness → a quote in white → cream → the archive. Scroll-driven, reversible.
   // Touch screens get a much shorter span — a couple of swipes, not a slog.
   outroLen(){ return this._coarse ? 1250 : 2600; }
   maxScroll(){ return this.cloudEnd() + this.outroLen(); }
+
+  // fit the whole flat-iso structure comfortably on screen for the hold: the bounding box of every
+  // point in the fixed iso camera space (rotY -0.65 / rotX 0.58, orthographic), scaled so it fills
+  // ~78% width / ~74% height with margins, and its centre so the look-offset can centre it
+  _fitHold(W,H){
+    const pts = this.pts;
+    if (!pts || !pts.length){ this._holdFit = null; return; }
+    const RC = this.center, ry = -0.65, rx = 0.58;
+    const cosY = Math.cos(ry), sinY = Math.sin(ry), cosX = Math.cos(rx), sinX = Math.sin(rx);
+    let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+    for (const p of pts){
+      const dx = p.x-RC.x, dy = p.y-RC.y, dz = p.z-RC.z;
+      const x1 = dx*cosY + dz*sinY, z1 = -dx*sinY + dz*cosY;
+      const y1 = dy*cosX - z1*sinX;
+      const wx = RC.x + x1, wy = RC.y + y1;
+      if (wx<minX) minX=wx; if (wx>maxX) maxX=wx; if (wy<minY) minY=wy; if (wy>maxY) maxY=wy;
+    }
+    const spanX = Math.max(1, maxX-minX), spanY = Math.max(1, maxY-minY);
+    const sX = (W*0.78)/(spanX*this.ORTHO), sY = (H*0.74)/(spanY*this.ORTHO);
+    this._holdFit = { scale: Math.min(sX, sY), cx: (minX+maxX)/2, cy: (minY+maxY)/2 };
+  }
 
   // CSV parsing + row interpretation live in js/m26-core.js (window.M26), shared with the
   // archive view so both views read the two CSVs identically. There is deliberately no
@@ -453,7 +585,7 @@ class Component extends DCLogic {
       seen.add(row.key);
       pts.push({ id, student: row.studentIndex, week: row.week, t: row.t, subKey: row.key,
         x: cl.x + (this.rnd(s)-0.5)*300, y: cl.y + (this.rnd(s+1)-0.5)*300, z: -(row.week-1)*160 + (this.rnd(s+2)-0.5)*110,
-        baseR: 4.4, phase: this.rnd(s+6)*6.28, spd: 0.6+this.rnd(s+7)*0.9,
+        baseR: 5.2, phase: this.rnd(s+6)*6.28, spd: 0.6+this.rnd(s+7)*0.9,
         kind: row.kind, subType: row.type,
         subText: row.text, image: row.image || null,
         dateStr: row.dateStr, time: row.time,
@@ -500,6 +632,10 @@ class Component extends DCLogic {
     sg.addColorStop(0,'rgba(255,255,255,1)'); sg.addColorStop(0.34,'rgba(255,255,255,1)'); sg.addColorStop(1,'rgba(255,255,255,0)');
     sctx.fillStyle = sg; sctx.fillRect(0,0,64,64);
     this._soft = spr;
+    // signal masthead — per-character handles so it can dissolve into ascii dust on entry
+    this._titleChars = null;
+    const grabTitle = () => { const tl=this.titleRef.current; if(!tl) return; const els=tl.querySelectorAll('[data-ic]'); if(!els.length) return; this._titleChars = Array.prototype.slice.call(els).map((el,i)=>({el, base:el.textContent, seed:this.rnd(i*2.3+1), dir:this.rnd(i*3.1+2)*6.283})); };
+    grabTitle(); setTimeout(grabTitle, 80); setTimeout(grabTitle, 400);
     const cv = this.canvasRef.current, wrap = this.wrapRef.current;
     const ctx = cv.getContext('2d');
     let W = 0, H = 0, dpr = 1;
@@ -507,14 +643,9 @@ class Component extends DCLogic {
     resize(); this._resize = resize; window.addEventListener('resize', resize);
 
     // fit the title's width to the sub-line width
-    const titleFit = () => {
-      const tl = this.titleRef.current, sb = this.subInnerRef.current; if (!tl || !sb) return;
-      tl.style.fontSize = '48px';
-      const sw = sb.getBoundingClientRect().width, tw = tl.getBoundingClientRect().width;
-      if (tw > 0 && sw > 0){ tl.style.fontSize = Math.max(13, 48 * sw / tw).toFixed(2) + 'px'; }
-    };
+    const titleFit = () => {}; // the SIGNAL masthead sizes via CSS clamp — no fitting
     this._titleFit = titleFit; titleFit();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(titleFit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { titleFit(); this._fieldW = 0; });
     setTimeout(titleFit, 350);
     const _resize0 = this._resize; this._resize = () => { _resize0(); titleFit(); }; window.removeEventListener('resize', resize); window.addEventListener('resize', this._resize);
 
@@ -622,7 +753,9 @@ class Component extends DCLogic {
 
     const loop = () => {
       if (this.handoff){ this._raf = requestAnimationFrame(loop); return; } // archive owns the page — idle cheaply
+      try {
       const t = performance.now();
+      this._gt = t;
       this.scroll += (this.targetScroll - this.scroll)*0.09;
       // end-of-cloud outro: past the last real submission the page reports 0..1 progress through
       // the quote threshold; the controller below the canvas choreographs it. At 1, scrolling is
@@ -635,11 +768,37 @@ class Component extends DCLogic {
         }
         if (hf >= 0.999 && !this.handoff) this.enterArchive();
       }
-      const entryT = ease(Math.min(1, this.scroll/this.ENTRY));
+      // middle stage — the camera is held at the iso view (camScroll 0, no rotation) through two
+      // beats: first the masthead disperses (titleDiss 0..1), then the student routes grow in
+      // (growP 0..1). Only past the hold does camScroll advance, releasing the rotation + dive.
+      const holdEnd = this.DISPERSE_LEN + this.GROW_LEN;
+      let camScroll, growP, titleDiss;
+      if (this.scroll <= this.DISPERSE_LEN){ camScroll = 0; titleDiss = this.scroll/this.DISPERSE_LEN; growP = 0; }
+      else if (this.scroll <= holdEnd){ camScroll = 0; titleDiss = 1; growP = (this.scroll - this.DISPERSE_LEN)/this.GROW_LEN; }
+      else { camScroll = this.scroll - holdEnd; titleDiss = 1; growP = 1; }
+      const entryT = ease(Math.min(1, camScroll/this.ENTRY));
       this.entryT = entryT;
-      const dollyExtra = Math.max(0, this.scroll - this.ENTRY - this.HOLD);
-      const past = Math.max(0, this.scroll - this.ENTRY);
-      const allLit = Math.min(1, past/this.HOLD) * (1 - Math.min(1, dollyExtra/900));
+      const dollyExtra = Math.max(0, camScroll - this.ENTRY - this.HOLD);
+      const past = Math.max(0, camScroll - this.ENTRY);
+      // zoom is decoupled from rotation + perspective: as the masthead disperses the structure is
+      // scaled UP uniformly (a natural push-in — no angle change, the iso stays flat so it keeps
+      // breathing) and pauses there through the route-grow hold. The dive's own perspective zoom
+      // (entryT) takes over afterwards, so this hold-scale relaxes back to 1 as the dive begins.
+      const holdRamp = this.scroll <= this.DISPERSE_LEN ? ease(this.scroll/this.DISPERSE_LEN) : 1;
+      // hb: 1 all through the flat hold, easing to 0 as the dive breaks perspective in
+      const hb = holdRamp * (1 - Math.min(1, entryT/0.35));
+      // auto-fit the whole flat-iso structure to the screen (comfortable side margins), recomputed
+      // on resize / data change; the hold scale + a look-offset centre it, both relaxing into the dive
+      if (!this._holdFit || this._holdFitW!==W || this._holdFitH!==H || this._holdFitN!==(this.pts?this.pts.length:0)){
+        this._fitHold(W,H); this._holdFitW=W; this._holdFitH=H; this._holdFitN=this.pts?this.pts.length:0;
+      }
+      const fitScale = this._holdFit ? this._holdFit.scale : 1;
+      const holdScale = 1 + (fitScale - 1) * hb;
+      // during the hold the paper lifts a touch lighter and the ascii air thins so the structure reads
+      const holdLight = ease(Math.max(0, Math.min(1, titleDiss))) * (1 - Math.min(1, entryT/0.12));
+      // the caption settles in on top once the routes are nearly drawn, then dwells; it fades as
+      // the dive tips into perspective
+      const allLit = Math.max(0, Math.min(1, (growP - 0.45)/0.2)) * (1 - Math.min(1, entryT/0.25));
       const mRY = this.mx*0.13 + Math.sin(t*7e-5)*0.05, mRX = -this.my*0.10 + Math.cos(t*6e-5)*0.035;
 
       let rcT, lookT, camZT, rotYT, rotXT, traveling = false;
@@ -661,7 +820,7 @@ class Component extends DCLogic {
         rotYT = -1.5707963; rotXT = 0;
       } else {
         this.focusBlend += (0 - this.focusBlend)*0.06;
-        rcT = this.center; lookT = { x:0, y:0 }; camZT = lerp(1600,700,entryT) - dollyExtra;
+        rcT = this.center; lookT = { x: (this._holdFit ? this._holdFit.cx : 0)*hb, y: (this._holdFit ? this._holdFit.cy : 0)*hb }; camZT = lerp(1600,700,entryT) - dollyExtra;
         rotYT = lerp(-0.65, mRY, entryT); rotXT = lerp(0.58, mRX, entryT);
       }
       // arrival key: 0 while flying a route, easing to 1 once the camera settles — drives
@@ -686,9 +845,9 @@ class Component extends DCLogic {
       const breatheFade = Math.max(0, 1 - persp/0.45);
       const bt = t*0.001;
       const globalBreathe = 1 + breatheFade*0.034*(Math.sin(bt*(6.283185/10.5)+this._bph1) + 0.55*Math.sin(bt*(6.283185/16.2)+this._bph2))/1.55;
-      const proj = (mx,my,mz) => { let dx=mx-RC.x,dy=my-RC.y,dz=mz-RC.z; let x1=dx*cosY+dz*sinY,z1=-dx*sinY+dz*cosY; let y1=dy*cosX-z1*sinX; z1=dy*sinX+z1*cosX; const wx=RC.x+x1,wy=RC.y+y1,wz=RC.z+z1; const relZ=camZ-wz; const perspS=this.focal/Math.max(40,relZ); const eff=(this.ORTHO+(perspS-this.ORTHO)*persp)*globalBreathe; return { sx:cx+(wx-LK.x)*eff, sy:cy+(wy-LK.y)*eff, relZ, eff, camx:wx-LK.x, camy:wy-LK.y, skip: persp>0.45 && relZ<8 }; };
+      const proj = (mx,my,mz) => { let dx=mx-RC.x,dy=my-RC.y,dz=mz-RC.z; let x1=dx*cosY+dz*sinY,z1=-dx*sinY+dz*cosY; let y1=dy*cosX-z1*sinX; z1=dy*sinX+z1*cosX; const wx=RC.x+x1,wy=RC.y+y1,wz=RC.z+z1; const relZ=camZ-wz; const perspS=this.focal/Math.max(40,relZ); const eff=(this.ORTHO+(perspS-this.ORTHO)*persp)*globalBreathe*holdScale; return { sx:cx+(wx-LK.x)*eff, sy:cy+(wy-LK.y)*eff, relZ, eff, camx:wx-LK.x, camy:wy-LK.y, skip: persp>0.45 && relZ<8 }; };
       const NEAR = 34; // near plane for line clipping
-      const effOf = d => (this.ORTHO + (this.focal/Math.max(40,d) - this.ORTHO)*persp)*globalBreathe;
+      const effOf = d => (this.ORTHO + (this.focal/Math.max(40,d) - this.ORTHO)*persp)*globalBreathe*holdScale;
       // bokeh blur: near points (small depth) and far points soften; a band stays sharp
       const bokehAmt = Math.max(0, Math.min(1, (persp-0.72)/0.28)); // 0 in iso/transition, ramps in deep
       const blurOf = d => { if (bokehAmt<=0) return 0; const fD = this.focus!=null ? Math.max(120, this.pts[this.focus].relZ) : 540; return (d < fD ? Math.min(7, (1 - d/fD)*7.5) : Math.min(5, (d-fD)/520)) * bokehAmt; };
@@ -702,11 +861,25 @@ class Component extends DCLogic {
         ctx.moveTo(cx+ax*ea, cy+ay*ea); ctx.lineTo(cx+bx*eb, cy+by*eb);
       };
       // bokeh-aware filled disc (soft feathered sprite when out of focus band; dimmer so far points merge into bg)
-      const soft = this._soft;
-      const disc = (x, y, r, blur, alpha, col) => {
-        const k = blur <= 0 ? 0 : Math.min(1, blur/1.6); // crossfade crisp<->soft, no hard cut
-        if (k < 1){ ctx.globalAlpha=alpha*(1-k); ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.fill(); }
-        if (k > 0){ const R=r+blur; ctx.globalAlpha=Math.min(1,alpha*0.62)*k; ctx.drawImage(soft, x-R, y-R, R*2, R*2); }
+      const GLY = ['·',':','=','+','*','#','%','@'];
+      // each student is one stable symbol — their identity in the field (shared with the archive)
+      // each student is one stable symbol — inline palette (no dependency on core-script version)
+      const STU_INLINE = ['#','&','%','$','*','+','=','§','¶','?','×','÷','~','^','¤','Ø','µ','¥','£','@'];
+      const stg = si => STU_INLINE[(((si|0)%STU_INLINE.length)+STU_INLINE.length)%STU_INLINE.length];
+      // idle shimmer the field flickers through until a student is singled out
+      const FLK = ['·',':','.','\'','+','*','=','·',':','×'];
+      const gfont = fs => '700 ' + fs.toFixed(1) + 'px "Space Mono", ui-monospace, monospace';
+      // one glyph per point. No white bokeh sprite — depth reads through dimmer, sparser marks.
+      const disc = (x, y, r, blur, alpha, col, glyph) => {
+        ctx.fillStyle = col;
+        if (blur <= 0.4){
+          ctx.globalAlpha = alpha; ctx.font = gfont(Math.max(17, Math.min(40, r*5.2)));
+          ctx.fillText(glyph, x, y);
+        } else {
+          const fade = Math.max(0.14, 1 - blur/7.5);
+          ctx.globalAlpha = alpha*fade*0.72; ctx.font = gfont(Math.max(13, Math.min(28, (r+blur)*3)));
+          ctx.fillText(blur > 3.2 ? '·' : ':', x, y);
+        }
       };
       // per-segment gates so lines never hard-cut at the near clip plane or pop in/out of the far bokeh --
       // they ease to transparent well before either happens.
@@ -727,11 +900,41 @@ class Component extends DCLogic {
         if (alpha<=0.003) return;
         ctx.globalAlpha=alpha; ctx.beginPath(); seg(a,b); ctx.stroke();
       };
+      // ascii route lines — glyphs stepped along the segment; '—|/\\' picked by screen angle
+      const lineChar = (dx, dy) => { let a=Math.atan2(dy,dx)*57.2958; if(a<0)a+=180; if(a<22.5||a>=157.5)return '—'; if(a<67.5)return '\\'; if(a<112.5)return '|'; return '/'; };
+      const asciiSeg = (a, b, alpha, fixedCh, size, col, flowOff) => {
+        let ax=a.ccx, ay=a.ccy, ad=a.cdepth, bx=b.ccx, by=b.ccy, bd=b.cdepth;
+        if (ad<NEAR && bd<NEAR) return;
+        if (ad<NEAR){ const tt=(NEAR-ad)/(bd-ad); ax+=(bx-ax)*tt; ay+=(by-ay)*tt; ad=NEAR; }
+        else if (bd<NEAR){ const tt=(NEAR-bd)/(ad-bd); bx+=(ax-bx)*tt; by+=(ay-by)*tt; bd=NEAR; }
+        const ea=effOf(ad), eb=effOf(bd);
+        const x0=cx+ax*ea, y0=cy+ay*ea, x1=cx+bx*eb, y1=cy+by*eb;
+        const dx=x1-x0, dy=y1-y0, L=Math.hypot(dx,dy); if (L<2) return;
+        // route dashes (no fixed glyph) are drawn as an em-dash rotated to the segment's screen
+        // direction, so the dashes visibly run ALONG the route; comment/other lines keep their glyph
+        const rotDash = !fixedCh; const ang = rotDash ? Math.atan2(dy,dx) : 0;
+        const ch = fixedCh || '—'; const step=Math.max(8.5, size*1.1), n=Math.floor(L/step);
+        if (col) ctx.fillStyle=col; ctx.font=gfont(size);
+        const off = flowOff ? (flowOff%1) : 0;
+        // slow pulse breathing down the line — brightness swells travel with the flow
+        const gt = this._gt || 0;
+        for (let i=1;i<n;i++){ const f=(i+off)/n; if (f>=1) continue; const pulse = 0.72 + 0.28*Math.sin(gt*0.0016 - f*7.5);
+          const px=x0+dx*f, py=y0+dy*f;
+          if (rotDash){ ctx.save(); ctx.translate(px,py); ctx.rotate(ang); ctx.globalAlpha=alpha*pulse; ctx.fillText('—',0,0); ctx.restore(); }
+          else { ctx.globalAlpha = alpha*pulse; ctx.fillText(ch, px, py); }
+        }
+      };
+      const asciiSegGated = (a, b, baseAlpha, ch, size, flowOff) => {
+        if (a.cdepth<NEAR && b.cdepth<NEAR) return;
+        const g=Math.min(nearGate(a.cdepth)*bokehGate(a.cdepth), nearGate(b.cdepth)*bokehGate(b.cdepth));
+        const al=baseAlpha*g; if (al<=0.02) return;
+        asciiSeg(a, b, al, ch, size, inkStr, flowOff);
+      };
 
       // watery ebb and flow: each point drifts on its own slow pair of waves — strongest in
       // the white iso (points visibly spread apart and gather), present again around a
       // focused point (which itself stays perfectly still at the centre)
-      const wobAmp = Math.max(26*breatheFade, 9*this.focusBlend);
+      const wobAmp = Math.max(30*breatheFade, 11*this.focusBlend);
       const order = [];
       for (const p of this.pts){
         let wobX = 0, wobY = 0;
@@ -792,7 +995,25 @@ class Component extends DCLogic {
       if (hovering){ const el=t-this.hoverStart; this.revFrac=ease(Math.min(1,Math.max(0,(el-this.DELAY)/this.DUR))); this.revAlpha+=(1-this.revAlpha)*0.12; }
       else { this.revAlpha += (0-this.revAlpha)*0.10; if (this.revAlpha<0.02) this.revFrac=0; }
 
-      const lr = this.landingRef.current; if (lr){ const lo = Math.max(0, 1 - entryT*1.8); lr.style.opacity = lo; lr.style.visibility = lo <= 0.01 ? 'hidden' : 'visible'; }
+      const lr = this.landingRef.current; if (lr){ const lo = Math.max(0, 1 - titleDiss*1.8); lr.style.opacity = lo; lr.style.visibility = lo <= 0.01 ? 'hidden' : 'visible'; }
+      // the masthead dissolves into ascii dust as it is scrolled — before the camera moves
+      // (reversible on scroll-up)
+      if (this._titleChars){
+        const diss = Math.max(0, Math.min(1, titleDiss)), dust = '·:+=*#%';
+        for (let k=0;k<this._titleChars.length;k++){ const tc=this._titleChars[k]; const st=tc.seed*0.4, lp=Math.max(0,Math.min(1,(diss-st)/0.55));
+          if (lp<=0){ if (tc._d){ tc.el.style.transform=''; tc.el.style.opacity=''; if(tc.el.textContent!==tc.base) tc.el.textContent=tc.base; tc._d=false; } continue; }
+          tc._d=true;
+          const dist=lp*70, dx=Math.cos(tc.dir)*dist*0.7, dy=Math.sin(tc.dir)*dist - lp*24, rot=(tc.seed-0.5)*80*lp;
+          tc.el.style.transform='translate('+dx.toFixed(1)+'px,'+dy.toFixed(1)+'px) rotate('+rot.toFixed(1)+'deg) scale('+(1-lp*0.45).toFixed(2)+')';
+          tc.el.style.opacity=(1-lp).toFixed(2);
+          if (lp>0.15) tc.el.textContent = dust[(k*7+((t*0.02)|0))%dust.length];
+        }
+      }
+      if (!this._readT || t - this._readT > 160){
+        this._readT = t;
+        const rr = this.rotReadRef.current; if (rr) rr.textContent = (this.rotX<0?'−':'+')+Math.abs(this.rotX).toFixed(2)+' / '+(this.rotY<0?'−':'+')+Math.abs(this.rotY).toFixed(2);
+        const pr = this.ptsReadRef.current; if (pr) pr.textContent = ('000'+(this.pts?this.pts.length:0)).slice(-3);
+      }
       if (this.cohortRef.current) this.cohortRef.current.style.opacity = (this.focus==null && this.students.length ? allLit : 0).toFixed(3);
       if (wrap) wrap.style.cursor = (this.focus==null && (this.hoverId!=null||this.hoverComment!=null)) ? 'pointer' : 'default';
 
@@ -800,9 +1021,11 @@ class Component extends DCLogic {
       const bg = lerp3([243,241,234],[6,6,12], entryT);
       const lc = lerp3([92,88,80],[150,155,185], entryT);
       const hueL = lerp(46,66,entryT);
+      if (holdLight > 0.001){ bg[0]=Math.round(lerp(bg[0],249,holdLight)); bg[1]=Math.round(lerp(bg[1],247,holdLight)); bg[2]=Math.round(lerp(bg[2],241,holdLight)); }
       ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
       const bgStr = 'rgb('+bg.join(',')+')';
       ctx.fillStyle = bgStr; ctx.fillRect(0,0,W,H);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       // keep the wrap behind the canvas the same colour — if the viewport ever outgrows the
       // canvas bitmap (scrollbars toggling, browser chrome collapsing), the gap shows the
       // scene colour instead of a pale rectangle
@@ -810,18 +1033,53 @@ class Component extends DCLogic {
 
       if (entryT > 0.02){ const vg = ctx.createRadialGradient(cx,cy*0.9,0,cx,cy,Math.max(W,H)*0.72); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,'+(0.5*entryT).toFixed(3)+')'); ctx.fillStyle=vg; ctx.fillRect(0,0,W,H); }
 
+      // ascii air — a fluid breathing void of glyphs on the paper (rebuilt ~22fps), decluttering
+      // and dissolving as the dive begins; the fog texture still carries the deep space
+      if (!this._fieldW || this._fieldW !== W || this._fieldH !== H){ this._mkFields(W, H); this._air = null; }
+      {
+        const aInk = 0.5*Math.max(0, 1 - entryT/0.46)*(1 - holdLight*0.5), aFog = 0.055*entryT;
+        if (aInk > 0.004){
+          if (!this._air || t - (this._airLast||0) >= 45){ this._airLast = t; this._paintAir(t, entryT, W, H); }
+          ctx.globalAlpha = aInk; ctx.drawImage(this._air, 0, 0);
+        }
+        if (aFog > 0.004){ const dx=Math.sin(t*3.1e-5)*16, dy=Math.cos(t*2.3e-5)*12; ctx.globalAlpha=aFog; ctx.drawImage(this._fieldFog, -40+dx, -40+dy); }
+        ctx.globalAlpha=1;
+      }
+
       // ink: dark on the cream page → light in the dark space. Plain source-over avoids
       // the difference-blend flips that were turning dots white / haloing them.
       const ink = lerp3([20,18,15],[232,233,244], entryT);
       const inkStr = 'rgb('+ink.join(',')+')';
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = inkStr; ctx.lineCap = 'round'; ctx.lineWidth=1;
-      const routeBaseA = lerp(0.42,0.24,entryT);
-      for (const r of this.routes){ for (let i=0;i<r.length-1;i++) segA(this.pts[r[i]], this.pts[r[i+1]], routeBaseA); }
-      const commentBaseA = lerp(0.3,0.16,entryT);
-      for (const cm of this.comments){ segA(this.pts[cm.parent], cm, commentBaseA); }
-      for (const p of order){ disc(p.sx, p.sy, p.rad, p.blur, p.depthA, inkStr); }
-      for (const cm of this.comments){ if(cm.cdepth<=NEAR) continue; disc(cm.sx, cm.sy, cm.crad, cm.blur, cm.depthA, inkStr); }
+      const routeBaseA = lerp(0.62,0.26,entryT);
+      const flowT = (t*0.00035)%1;
+      // routes draw in ALONG THEIR LENGTH during the hold band (title dust → freeze → routes
+      // grow → beat → dive). Driven by growP so they grow only while the camera is held, and
+      // complete before the band ends, leaving a moment to take the whole structure in.
+      const rGrow = Math.max(0, Math.min(1, growP/0.5));
+      for (const r of this.routes){
+        if (rGrow<=0 || r.length<2) continue;
+        const cps = r.map(id=>this.pts[id]);
+        let total=0; const segLen=[]; for (let i=0;i<cps.length-1;i++){ const L=Math.hypot(cps[i+1].sx-cps[i].sx,cps[i+1].sy-cps[i].sy); segLen.push(L); total+=L; }
+        if (total<=0) continue;
+        const budget=rGrow*total; let acc=0;
+        for (let i=0;i<segLen.length;i++){
+          if (acc+segLen[i]<=budget){ asciiSegGated(cps[i], cps[i+1], routeBaseA, null, 9, flowT); acc+=segLen[i]; }
+          else { const f=segLen[i]>0?(budget-acc)/segLen[i]:0; const stub={ccx:cps[i].ccx+(cps[i+1].ccx-cps[i].ccx)*f, ccy:cps[i].ccy+(cps[i+1].ccy-cps[i].ccy)*f, cdepth:cps[i].cdepth+(cps[i+1].cdepth-cps[i].cdepth)*f}; asciiSegGated(cps[i], stub, routeBaseA, null, 9, flowT); break; }
+        }
+      }
+      const commentBaseA = lerp(0.4,0.16,entryT);
+      for (const cm of this.comments){ asciiSegGated(this.pts[cm.parent], cm, commentBaseA, '·', 7, flowT); }
+      const glyL = Math.round(lerp(34, 68, entryT));
+      for (const p of order){
+        const isStatic = (this.revStudent===p.student && this.revAlpha>0.35) || p.id===this.hoverId || p.student===this.selectedStudent;
+        let glyph;
+        if (isStatic) glyph = stg(p.student);
+        else { const ph = t*0.0026*p.spd + p.phase*4.3; glyph = Math.sin(ph) > 0.5 ? stg(p.student) : FLK[((Math.floor(ph*1.9)%FLK.length)+FLK.length)%FLK.length]; }
+        disc(p.sx, p.sy, p.rad, p.blur, p.depthA, this.hue(p.student, glyL), glyph);
+      }
+      for (const cm of this.comments){ if(cm.cdepth<=NEAR) continue; disc(cm.sx, cm.sy, cm.crad, cm.blur, cm.depthA, inkStr, '·'); }
       ctx.globalAlpha = 1;
 
       // freshly-published real submissions: a brief expanding pulse so a new entry visibly "arrives"
@@ -840,32 +1098,19 @@ class Component extends DCLogic {
         const acol = this.hue(ap.student, 68);
         const pulse = 1 + 0.12*Math.sin(t*0.004);
         ctx.globalAlpha = 0.95; ctx.fillStyle = acol; ctx.shadowBlur = 18; ctx.shadowColor = acol;
-        ctx.beginPath(); ctx.arc(ap.sx, ap.sy, ap.rad*1.6, 0, 6.2832); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.font = gfont(Math.max(14, ap.rad*4)); ctx.fillText(stg(ap.student), ap.sx, ap.sy); ctx.shadowBlur = 0;
         ctx.globalAlpha = 0.7; ctx.strokeStyle = acol; ctx.lineWidth = 1.3;
         ctx.beginPath(); ctx.arc(ap.sx, ap.sy, ap.rad*2.6*pulse, 0, 6.2832); ctx.stroke();
         ctx.globalAlpha = 1;
-      }
-
-      // cohort dwell highlight — mark only each student's STARTING point so we read them as the students
-      if (allLit > 0.02 && this.focus == null){
-        for (let si=0; si<this.routes.length; si++){
-          const p = this.pts[this.routes[si][0]]; if (!p || !p.vis) continue;
-          const col = this.hue(si, hueL);
-          ctx.globalAlpha=allLit; ctx.fillStyle=col; ctx.shadowBlur=11; ctx.shadowColor=this.hue(si,60);
-          ctx.beginPath(); ctx.arc(p.sx,p.sy,Math.max(3,p.rad*1.7),0,6.2832); ctx.fill();
-          ctx.shadowBlur=0; ctx.globalAlpha=allLit*0.55; ctx.strokeStyle=col; ctx.lineWidth=1.2;
-          ctx.beginPath(); ctx.arc(p.sx,p.sy,Math.max(7,p.rad*2.8),0,6.2832); ctx.stroke();
-        }
-        ctx.shadowBlur=0; ctx.globalAlpha=1;
       }
 
       // persistent selected-student route (locked in iso, stays lit through 3D)
       if (this.selectedStudent != null && this.focus == null){
         const r = this.routes[this.selectedStudent];
         const col = this.hue(this.selectedStudent, hueL);
-        ctx.strokeStyle = col; ctx.lineWidth = 1.7; ctx.lineCap = 'round'; ctx.shadowBlur = lerp(2,7,entryT); ctx.shadowColor = this.hue(this.selectedStudent,60);
-        for (let i=0;i<r.length-1;i++) segN(this.pts[r[i]], this.pts[r[i+1]], 0.75); ctx.shadowBlur=0;
-        for (let i=0;i<r.length;i++){ const pp=this.pts[r[i]]; if(!pp.vis) continue; ctx.globalAlpha=0.9; ctx.fillStyle=col; ctx.shadowBlur=lerp(3,8,entryT); ctx.shadowColor=this.hue(this.selectedStudent,60); ctx.beginPath(); ctx.arc(pp.sx,pp.sy,pp.rad*1.35,0,6.2832); ctx.fill(); ctx.shadowBlur=0; }
+        ctx.fillStyle = col; ctx.shadowBlur = lerp(2,7,entryT); ctx.shadowColor = this.hue(this.selectedStudent,60);
+        for (let i=0;i<r.length-1;i++) asciiSeg(this.pts[r[i]], this.pts[r[i+1]], 0.78, null, 8.5, col); ctx.shadowBlur=0;
+        for (let i=0;i<r.length;i++){ const pp=this.pts[r[i]]; if(!pp.vis) continue; ctx.globalAlpha=0.95; ctx.fillStyle=col; ctx.shadowBlur=lerp(3,8,entryT); ctx.shadowColor=this.hue(this.selectedStudent,60); ctx.font=gfont(Math.max(10, pp.rad*3.8)); ctx.fillText(stg(this.selectedStudent), pp.sx, pp.sy); ctx.shadowBlur=0; }
         ctx.globalAlpha=1;
       }
 
@@ -875,11 +1120,11 @@ class Component extends DCLogic {
         const r = this.routes[this.revStudent], cps = r.map(id=>this.pts[id]);
         const segLen=[]; let total=0; for (let i=0;i<cps.length-1;i++){ const L=Math.hypot(cps[i+1].sx-cps[i].sx,cps[i+1].sy-cps[i].sy); segLen.push(L); total+=L; }
         const budget=this.revFrac*total;
-        ctx.strokeStyle=this.hue(this.revStudent,hueL); ctx.lineWidth=1.8; ctx.lineCap='round'; ctx.shadowBlur=lerp(2,8,entryT); ctx.shadowColor=this.hue(this.revStudent,64);
+        const revCol=this.hue(this.revStudent,hueL); ctx.shadowBlur=lerp(2,8,entryT); ctx.shadowColor=this.hue(this.revStudent,64);
         let acc=0;
-        for (let i=0;i<segLen.length;i++){ if(acc+segLen[i]<=budget){ segN(cps[i], cps[i+1], this.revAlpha*0.85); this.revLitSet.add(r[i+1]); acc+=segLen[i]; } else { const f=segLen[i]>0?(budget-acc)/segLen[i]:0; const stub={ccx:cps[i].ccx+(cps[i+1].ccx-cps[i].ccx)*f, ccy:cps[i].ccy+(cps[i+1].ccy-cps[i].ccy)*f, cdepth:cps[i].cdepth+(cps[i+1].cdepth-cps[i].cdepth)*f}; segN(cps[i], stub, this.revAlpha*0.85); break; } }
+        for (let i=0;i<segLen.length;i++){ if(acc+segLen[i]<=budget){ asciiSeg(cps[i], cps[i+1], this.revAlpha*0.9, null, 8.5, revCol); this.revLitSet.add(r[i+1]); acc+=segLen[i]; } else { const f=segLen[i]>0?(budget-acc)/segLen[i]:0; const stub={ccx:cps[i].ccx+(cps[i+1].ccx-cps[i].ccx)*f, ccy:cps[i].ccy+(cps[i+1].ccy-cps[i].ccy)*f, cdepth:cps[i].cdepth+(cps[i+1].cdepth-cps[i].cdepth)*f}; asciiSeg(cps[i], stub, this.revAlpha*0.9, null, 8.5, revCol); break; } }
         this.revLitSet.add(r[0]); ctx.shadowBlur=0; ctx.globalAlpha=1;
-        for (const p of order){ if(!this.revLitSet.has(p.id)) continue; ctx.globalAlpha=1; ctx.fillStyle=this.hue(p.student,hueL); ctx.shadowBlur=lerp(3,7,entryT); ctx.shadowColor=this.hue(p.student,64); ctx.beginPath(); ctx.arc(p.sx,p.sy,p.rad*1.35,0,6.2832); ctx.fill(); ctx.shadowBlur=0; }
+        for (const p of order){ if(!this.revLitSet.has(p.id)) continue; ctx.globalAlpha=1; ctx.fillStyle=this.hue(p.student,hueL); ctx.shadowBlur=lerp(3,7,entryT); ctx.shadowColor=this.hue(p.student,64); ctx.font=gfont(Math.max(10, p.rad*3.8)); ctx.fillText(stg(p.student), p.sx, p.sy); ctx.shadowBlur=0; }
       }
 
       // focus: dim the field, highlight the route line, spotlight the dot (+ light streak on travel)
@@ -888,18 +1133,24 @@ class Component extends DCLogic {
         if (this.focus != null){
           const fp = this.pts[this.focus]; const col = this.hue(fp.student,66); const route = this.routes[fp.student];
           // highlighted route line — skip non-visible nodes so stale sx/sy can't spike the path
-          ctx.lineCap = 'round'; ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.45*this.focusBlend; ctx.shadowBlur = 6; ctx.shadowColor = this.hue(fp.student,60);
-          ctx.beginPath(); for (let i=0;i<route.length-1;i++) seg(this.pts[route[i]], this.pts[route[i+1]]); ctx.stroke(); ctx.shadowBlur = 0;
+          ctx.shadowBlur = 6; ctx.shadowColor = this.hue(fp.student,60);
+          for (let i=0;i<route.length-1;i++) asciiSeg(this.pts[route[i]], this.pts[route[i+1]], 0.5*this.focusBlend, null, 8.5, col); ctx.shadowBlur = 0;
           // faint nodes along the route (visible only)
           ctx.globalAlpha = 0.7*this.focusBlend; ctx.fillStyle = col;
           for (let i=0;i<route.length;i++){ const pp=this.pts[route[i]]; if(!pp.vis||route[i]===this.focus) continue; ctx.beginPath(); ctx.arc(pp.sx,pp.sy,Math.max(1.4,pp.rad*0.8),0,6.2832); ctx.fill(); }
           ctx.globalAlpha = 1;
           // the encircling ring lets go during flight and slowly grows back on arrival (uiK)
           if (uiK > 0.02){
-            ctx.strokeStyle = col; ctx.globalAlpha = 0.5*this.focusBlend*uiK; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.arc(fp.sx, fp.sy, (fp.rad*1.3 + fp.rad*1.3*uiK) + 6*Math.sin(t*0.002)*uiK, 0, 6.2832); ctx.stroke();
+            const hb = fp.rad*2.3 + 12*uiK + 2.5*Math.sin(t*0.002)*uiK, Lb = Math.max(6, hb*0.42);
+            ctx.strokeStyle = col; ctx.globalAlpha = 0.85*this.focusBlend*uiK; ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(fp.sx-hb+Lb, fp.sy-hb); ctx.lineTo(fp.sx-hb, fp.sy-hb); ctx.lineTo(fp.sx-hb, fp.sy-hb+Lb);
+            ctx.moveTo(fp.sx+hb-Lb, fp.sy-hb); ctx.lineTo(fp.sx+hb, fp.sy-hb); ctx.lineTo(fp.sx+hb, fp.sy-hb+Lb);
+            ctx.moveTo(fp.sx-hb+Lb, fp.sy+hb); ctx.lineTo(fp.sx-hb, fp.sy+hb); ctx.lineTo(fp.sx-hb, fp.sy+hb-Lb);
+            ctx.moveTo(fp.sx+hb-Lb, fp.sy+hb); ctx.lineTo(fp.sx+hb, fp.sy+hb); ctx.lineTo(fp.sx+hb, fp.sy+hb-Lb);
+            ctx.stroke();
             ctx.globalAlpha = this.focusBlend*uiK; ctx.fillStyle = col; ctx.shadowBlur = 22*uiK; ctx.shadowColor = col;
-            ctx.beginPath(); ctx.arc(fp.sx, fp.sy, fp.rad*1.25, 0, 6.2832); ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+            ctx.font = gfont(Math.min(38, Math.max(16, fp.rad*3.8))); ctx.fillText(stg(fp.student), fp.sx, fp.sy); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
           }
         }
       }
@@ -921,6 +1172,7 @@ class Component extends DCLogic {
       // hover placeholder follows fragment
       if (this.hoverId != null && this.focus == null){ const p=this.pts[this.hoverId]; if(p.vis){ this.phRef.current.style.transform='translate('+p.sx+'px,'+p.sy+'px) translate(-50%,-128%)'; this.phRef.current.style.display='block'; } else this.phRef.current.style.display='none'; }
 
+      } catch(e){ if (!this._loopErr){ this._loopErr = 1; console.error('m26 draw error:', e); } }
       this._raf = requestAnimationFrame(loop);
     };
     this._raf = requestAnimationFrame(loop);
@@ -998,7 +1250,9 @@ class Component extends DCLogic {
     this.build();
     const f = this.state.focus;
     const uName = this.state.userName;
-    let v = { wrapRef:this.wrapRef, canvasRef:this.canvasRef, phRef:this.phRef, phCapRef:this.phCapRef, cohortCount: (this.students ? this.students.length : 0), landingRef:this.landingRef, previewRef:this.previewRef, previewAuthorRef:this.previewAuthorRef, previewTextRef:this.previewTextRef, expandInputRef:this.expandInputRef, replyInputRef:this.replyInputRef, firstRef:this.firstRef, lastRef:this.lastRef, replyFirstRef:this.replyFirstRef, replyLastRef:this.replyLastRef, mediaRef:this.mediaRef, dataStatusRef:this.dataStatusRef, nextArrowRef:this.nextArrowRef, prevArrowRef:this.prevArrowRef, titleRef:this.titleRef, subRef:this.subRef, subInnerRef:this.subInnerRef, cohortRef:this.cohortRef, expand:this.expand, closeExpand:this.closeExpand, exitFocus:this.exitFocus, postComment:this.postComment, postReply:this.postReply, goNext:this.goNext, goPrev:this.goPrev, submitName:this.submitName, submitReplyName:this.submitReplyName, showCard: f!=null && !this.state.expanded, expanded: this.state.expanded, hasName: !!uName, needName: !uName, userName: uName, postingAs: uName ? ('posting as ' + uName) : '' };
+    let v = { wrapRef:this.wrapRef, canvasRef:this.canvasRef, phRef:this.phRef, phCapRef:this.phCapRef, cohortCount: (this.students ? this.students.length : 0), landingRef:this.landingRef, previewRef:this.previewRef, previewAuthorRef:this.previewAuthorRef, previewTextRef:this.previewTextRef, expandInputRef:this.expandInputRef, replyInputRef:this.replyInputRef, firstRef:this.firstRef, lastRef:this.lastRef, replyFirstRef:this.replyFirstRef, replyLastRef:this.replyLastRef, mediaRef:this.mediaRef, dataStatusRef:this.dataStatusRef, rotReadRef:this.rotReadRef, ptsReadRef:this.ptsReadRef, nextArrowRef:this.nextArrowRef, prevArrowRef:this.prevArrowRef, titleRef:this.titleRef, subRef:this.subRef, subInnerRef:this.subInnerRef, cohortRef:this.cohortRef, expand:this.expand, closeExpand:this.closeExpand, exitFocus:this.exitFocus, postComment:this.postComment, postReply:this.postReply, goNext:this.goNext, goPrev:this.goPrev, submitName:this.submitName, submitReplyName:this.submitReplyName, showCard: f!=null && !this.state.expanded, expanded: this.state.expanded, hasName: !!uName, needName: !uName, userName: uName, postingAs: uName ? ('posting as ' + uName) : '' };
+    if (!this._titleData){ const mk=s=>Array.prototype.map.call(s,ch=>({ch,color:ch==='/'?'#8a5a34':'#1d1b17'})); this._titleData={ titleL1:mk('IMAGINATION//'), titleL2:mk('INFRASTRUCTURE') }; }
+    v.titleL1=this._titleData.titleL1; v.titleL2=this._titleData.titleL2;
     if (f != null && this.pts[f]){
       const p = this.pts[f];
       const all = M26Discourse.forSub(p.subKey);
@@ -1015,21 +1269,24 @@ class Component extends DCLogic {
           del: () => this.delComment(c.id), delDisplay: c.mine ? 'flex' : 'none' };
       };
       v.focusName = p.name; v.focusKind = p.kind; v.focusDate = p.dateStr; v.focusType = p.subType; v.focusText = p.subText;
+      v.focusSym = this._stg(p.student);
       v.focusColor = this.hue(p.student, 72);
       v.focusWeek = p.week;
       const _rt = this.routes[p.student] || [], _ri = this.routeIdx[p.id];
       v.focusPos = (_ri != null ? (_ri + 1) : 1) + ' of ' + Math.max(1, _rt.length);
       v.focusComments = tops.map(mapC);
       v.focusCommentCount = all.length;
+      const tparts = tops.map(c => '“' + c.text + '” — ' + c.author);
+      v.tickerText = '░▒▓ ' + p.name.toUpperCase() + ' · W' + p.week + ' · ' + (p.kind || '').toUpperCase() + ' · ' + p.dateStr.toUpperCase() + ' ▓▒░  ' + (tparts.length ? 'DISCOURSE ' + all.length + '  ░▒▓  ' + tparts.join('  ░▒▓  ') : 'NO DISCOURSE YET — EXPAND AND START IT') + '  ';
       v.discourseEmpty = all.length === 0 && M26Discourse.state.connected && !M26Discourse.state.error;
       v.discourseStatus = !M26Discourse.state.connected ? 'discourse not connected yet — comments can’t be saved'
         : M26Discourse.state.error ? 'discourse unreachable — ' + M26Discourse.state.error
         : this._discBusy ? 'saving…'
         : (this._discMsg || '');
     } else {
-      v.focusName=''; v.focusKind=''; v.focusDate=''; v.focusType=''; v.focusText=''; v.focusComments=[]; v.focusCommentCount=0;
+      v.focusName=''; v.focusKind=''; v.focusDate=''; v.focusType=''; v.focusText=''; v.focusComments=[]; v.focusCommentCount=0; v.focusSym='';
       v.focusColor=''; v.focusWeek=''; v.focusPos='';
-      v.discourseEmpty=false; v.discourseStatus='';
+      v.discourseEmpty=false; v.discourseStatus=''; v.tickerText='';
     }
     return v;
   }
