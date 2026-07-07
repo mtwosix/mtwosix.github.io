@@ -61,10 +61,8 @@
       <div ref="{{ subRef }}" style="display:block;margin-top:22px;font:11px 'Space Mono',ui-monospace,monospace;letter-spacing:.26em;color:#6c685f"><span ref="{{ subInnerRef }}" style="display:inline-block">M26 STUDIO · CEPT · 2026</span></div>
       <!-- orientation: tells a first-time visitor what this is and how to read it.
            Sits on a paper chip so it never collides with the ascii dust behind it. -->
-      <div style="display:inline-block;max-width:560px;margin:22px auto 0;padding:14px 20px 15px;background:rgba(243,241,234,.94);border:1px solid rgba(29,27,23,.35);text-align:center">
+      <div id="m26-orient" style="display:inline-block;max-width:440px;margin:20px auto 0;padding:11px 18px;background:rgba(243,241,234,.94);border:1px solid rgba(29,27,23,.35);text-align:center">
         <div style="font:600 clamp(12px,1.4vw,14px)/1.5 'Space Mono',ui-monospace,monospace;color:#1d1b17">A design studio at CEPT for futures thinking &amp; systems design.</div>
-        <div style="margin-top:8px;font:italic 300 clamp(13px,1.6vw,15px)/1.55 Spectral,Georgia,serif;color:#3a382f">Each dot is one idea a student put on the page. Each colour is one student. Follow a thread through the weeks — first spark to final work.</div>
-        <div style="margin-top:10px;font:9px 'Space Mono',ui-monospace,monospace;letter-spacing:.14em;color:#8a8678">NEW WORK LANDS EVERY WEEK · SCROLL TO ENTER — OR OPEN THE LEDGER</div>
       </div>
       <div ref="{{ dataStatusRef }}" style="display:none;margin-top:12px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.18em;color:#8a8678"></div>
     </div>
@@ -646,7 +644,15 @@ class Component extends DCLogic {
     const cv = this.canvasRef.current, wrap = this.wrapRef.current;
     const ctx = cv.getContext('2d');
     let W = 0, H = 0, dpr = 1;
-    const resize = () => { dpr = Math.min(window.devicePixelRatio||1,2); W = wrap.clientWidth; H = wrap.clientHeight; cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); };
+    // overlay canvas ABOVE the landing chrome: during the dispersed landing, the points
+    // nearest the camera draw here, passing IN FRONT of the masthead and the orientation
+    // chip — the title sits inside the cloud, not on top of it. Pointer-transparent.
+    const ov = document.createElement('canvas');
+    ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6';
+    wrap.appendChild(ov);
+    const octx = ov.getContext('2d');
+    this._octx = octx;
+    const resize = () => { dpr = Math.min(window.devicePixelRatio||1,2); W = wrap.clientWidth; H = wrap.clientHeight; cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); ov.width = W*dpr; ov.height = H*dpr; octx.setTransform(dpr,0,0,dpr,0,0); };
     resize(); this._resize = resize; window.addEventListener('resize', resize);
 
     // fit the title's width to the sub-line width
@@ -676,8 +682,35 @@ class Component extends DCLogic {
       this.targetScroll = Math.max(0, Math.min(this.maxScroll(), this.targetScroll + step));
     };
     window.addEventListener('keydown', this._key);
-    this._move = (e) => { const r = wrap.getBoundingClientRect(); this.mx = ((e.clientX-r.left)/r.width)*2-1; this.my = ((e.clientY-r.top)/r.height)*2-1; this.mpx = e.clientX-r.left; this.mpy = e.clientY-r.top; this._moved = true; };
+    this._move = (e) => {
+      const r = wrap.getBoundingClientRect(); this.mx = ((e.clientX-r.left)/r.width)*2-1; this.my = ((e.clientY-r.top)/r.height)*2-1; this.mpx = e.clientX-r.left; this.mpy = e.clientY-r.top; this._moved = true;
+      // landing physics: drag the held point (its velocity follows the hand, so release = throw)
+      if (this._grabId != null){
+        const p = this.pts && this.pts[this._grabId];
+        if (p && p._px !== undefined){ p._vx = (this.mpx - p._px)*0.42; p._vy = (this.mpy - p._py)*0.42; p._px = this.mpx; p._py = this.mpy; }
+      } else if (this._settleP < 1 && this.pts){
+        let near = false;
+        for (const p of this.pts){ if (p._px !== undefined && p._es < 1 && Math.hypot(p._px - this.mpx, p._py - this.mpy) < 26){ near = true; break; } }
+        wrap.style.cursor = near ? 'grab' : '';
+      }
+    };
     wrap.addEventListener('mousemove', this._move);
+    // hold a point / throw it — landing only (touch keeps its scroll gesture)
+    this._grabId = null;
+    this._down = (e) => {
+      if (!(this._settleP < 1) || this.focus != null || !this.pts) return;
+      const r = wrap.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+      let best = null, bd = 1e9;
+      for (const p of this.pts){
+        if (p._px === undefined || !(p._es < 1)) continue;
+        const d = Math.hypot(p._px - px, p._py - py);
+        if (d < Math.max(26, (p.rad || 6) + 14) && d < bd){ bd = d; best = p; }
+      }
+      if (best){ this._grabId = best.id; best._vx = 0; best._vy = 0; wrap.style.cursor = 'grabbing'; e.preventDefault(); }
+    };
+    this._up = () => { if (this._grabId != null){ this._grabId = null; wrap.style.cursor = ''; } };
+    wrap.addEventListener('mousedown', this._down);
+    window.addEventListener('mouseup', this._up);
     this._click = () => {
       // iso / white view: allow student-route selection only (no focus/turntable)
       if (this.entryT < 0.82 && this.focus == null){
@@ -712,6 +745,7 @@ class Component extends DCLogic {
     // ---- touch / mobile ----
     this._hitAt = (px,py) => {
       if (this.focus != null) return;
+      if (!this._hoverReady) return; // no picking until the structure has settled
       let bf=null,bfd=1e9,bc=null,bcd=1e9;
       for (const p of this.pts){ if(!p.vis) continue; const d=Math.hypot(p.sx-px,p.sy-py); if(d<Math.max(22,p.rad+16)&&d<bfd){bfd=d;bf=p;} }
       for (let ci=0;ci<this.comments.length;ci++){ const cm=this.comments[ci]; if(!cm.vis) continue; const d=Math.hypot(cm.sx-px,cm.sy-py); if(d<Math.max(15,cm.crad+12)&&d<bcd){bcd=d;bc=ci;} }
@@ -888,6 +922,23 @@ class Component extends DCLogic {
           ctx.fillText(blur > 3.2 ? '·' : ':', x, y);
         }
       };
+      // soft depth-of-field glyph: five offset stamps approximate a bokeh blur on any 2d context
+      // (no ctx.filter — works everywhere, cheap at this point count)
+      const blurText = (c, glyph, x, y, fs, col, alpha, bl) => {
+        c.fillStyle = col; c.font = gfont(fs);
+        if (bl < 0.35){ c.globalAlpha = alpha; c.fillText(glyph, x, y); return; }
+        if (bl < 2.2){
+          c.globalAlpha = alpha*0.34;
+          c.fillText(glyph, x, y);
+          for (let i = 0; i < 4; i++){ const a2 = i*1.5708 + 0.6; c.fillText(glyph, x + Math.cos(a2)*bl, y + Math.sin(a2)*bl); }
+        } else {
+          // heavy bokeh: two rings of stamps so the copies fuse into one soft disc
+          c.globalAlpha = alpha*0.21;
+          c.fillText(glyph, x, y);
+          for (let i = 0; i < 3; i++){ const a2 = i*2.094 + 0.4; c.fillText(glyph, x + Math.cos(a2)*bl*0.5, y + Math.sin(a2)*bl*0.5); }
+          for (let i = 0; i < 6; i++){ const a2 = i*1.047 + 1.1; c.fillText(glyph, x + Math.cos(a2)*bl, y + Math.sin(a2)*bl); }
+        }
+      };
       // per-segment gates so lines never hard-cut at the near clip plane or pop in/out of the far bokeh --
       // they ease to transparent well before either happens.
       const nearGate = d => persp>0.03 ? Math.max(0, Math.min(1, (d-NEAR)/85)) : 1;
@@ -942,6 +993,24 @@ class Component extends DCLogic {
       // the white iso (points visibly spread apart and gather), present again around a
       // focused point (which itself stays perfectly still at the centre)
       const wobAmp = Math.max(30*breatheFade, 11*this.focusBlend);
+      // entry choreography: at the landing the points lie DISPERSED across the whole screen;
+      // as the masthead dissolves they drift into their true structure positions (staggered
+      // per point), finishing early in the grow band so the routes draw between settled points.
+      const settleP = Math.max(0, Math.min(1, this.scroll / (this.DISPERSE_LEN + this.GROW_LEN*0.45)));
+      this._settleP = settleP;
+      // text colliders for the landing physics: the masthead, subtitle and orientation chip
+      // are solid — points rest outside them and thrown points bounce off
+      let colliders = null;
+      if (settleP < 1){
+        if (!this._colEls) this._colEls = [this.titleRef.current, this.subRef.current, document.getElementById('m26-orient')].filter(Boolean);
+        const wr0 = wrap.getBoundingClientRect();
+        colliders = [];
+        for (const el of this._colEls){
+          const r = el.getBoundingClientRect();
+          if (r.width > 4) colliders.push({ x0: r.left - wr0.left - 10, y0: r.top - wr0.top - 8, x1: r.right - wr0.left + 10, y1: r.bottom - wr0.top + 8 });
+        }
+        this._colliders = colliders;
+      }
       const order = [];
       for (const p of this.pts){
         let wobX = 0, wobY = 0;
@@ -952,6 +1021,55 @@ class Component extends DCLogic {
         const pr = proj(p.x + wobX, p.y + wobY, p.z);
         // always update sx/sy + camera-space coords so segments never draw stale
         p.sx=pr.sx; p.sy=pr.sy; p.relZ=pr.relZ; p.ccx=pr.camx; p.ccy=pr.camy; p.cdepth=pr.relZ;
+        if (settleP < 1){
+          if (p._sca === undefined){
+            const h = k => { const s = Math.sin(p.id*k + 17.13)*43758.5453; return s - Math.floor(s); };
+            p._sca = h(127.1); p._scb = h(269.5); p._scd = h(419.2)*0.35; // scatter x, y, per-point stagger
+            // scatter DEPTH: -1 far … 0 title plane … +1 near camera. The far side bunches
+            // toward the middle; the near side keeps its reach, so a handful of points
+            // genuinely hang right in front of the lens.
+            const zr = h(631.7)*2 - 1;
+            p._scz = zr >= 0 ? Math.pow(zr, 1.1) : -Math.pow(-zr, 1.6);
+          }
+          const le = Math.max(0, Math.min(1, (settleP - p._scd)/0.65));
+          const es = le*le*(3-2*le);
+          p._es = es;
+          if (es < 1){
+            // the scattered points are STILL — a held breath — but physical: grab one and
+            // throw it, it glides, bounces off the screen edges and off the text
+            if (p._px === undefined){
+              let sx0 = (0.05 + 0.90*p._sca)*W, sy0 = (0.07 + 0.84*p._scb)*H;
+              for (const c of (colliders || [])) if (sx0 > c.x0 && sx0 < c.x1 && sy0 > c.y0 && sy0 < c.y1){
+                sy0 = (sy0 - c.y0 < c.y1 - sy0) ? c.y0 - 16 : c.y1 + 16; // seed clear of the text
+              }
+              p._px = sx0; p._py = sy0; p._vx = 0; p._vy = 0;
+            }
+            if (this._grabId !== p.id){
+              p._px += p._vx; p._py += p._vy;
+              p._vx *= 0.988; p._vy *= 0.988;
+              // walls
+              if (p._px < 10){ p._px = 10; p._vx = Math.abs(p._vx)*0.78; }
+              else if (p._px > W - 10){ p._px = W - 10; p._vx = -Math.abs(p._vx)*0.78; }
+              if (p._py < 10){ p._py = 10; p._vy = Math.abs(p._vy)*0.78; }
+              else if (p._py > H - 10){ p._py = H - 10; p._vy = -Math.abs(p._vy)*0.78; }
+              // the text is solid
+              if (colliders) for (const c of colliders){
+                if (p._px > c.x0 && p._px < c.x1 && p._py > c.y0 && p._py < c.y1){
+                  const dl = p._px - c.x0, dr = c.x1 - p._px, dt2 = p._py - c.y0, db = c.y1 - p._py;
+                  const m = Math.min(dl, dr, dt2, db);
+                  if (m === dl){ p._px = c.x0; p._vx = -Math.abs(p._vx)*0.72; }
+                  else if (m === dr){ p._px = c.x1; p._vx = Math.abs(p._vx)*0.72; }
+                  else if (m === dt2){ p._py = c.y0; p._vy = -Math.abs(p._vy)*0.72; }
+                  else { p._py = c.y1; p._vy = Math.abs(p._vy)*0.72; }
+                }
+              }
+            }
+            const scx = p._px, scy = p._py;
+            p.sx = scx + (p.sx - scx)*es; p.sy = scy + (p.sy - scy)*es;
+            // keep camera-space coords consistent so route/comment segments track the drift
+            p.ccx = (p.sx - cx)/pr.eff; p.ccy = (p.sy - cy)/pr.eff;
+          }
+        } else p._es = 1;
         p.blur = persp>0.05 ? blurOf(pr.relZ) : 0;
         if (pr.skip){ p.vis=false; continue; }
         const breath=1+0.3*Math.sin(t*0.0018*p.spd+p.phase);
@@ -975,10 +1093,19 @@ class Component extends DCLogic {
         cm.depthA = lerp(0.9, depthBrightC, entryT) * (persp>0.05 ? nearFadeC : 1);
         cm.vis=(cm.sx>-120&&cm.sx<W+120&&cm.sy>-120&&cm.sy<H+120);
       }
-      order.sort((a,b)=>b.relZ-a.relZ);
+      // painter's order: while dispersed, depth is the SCATTER depth (far paints first,
+      // near paints last, over it); once settled it's the structure's camera depth again
+      if (settleP < 1) order.sort((a,b)=>((a._scz||0)-(b._scz||0)));
+      else order.sort((a,b)=>b.relZ-a.relZ);
 
-      // hover (only when not focused)
-      if (this._moved && this.mpx != null && this.focus == null){
+      // hover (only when not focused, and never before the structure has settled into the iso —
+      // the landing/settling phases are for watching, not picking)
+      this._hoverReady = this.scroll >= this.DISPERSE_LEN + this.GROW_LEN*0.55;
+      if (!this._hoverReady && (this.hoverId != null || this.hoverComment != null)){
+        this.hoverId = null; this.hoverComment = null;
+        if (this.phRef.current) this.phRef.current.style.display = 'none';
+      }
+      if (this._hoverReady && this._moved && this.mpx != null && this.focus == null){
         this._moved = false;
         let bf=null,bfd=1e9,bc=null,bcd=1e9;
         for (const p of order){ const d=Math.hypot(p.sx-this.mpx,p.sy-this.mpy); if (d<Math.max(16,p.rad+11)&&d<bfd){ bfd=d; bf=p; } }
@@ -1076,13 +1203,21 @@ class Component extends DCLogic {
           else { const f=segLen[i]>0?(budget-acc)/segLen[i]:0; const stub={ccx:cps[i].ccx+(cps[i+1].ccx-cps[i].ccx)*f, ccy:cps[i].ccy+(cps[i+1].ccy-cps[i].ccy)*f, cdepth:cps[i].cdepth+(cps[i+1].cdepth-cps[i].cdepth)*f}; asciiSegGated(cps[i], stub, routeBaseA, null, 9, flowT); break; }
         }
       }
-      const commentBaseA = lerp(0.4,0.16,entryT);
-      for (const cm of this.comments){ asciiSegGated(this.pts[cm.parent], cm, commentBaseA, '·', 7, flowT); }
+      // comment marks arrive only once the points have settled (they have no scatter of their own)
+      const cmIn = settleP >= 1 ? 1 : Math.max(0, (settleP - 0.75)/0.25);
+      const commentBaseA = lerp(0.4,0.16,entryT) * cmIn;
+      if (cmIn > 0.01) for (const cm of this.comments){ asciiSegGated(this.pts[cm.parent], cm, commentBaseA, '·', 7, flowT); }
       const glyL = Math.round(lerp(34, 68, entryT));
       // ---- excitation field: the points hold still (each keeps its own glyph); motion arrives
       // as a WAVE that sweeps through, not a per-point flicker. A slow diagonal "Mexican wave"
       // drifts across continuously, and water-droplet ripples spawn at random spots now and then.
       // A point that the wave reaches briefly swells — brighter and a touch larger — then settles.
+      // front layer housekeeping: live during the dispersed landing, wiped once settled
+      const octx2 = this._octx;
+      if (octx2){
+        if (settleP < 1){ octx2.clearRect(0, 0, W, H); this._ovLive = true; }
+        else if (this._ovLive){ octx2.clearRect(0, 0, W, H); this._ovLive = false; }
+      }
       if (!this._drops) this._drops = [];
       if (t - (this._dropLast || 0) > 2600 + (this._dropGap || 0)) {
         this._dropLast = t; this._dropGap = Math.random() * 3400;
@@ -1114,9 +1249,39 @@ class Component extends DCLogic {
           }
         }
         const a = Math.min(1, p.depthA * (1 + exc * 1.0));
-        disc(p.sx, p.sy, p.rad * (1 + exc * 0.45), p.blur, a, this.hue(p.student, glyL), stg(p.student));
+        const es = p._es === undefined ? 1 : p._es;
+        if (es >= 1){
+          disc(p.sx, p.sy, p.rad * (1 + exc * 0.45), p.blur, a, this.hue(p.student, glyL), stg(p.student));
+        } else {
+          // dispersed in TRUE PERSPECTIVE: the title holds the middle ground (the focal
+          // plane); optical 1/(z) scaling makes near points loom and far points recede,
+          // and focus falls away with distance from the title plane — a shallow
+          // depth-of-field portrait of the cloud. Near-of-title points draw on the
+          // overlay canvas, crossing OVER the text.
+          const un = 1 - es, dk = p._scz;
+          // DIVE-GRADE perspective: same feel as passing through the deep cloud — the
+          // nearest points loom right at the lens (≈8×), the title plane holds 1×,
+          // the far field recedes to ≈0.53×
+          const persF = 1/(1 - dk*0.88);
+          const sizeF = 1 + (persF - 1)*un;
+          // focus: crisp only in a narrow band at the title plane; blur grows with
+          // distance AND with apparent size, so the close passes melt into soft blobs
+          const bl = 0; // no bokeh — crisp glyphs, size alone carries the depth
+          const fs = Math.max(8, Math.min(170, p.rad*5.2*sizeF));
+          const col = this.hue(p.student, glyL);
+          // atmosphere: the closer to the lens, the softer — but still PRESENT, so the
+          // giants read as shapes floating in front; the far field fades toward the paper
+          const aa = a*(dk > 0 ? (1 - 0.42*dk*un) : (1 - 0.42*(-dk)*un));
+          if (dk > 0.15){
+            const oA = aa*un, mA = aa*es;
+            if (oA > 0.01) blurText(octx2, stg(p.student), p.sx, p.sy, fs, col, oA, bl);
+            if (mA > 0.01) blurText(ctx, stg(p.student), p.sx, p.sy, fs, col, mA, bl);
+          } else {
+            blurText(ctx, stg(p.student), p.sx, p.sy, fs, col, aa, bl);
+          }
+        }
       }
-      for (const cm of this.comments){ if(cm.cdepth<=NEAR) continue; disc(cm.sx, cm.sy, cm.crad, cm.blur, cm.depthA, inkStr, '·'); }
+      if (cmIn > 0.01) for (const cm of this.comments){ if(cm.cdepth<=NEAR) continue; disc(cm.sx, cm.sy, cm.crad, cm.blur, cm.depthA*cmIn, inkStr, '·'); }
       ctx.globalAlpha = 1;
 
       // freshly-published real submissions: a brief expanding pulse so a new entry visibly "arrives"
@@ -1215,7 +1380,7 @@ class Component extends DCLogic {
     this._raf = requestAnimationFrame(loop);
   }
 
-  componentWillUnmount(){ cancelAnimationFrame(this._raf); clearInterval(this._subPoll); clearInterval(this._discPoll); const wrap=this.wrapRef.current; if(wrap){ wrap.removeEventListener('wheel',this._wheel); wrap.removeEventListener('mousemove',this._move); wrap.removeEventListener('click',this._click); wrap.removeEventListener('touchstart',this._tStart); wrap.removeEventListener('touchmove',this._tMove); wrap.removeEventListener('touchend',this._tEnd); } window.removeEventListener('resize',this._resize); window.removeEventListener('keydown',this._key); if (window.__m26Cloud === this._bridge) delete window.__m26Cloud; }
+  componentWillUnmount(){ cancelAnimationFrame(this._raf); clearInterval(this._subPoll); clearInterval(this._discPoll); const wrap=this.wrapRef.current; if(wrap){ wrap.removeEventListener('wheel',this._wheel); wrap.removeEventListener('mousemove',this._move); wrap.removeEventListener('mousedown',this._down); wrap.removeEventListener('click',this._click); wrap.removeEventListener('touchstart',this._tStart); wrap.removeEventListener('touchmove',this._tMove); wrap.removeEventListener('touchend',this._tEnd); } window.removeEventListener('resize',this._resize); window.removeEventListener('keydown',this._key); window.removeEventListener('mouseup',this._up); if (window.__m26Cloud === this._bridge) delete window.__m26Cloud; }
 
   // media (image / video / audio) for the expanded panel is rendered imperatively via the
   // shared M26 renderer — plain createElement/textContent, no HTML string paths

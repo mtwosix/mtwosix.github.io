@@ -13,7 +13,7 @@
  */
 
 // ---------------------------------------------------------------- settings
-var GITHUB_REPO = 'khapewie/M26_STUDIO';
+var GITHUB_REPO = 'mtwosix/mtwosix.github.io';
 var CSV_PATH = 'data/submissions.csv';
 var BRANCH = 'main';
 
