@@ -153,8 +153,9 @@
   function colorFor(rosterIndex, rosterCount, lightness) {
     return 'hsl(' + hueFor(rosterIndex, rosterCount) + ', 78%, ' + (lightness || 66) + '%)';
   }
-  // one stable glyph per student — shared identity across the cloud and the archive
-  var STU_SYMBOLS = ['@','#','&','%','$','*','+','=','§','¶','?','×','÷','~','^','¤','Ø','µ','¥','£'];
+  // one stable glyph per student — a pixel/structure alphabet (nodes, blocks, lattices),
+  // the studio's visual language: imagination infrastructure, not math notation
+  var STU_SYMBOLS = ['◆','○','■','◇','●','□','▲','△','┼','╳','▚','▞','▌','▐','╱','╲','▀','▄','▙','▜'];
   function STU_GLYPH(i) { i = i | 0; return STU_SYMBOLS[((i % STU_SYMBOLS.length) + STU_SYMBOLS.length) % STU_SYMBOLS.length]; }
   function slugFor(name) {
     return String(name).toLowerCase().normalize('NFKD')

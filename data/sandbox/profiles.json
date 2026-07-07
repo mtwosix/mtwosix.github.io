@@ -3,24 +3,28 @@
 
   "aarav": {
     "photo": "",
+    "mark": "◇",
     "role": "Architecture · M26",
     "bio": "Works between drawing and model, testing how a threshold can hold both a pause and a crowd. Interested in the quiet infrastructure of everyday movement.",
     "links": { "instagram": "https://instagram.com/aarav.studio", "linkedin": "https://linkedin.com/in/aarav", "behance": "https://behance.net/aarav", "website": "https://aarav.work", "email": "aarav@m26.studio" }
   },
   "diya": {
     "photo": "",
+    "mark": "☾",
     "role": "Architecture · M26",
     "bio": "Collects thresholds — benches, steps, ledges — and asks what each one asks of the body. Field notes and slow section drawings.",
     "links": { "instagram": "https://instagram.com/diya.draws", "linkedin": "https://linkedin.com/in/diya", "website": "https://diya.space", "email": "diya@m26.studio" }
   },
   "kabir": {
     "photo": "",
+    "mark": "❋",
     "role": "Architecture · M26",
     "bio": "Long-caption thinker. Builds arguments the size of a paragraph and then tries to draw them in one line.",
     "links": { "instagram": "https://instagram.com/kabir.makes", "behance": "https://behance.net/kabir", "email": "kabir@m26.studio" }
   },
   "meera": {
     "photo": "",
+    "mark": "✳",
     "role": "Architecture · M26",
     "bio": "Sound and section. Records the room before she draws it, so the plan remembers how it felt to stand there.",
     "links": { "instagram": "https://instagram.com/meera.field", "linkedin": "https://linkedin.com/in/meera", "website": "https://meera.audio" }

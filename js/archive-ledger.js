@@ -42,6 +42,29 @@
     return '';
   }
 
+  /* ---- student identity mark ----------------------------------------------
+     Each student's mark is theirs — a chosen glyph or a small image (svg/png)
+     they supply, set as `mark` in profiles.json. With none, it falls back to a
+     filled dot in their colour — never an arbitrary stand-in symbol. */
+  var MARK_IMG = /\.(svg|png|jpe?g|webp|gif|avif)(?:[?#]|$)/i;
+  function markUrl(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!s) return '';
+    if (/^https?:\/\//i.test(s)) return s;
+    if (/^[a-z][a-z0-9+.-]*:/i.test(s)) return '';   // block javascript:, data:, …
+    return s;                                         // repo-relative path (uploads/marks/…)
+  }
+  function markNode(student) {
+    var m = student.mark;
+    if (m && MARK_IMG.test(m)) {
+      var u = markUrl(m);
+      if (u) { var img = el('img', 'm26l-markimg'); img.src = u; img.alt = ''; img.loading = 'lazy'; return img; }
+    }
+    if (m) { var g = el('span', 'm26l-mark', m); g.style.color = student.color; return g; }
+    var dot = el('span', 'm26l-dot'); dot.style.background = student.color;
+    dot.setAttribute('aria-hidden', 'true'); return dot;
+  }
+
   /* ---- one-time stylesheet ------------------------------------------------ */
   function injectStyles() {
     if (document.getElementById('m26l-styles')) return;
@@ -85,8 +108,10 @@
       '.m26l-row:hover{background:rgba(138,90,52,.08)}',
       '.m26l-row:hover .m26l-name{color:' + RUST + '}',
       '.m26l-no{font:400 11px "IBM Plex Mono",monospace;color:' + RUST + '}',
-      '.m26l-namecell{display:flex;align-items:baseline;gap:11px;min-width:0}',
-      '.m26l-sym{font:700 15px "Space Mono",monospace;line-height:1}',
+      '.m26l-namecell{display:flex;align-items:center;gap:11px;min-width:0}',
+      '.m26l-mark{font:700 16px "Space Mono",monospace;line-height:1;flex:none}',
+      '.m26l-markimg{width:18px;height:18px;object-fit:contain;flex:none;display:block}',
+      '.m26l-dot{width:11px;height:11px;border-radius:50%;flex:none;display:inline-block}',
       '.m26l-name{font:700 clamp(16px,1.7vw,21px) "Space Mono",monospace;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .12s}',
       '.m26l-namesub{font:400 9px "IBM Plex Mono",monospace;letter-spacing:.06em;color:' + MUTE + ';white-space:nowrap}',
       '.m26l-act{display:flex;align-items:flex-end;gap:0;line-height:1;font:400 15px "Space Mono",monospace;letter-spacing:1px}',
@@ -94,6 +119,29 @@
       '.m26l-subs{text-align:right;font:400 12px "IBM Plex Mono",monospace;color:' + MUTE + '}',
       '.m26l-subs b{color:' + INK + ';font-weight:700}',
       '.m26l-open{display:inline-block;margin-left:8px;color:' + RUST + '}',
+
+      /* subtitle + legend (orientation) */
+      '.m26l-sub{font:italic 300 14px/1.6 Spectral,Georgia,serif;color:#3a382f;margin:8px 0 0;max-width:62ch}',
+      '.m26l-legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin:16px 0 2px;',
+        'font:400 9px "IBM Plex Mono",monospace;letter-spacing:.1em;color:' + MUTE + '}',
+      '.m26l-legend b{color:' + INK + ';font-weight:700}',
+
+      /* newest work strip */
+      '.m26l-latest{margin:20px 0 6px;border-top:1px solid rgba(29,27,23,.16);border-bottom:1px solid rgba(29,27,23,.16);padding:16px 0}',
+      '.m26l-latest-tag{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}',
+      '.m26l-latest-tag b{font:700 10px "IBM Plex Mono",monospace;letter-spacing:.24em;color:' + RUST + '}',
+      '.m26l-latest-tag span{font:400 9px "IBM Plex Mono",monospace;letter-spacing:.14em;color:' + MUTE + '}',
+      '.m26l-latest-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}',
+      '.m26l-lcard{border:1px solid rgba(29,27,23,.2);background:#faf9f4;display:flex;flex-direction:column;',
+        'overflow:hidden;cursor:pointer;transition:border-color .12s}',
+      '.m26l-lcard:hover{border-color:' + RUST + '}',
+      '.m26l-lcard:focus-visible{outline:2px solid ' + RUST + ';outline-offset:2px}',
+      '.m26l-lmedia{background:#efece3;aspect-ratio:4/3;overflow:hidden;min-height:0;pointer-events:none;margin:0}',
+      '.m26l-lmedia img,.m26l-lmedia video,.m26l-lmedia canvas,.m26l-lmedia iframe{width:100%;height:100%;object-fit:cover;display:block}',
+      '.m26l-lbody{padding:9px 11px 11px;display:flex;flex-direction:column;gap:5px}',
+      '.m26l-lname{display:flex;align-items:center;gap:7px;font:700 12px "Space Mono",monospace;color:' + INK + ';min-width:0}',
+      '.m26l-lname .m26l-name{font-size:12px}',
+      '.m26l-lmeta{font:700 8px "IBM Plex Mono",monospace;letter-spacing:.12em;color:' + MUTE + '}',
 
       '.m26l-foot{margin-top:20px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;',
         'font:400 9px/1.9 "IBM Plex Mono",monospace;letter-spacing:.12em;color:' + MUTE + '}',
@@ -133,7 +181,10 @@
         'letter-spacing:.2em;color:' + MUTE + ';background:rgba(243,241,234,.85);padding:3px 6px}',
       '.m26l-id-main{min-width:0;display:flex;flex-direction:column}',
       '.m26l-id-no{font:700 9px "IBM Plex Mono",monospace;letter-spacing:.22em;color:' + RUST + '}',
-      '.m26l-id-name{font:700 clamp(30px,4vw,50px) "Space Mono",monospace;letter-spacing:-.03em;line-height:1.02;margin:6px 0 4px;text-transform:uppercase}',
+      '.m26l-id-name{font:700 clamp(30px,4vw,50px) "Space Mono",monospace;letter-spacing:-.03em;line-height:1.02;margin:6px 0 4px;text-transform:uppercase;display:flex;align-items:center;gap:.3em;flex-wrap:wrap}',
+      '.m26l-id-name .m26l-mark{font-size:.82em}',
+      '.m26l-id-name .m26l-markimg{width:.8em;height:.8em}',
+      '.m26l-id-name .m26l-dot{width:.42em;height:.42em}',
       '.m26l-id-role{font:400 11px "IBM Plex Mono",monospace;letter-spacing:.12em;color:' + MUTE + '}',
       '.m26l-id-bio{font:300 17px/1.65 Spectral,Georgia,serif;max-width:56ch;margin:16px 0 0}',
       '.m26l-id-bio.empty{color:' + MUTE + ';font-style:italic}',
@@ -179,6 +230,9 @@
       '@media(max-width:720px){',
         '.m26l-thead,.m26l-row{grid-template-columns:34px 1fr 60px}',
         '.m26l-act{display:none}',
+        /* keep the name on its own line so it never gets crushed by the role */
+        '.m26l-namecell{flex-wrap:wrap}',
+        '.m26l-namesub{flex-basis:100%;white-space:normal}',
         '.m26l-id{grid-template-columns:1fr;gap:22px}',
         '.m26l-portrait{width:160px;height:190px}',
         '.m26l-panel{inset:2vh 2vw}',
@@ -246,12 +300,14 @@
       works.forEach(function (r) { byWeek[r.week] = (byWeek[r.week] || 0) + 1; });
       for (var wk in byWeek) if (byWeek[wk] > peak) peak = byWeek[wk];
       var activeWeeks = Object.keys(byWeek).length;
+      var slug = M26.slugFor(name);
+      var profile = profiles[slug] || null;
       return {
         name: name, index: i, works: works, byWeek: byWeek, peak: peak, activeWeeks: activeWeeks,
-        sym: M26.STU_GLYPH(i), slug: M26.slugFor(name),
+        slug: slug, mark: (profile && profile.mark && String(profile.mark).trim()) || '',
         color: M26.colorFor(i, roster.length, 46), colorSoft: M26.colorFor(i, roster.length, 66),
         count: works.length,
-        profile: profiles[M26.slugFor(name)] || null
+        profile: profile
       };
     });
 
@@ -271,6 +327,12 @@
       back.type = 'button';
       back.addEventListener('click', opts.onReturn);
       wrap.appendChild(back);
+    } else {
+      var toCloud = el('a', 'm26l-back', '← THE CLOUD — the whole semester as one field');
+      toCloud.href = M26.pageUrl('index.html');
+      toCloud.style.display = 'inline-block';
+      toCloud.style.textDecoration = 'none';
+      wrap.appendChild(toCloud);
     }
     wrap.appendChild(el('p', 'm26l-eyebrow', 'M26 STUDIO · CEPT · 2026 — THE LEDGER'));
 
@@ -280,6 +342,7 @@
     ch.appendChild(el('h1', 'm26l-title', 'ARCHIVE / LEDGER'));
     ch.appendChild(el('div', 'm26l-source', 'SOURCE — ' + ((M26.CONFIG.submissionsCsv || '').toUpperCase()) + ' · NOTHING INVENTED'));
     card.appendChild(ch);
+    card.appendChild(el('p', 'm26l-sub', 'A living archive that grows week by week — it starts empty and fills as the cohort submits their work.'));
 
     /* stats + sort */
     var strip = el('div', 'm26l-strip');
@@ -299,6 +362,30 @@
     sortWrap.appendChild(bName); sortWrap.appendChild(bAct);
     strip.appendChild(sortWrap);
     card.appendChild(strip);
+
+    /* legend — teach the marks so nothing needs decoding */
+    var legend = el('div', 'm26l-legend');
+    function leg(b, t) { var d = el('div', null); d.appendChild(el('b', null, b)); d.appendChild(document.createTextNode(' ' + t)); return d; }
+    legend.appendChild(leg('MARK + COLOUR', '= one student'));
+    legend.appendChild(leg('STRIP', '= submissions each week'));
+    legend.appendChild(leg('ROW →', 'opens their dossier'));
+    card.appendChild(legend);
+
+    /* newest work — what the cohort just filed */
+    if (subs.length) {
+      var latestWk = 0;
+      subs.forEach(function (r) { if (r.week > latestWk) latestWk = r.week; });
+      var recent = subs.slice().sort(function (a, b) { return b.t - a.t; }).slice(0, 6);
+      var lat = el('div', 'm26l-latest');
+      var lt = el('div', 'm26l-latest-tag');
+      lt.appendChild(el('b', null, '◷ NEWEST WORK'));
+      lt.appendChild(el('span', null, 'WEEK ' + w2(latestWk) + ' · WHAT THE COHORT JUST FILED'));
+      lat.appendChild(lt);
+      var lrow = el('div', 'm26l-latest-row');
+      recent.forEach(function (row) { lrow.appendChild(buildLatestCard(row, students[row.studentIndex])); });
+      lat.appendChild(lrow);
+      card.appendChild(lat);
+    }
 
     /* table head */
     var thead = el('div', 'm26l-thead');
@@ -326,13 +413,13 @@
 
     function paintRows() {
       rowsHost.textContent = '';
-      if (!roster.length) { rowsHost.appendChild(el('p', 'm26l-status', 'No students on the roster yet.')); return; }
+      if (!roster.length) { rowsHost.appendChild(el('p', 'm26l-status', 'The roster fills as the semester begins — this is week zero. Every student and every work will appear here as they arrive.')); return; }
       sorted().forEach(function (s, i) {
         var row = el('button', 'm26l-row');
         row.type = 'button';
         row.appendChild(el('div', 'm26l-no', w2(i + 1)));
         var nc = el('div', 'm26l-namecell');
-        var sym = el('span', 'm26l-sym', s.sym); sym.style.color = s.color; nc.appendChild(sym);
+        nc.appendChild(markNode(s));
         nc.appendChild(el('span', 'm26l-name', s.name));
         var role = s.profile && s.profile.role;
         if (role) nc.appendChild(el('span', 'm26l-namesub', '· ' + role));
@@ -412,8 +499,8 @@
 
       var main = el('div', 'm26l-id-main');
       main.appendChild(el('div', 'm26l-id-no', 'STUDENT ' + w2(no) + ' · ' + student.count + (student.count === 1 ? ' SUBMISSION' : ' SUBMISSIONS') + ' · ' + student.activeWeeks + ' ACTIVE WEEK' + (student.activeWeeks === 1 ? '' : 'S')));
-      var nm = el('div', 'm26l-id-name'); 
-      var nsym = el('span', null, student.sym + ' '); nsym.style.color = student.color; nm.appendChild(nsym);
+      var nm = el('div', 'm26l-id-name');
+      nm.appendChild(markNode(student));
       nm.appendChild(document.createTextNode(student.name));
       main.appendChild(nm);
       main.appendChild(el('div', 'm26l-id-role', (student.profile && student.profile.role) ? student.profile.role : 'M26 STUDIO · CEPT · 2026'));
@@ -517,6 +604,29 @@
       return g;
     }
 
+    function buildLatestCard(row, student) {
+      var c = el('div', 'm26l-lcard');
+      c.setAttribute('role', 'button'); c.setAttribute('tabindex', '0');
+      var who = student ? student.name : row.student;
+      c.setAttribute('aria-label', who + ' — ' + (row.kind || 'entry') + ', week ' + w2(row.week) + '. Open dossier.');
+      var fig = el('figure', 'm26l-lmedia');
+      var hasMedia = M26.renderMediaInto(fig, row);
+      if (hasMedia) c.appendChild(fig);
+      var body = el('div', 'm26l-lbody');
+      var nm = el('div', 'm26l-lname');
+      if (student) nm.appendChild(markNode(student));
+      nm.appendChild(el('span', 'm26l-name', who));
+      body.appendChild(nm);
+      body.appendChild(el('div', 'm26l-lmeta', 'W' + w2(row.week) + ' · ' + (row.kind || 'entry').toUpperCase() + ' · ' + row.dateStr));
+      c.appendChild(body);
+      if (student) {
+        var open = function () { openDossier(student, student.index + 1); };
+        c.addEventListener('click', open);
+        c.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+      }
+      return c;
+    }
+
     function buildWork(row) {
       var art = el('article', 'm26l-work');
       var fig = el('figure', 'm26l-work-media');
@@ -561,7 +671,8 @@
       // big student glyph, watermark
       g.fillStyle = 'rgba(29,27,23,.06)';
       g.font = '700 150px "Space Mono", monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText(student.sym, W / 2, H / 2 + 8);
+      var wm = (student.mark && !MARK_IMG.test(student.mark)) ? student.mark : (student.name.charAt(0) || '·').toUpperCase();
+      g.fillText(wm, W / 2, H / 2 + 8);
       // one dot per work, laid along the weeks
       var works = student.works, span = Math.max(1, wMax - 1);
       function rnd(i) { var s = Math.sin(i * 12.9898) * 43758.5453; return s - Math.floor(s); }
