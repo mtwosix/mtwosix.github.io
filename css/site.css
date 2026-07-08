@@ -158,6 +158,27 @@
   background: var(--paper-2);
 }
 .m26-media audio { display: block; width: 100%; max-width: 480px; }
+/* custom audio player — a mono bar with a play toggle, a scrub track and a time read */
+.m26-audio {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%; padding: 12px 14px; box-sizing: border-box;
+  background: var(--ink); color: var(--paper);
+}
+.m26-audio audio { display: none; }
+.m26-audio-btn {
+  flex: none; width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid rgba(243,241,234,.5); background: transparent; color: var(--paper);
+  font: 10px var(--mono); line-height: 1; cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.m26-audio-btn:hover { background: var(--paper); color: var(--ink); }
+.m26-audio-bar {
+  flex: 1; min-width: 0; height: 4px; cursor: pointer;
+  background: rgba(243,241,234,.22); position: relative;
+}
+.m26-audio-fill { position: absolute; inset: 0 auto 0 0; width: 0%; background: var(--rust, #8a5a34); }
+.m26-audio-time { flex: none; font: 10px var(--mono); letter-spacing: .1em; color: rgba(243,241,234,.7); min-width: 34px; text-align: right; }
 .m26-media iframe.m26-media-frame {
   display: block; width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--hairline);
   background: var(--paper-2);
@@ -404,7 +425,7 @@ html.m26-archive-mode #m26-outro { display: none !important; }
 /* ---- the media viewer (image lightbox + pdf page-chain) ------------------ */
 html.m26-viewer-lock, html.m26-viewer-lock body { overflow: hidden !important; }
 .m26-viewer {
-  position: fixed; inset: 0; z-index: 80;
+  position: fixed; inset: 0; z-index: 6000; /* above the ledger dossier (z 4000) */
   display: flex; flex-direction: column;
   background: rgba(10, 10, 14, .93);
   opacity: 0; visibility: hidden; pointer-events: none;

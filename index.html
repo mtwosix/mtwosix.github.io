@@ -702,35 +702,8 @@ class Component extends DCLogic {
       this.targetScroll = Math.max(0, Math.min(this.maxScroll(), this.targetScroll + step));
     };
     window.addEventListener('keydown', this._key);
-    this._move = (e) => {
-      const r = wrap.getBoundingClientRect(); this.mx = ((e.clientX-r.left)/r.width)*2-1; this.my = ((e.clientY-r.top)/r.height)*2-1; this.mpx = e.clientX-r.left; this.mpy = e.clientY-r.top; this._moved = true;
-      // landing physics: drag the held point (its velocity follows the hand, so release = throw)
-      if (this._grabId != null){
-        const p = this.pts && this.pts[this._grabId];
-        if (p && p._px !== undefined){ p._vx = (this.mpx - p._px)*0.42; p._vy = (this.mpy - p._py)*0.42; p._px = this.mpx; p._py = this.mpy; }
-      } else if (this._settleP < 1 && this.pts){
-        let near = false;
-        for (const p of this.pts){ if (p._px !== undefined && p._es < 1 && Math.hypot(p._px - this.mpx, p._py - this.mpy) < 26){ near = true; break; } }
-        wrap.style.cursor = near ? 'grab' : '';
-      }
-    };
+    this._move = (e) => { const r = wrap.getBoundingClientRect(); this.mx = ((e.clientX-r.left)/r.width)*2-1; this.my = ((e.clientY-r.top)/r.height)*2-1; this.mpx = e.clientX-r.left; this.mpy = e.clientY-r.top; this._moved = true; };
     wrap.addEventListener('mousemove', this._move);
-    // hold a point / throw it — landing only (touch keeps its scroll gesture)
-    this._grabId = null;
-    this._down = (e) => {
-      if (!(this._settleP < 1) || this.focus != null || !this.pts) return;
-      const r = wrap.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
-      let best = null, bd = 1e9;
-      for (const p of this.pts){
-        if (p._px === undefined || !(p._es < 1)) continue;
-        const d = Math.hypot(p._px - px, p._py - py);
-        if (d < Math.max(26, (p.rad || 6) + 14) && d < bd){ bd = d; best = p; }
-      }
-      if (best){ this._grabId = best.id; best._vx = 0; best._vy = 0; wrap.style.cursor = 'grabbing'; e.preventDefault(); }
-    };
-    this._up = () => { if (this._grabId != null){ this._grabId = null; wrap.style.cursor = ''; } };
-    wrap.addEventListener('mousedown', this._down);
-    window.addEventListener('mouseup', this._up);
     this._click = () => {
       // iso / white view: allow student-route selection only (no focus/turntable)
       if (this.entryT < 0.82 && this.focus == null){
@@ -1018,19 +991,6 @@ class Component extends DCLogic {
       // per point), finishing early in the grow band so the routes draw between settled points.
       const settleP = Math.max(0, Math.min(1, this.scroll / (this.DISPERSE_LEN + this.GROW_LEN*0.45)));
       this._settleP = settleP;
-      // text colliders for the landing physics: the masthead, subtitle and orientation chip
-      // are solid — points rest outside them and thrown points bounce off
-      let colliders = null;
-      if (settleP < 1){
-        if (!this._colEls) this._colEls = [this.titleRef.current, this.subRef.current, document.getElementById('m26-orient')].filter(Boolean);
-        const wr0 = wrap.getBoundingClientRect();
-        colliders = [];
-        for (const el of this._colEls){
-          const r = el.getBoundingClientRect();
-          if (r.width > 4) colliders.push({ x0: r.left - wr0.left - 10, y0: r.top - wr0.top - 8, x1: r.right - wr0.left + 10, y1: r.bottom - wr0.top + 8 });
-        }
-        this._colliders = colliders;
-      }
       const order = [];
       for (const p of this.pts){
         let wobX = 0, wobY = 0;
@@ -1057,36 +1017,9 @@ class Component extends DCLogic {
           const es = le*le*(3-2*le);
           p._es = es;
           if (es < 1){
-            // the scattered points are STILL — a held breath — but physical: grab one and
-            // throw it, it glides, bounces off the screen edges and off the text
-            if (p._px === undefined){
-              let sx0 = (0.05 + 0.90*p._sca)*W, sy0 = (0.07 + 0.84*p._scb)*H;
-              for (const c of (colliders || [])) if (sx0 > c.x0 && sx0 < c.x1 && sy0 > c.y0 && sy0 < c.y1){
-                sy0 = (sy0 - c.y0 < c.y1 - sy0) ? c.y0 - 16 : c.y1 + 16; // seed clear of the text
-              }
-              p._px = sx0; p._py = sy0; p._vx = 0; p._vy = 0;
-            }
-            if (this._grabId !== p.id){
-              p._px += p._vx; p._py += p._vy;
-              p._vx *= 0.988; p._vy *= 0.988;
-              // walls
-              if (p._px < 10){ p._px = 10; p._vx = Math.abs(p._vx)*0.78; }
-              else if (p._px > W - 10){ p._px = W - 10; p._vx = -Math.abs(p._vx)*0.78; }
-              if (p._py < 10){ p._py = 10; p._vy = Math.abs(p._vy)*0.78; }
-              else if (p._py > H - 10){ p._py = H - 10; p._vy = -Math.abs(p._vy)*0.78; }
-              // the text is solid
-              if (colliders) for (const c of colliders){
-                if (p._px > c.x0 && p._px < c.x1 && p._py > c.y0 && p._py < c.y1){
-                  const dl = p._px - c.x0, dr = c.x1 - p._px, dt2 = p._py - c.y0, db = c.y1 - p._py;
-                  const m = Math.min(dl, dr, dt2, db);
-                  if (m === dl){ p._px = c.x0; p._vx = -Math.abs(p._vx)*0.72; }
-                  else if (m === dr){ p._px = c.x1; p._vx = Math.abs(p._vx)*0.72; }
-                  else if (m === dt2){ p._py = c.y0; p._vy = -Math.abs(p._vy)*0.72; }
-                  else { p._py = c.y1; p._vy = Math.abs(p._vy)*0.72; }
-                }
-              }
-            }
-            const scx = p._px, scy = p._py;
+            // the scattered points hold still at their dispersed spots — no drift, no throwing —
+            // and interpolate to their structure position as the scroll settles them
+            const scx = (0.05 + 0.90*p._sca)*W, scy = (0.07 + 0.84*p._scb)*H;
             p.sx = scx + (p.sx - scx)*es; p.sy = scy + (p.sy - scy)*es;
             // keep camera-space coords consistent so route/comment segments track the drift
             p.ccx = (p.sx - cx)/pr.eff; p.ccy = (p.sy - cy)/pr.eff;
@@ -1290,8 +1223,10 @@ class Component extends DCLogic {
           const fs = Math.max(8, Math.min(170, p.rad*5.2*sizeF));
           const col = this.hue(p.student, glyL);
           // atmosphere: the closer to the lens, the softer — but still PRESENT, so the
-          // giants read as shapes floating in front; the far field fades toward the paper
-          const aa = a*(dk > 0 ? (1 - 0.42*dk*un) : (1 - 0.42*(-dk)*un));
+          // giants read as shapes floating in front; the far field fades toward the paper.
+          // AND the whole field materialises from nothing: fully transparent at the landing
+          // (es→0), fading to opaque only as the scroll settles each point into position.
+          const aa = a*es*(dk > 0 ? (1 - 0.42*dk*un) : (1 - 0.42*(-dk)*un));
           if (dk > 0.15){
             const oA = aa*un, mA = aa*es;
             if (oA > 0.01) blurText(octx2, stg(p.student), p.sx, p.sy, fs, col, oA, bl);
@@ -1400,7 +1335,7 @@ class Component extends DCLogic {
     this._raf = requestAnimationFrame(loop);
   }
 
-  componentWillUnmount(){ cancelAnimationFrame(this._raf); clearInterval(this._subPoll); clearInterval(this._discPoll); const wrap=this.wrapRef.current; if(wrap){ wrap.removeEventListener('wheel',this._wheel); wrap.removeEventListener('mousemove',this._move); wrap.removeEventListener('mousedown',this._down); wrap.removeEventListener('click',this._click); wrap.removeEventListener('touchstart',this._tStart); wrap.removeEventListener('touchmove',this._tMove); wrap.removeEventListener('touchend',this._tEnd); } window.removeEventListener('resize',this._resize); window.removeEventListener('keydown',this._key); window.removeEventListener('mouseup',this._up); if (window.__m26Cloud === this._bridge) delete window.__m26Cloud; }
+  componentWillUnmount(){ cancelAnimationFrame(this._raf); clearInterval(this._subPoll); clearInterval(this._discPoll); const wrap=this.wrapRef.current; if(wrap){ wrap.removeEventListener('wheel',this._wheel); wrap.removeEventListener('mousemove',this._move); wrap.removeEventListener('click',this._click); wrap.removeEventListener('touchstart',this._tStart); wrap.removeEventListener('touchmove',this._tMove); wrap.removeEventListener('touchend',this._tEnd); } window.removeEventListener('resize',this._resize); window.removeEventListener('keydown',this._key); if (window.__m26Cloud === this._bridge) delete window.__m26Cloud; }
 
   // media (image / video / audio) for the expanded panel is rendered imperatively via the
   // shared M26 renderer — plain createElement/textContent, no HTML string paths

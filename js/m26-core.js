@@ -348,15 +348,38 @@
         });
       });
       el.appendChild(pbtn);
-    } else if (media.mode === 'video' || media.mode === 'audio') {
-      var mel = document.createElement(media.mode);
-      mel.className = 'm26-media-' + media.mode;
-      mel.controls = true; mel.preload = 'metadata';
-      mel.src = media.src;
-      mel.addEventListener('error', function () {
-        if (el.contains(mel)) { el.removeChild(mel); linkCard('open ' + media.label + ' ↗'); }
+    } else if (media.mode === 'video') {
+      var vid = document.createElement('video');
+      vid.className = 'm26-media-video';
+      vid.controls = true; vid.preload = 'metadata'; vid.playsInline = true;
+      vid.src = media.src;
+      vid.addEventListener('error', function () {
+        if (el.contains(vid)) { el.removeChild(vid); linkCard('open ' + media.label + ' ↗'); }
       });
-      el.appendChild(mel);
+      el.appendChild(vid);
+    } else if (media.mode === 'audio') {
+      // custom mono-styled audio player — native controls look broken/out of place here
+      var au = document.createElement('audio');
+      au.preload = 'metadata'; au.src = media.src;
+      var pl = document.createElement('div'); pl.className = 'm26-audio';
+      var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'm26-audio-btn'; pb.setAttribute('aria-label', 'play'); pb.textContent = '►';
+      var bar = document.createElement('div'); bar.className = 'm26-audio-bar';
+      var fill = document.createElement('div'); fill.className = 'm26-audio-fill'; bar.appendChild(fill);
+      var tm = document.createElement('span'); tm.className = 'm26-audio-time'; tm.textContent = '0:00';
+      pl.appendChild(pb); pl.appendChild(bar); pl.appendChild(tm); pl.appendChild(au);
+      function fmt(s) { s = Math.max(0, s | 0); return (s / 60 | 0) + ':' + ('0' + (s % 60)).slice(-2); }
+      pb.addEventListener('click', function () { if (au.paused) au.play(); else au.pause(); });
+      au.addEventListener('play', function () { pb.textContent = '❚❚'; pb.setAttribute('aria-label', 'pause'); });
+      au.addEventListener('pause', function () { pb.textContent = '►'; pb.setAttribute('aria-label', 'play'); });
+      au.addEventListener('loadedmetadata', function () { tm.textContent = fmt(au.duration); });
+      au.addEventListener('timeupdate', function () {
+        var d = au.duration || 0; fill.style.width = (d ? (au.currentTime / d * 100) : 0) + '%';
+        tm.textContent = fmt(d ? d - au.currentTime : 0);
+      });
+      au.addEventListener('ended', function () { fill.style.width = '0%'; });
+      bar.addEventListener('click', function (e) { var r = bar.getBoundingClientRect(); if (au.duration) au.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * au.duration; });
+      au.addEventListener('error', function () { if (el.contains(pl)) { el.removeChild(pl); linkCard('open ' + media.label + ' ↗'); } });
+      el.appendChild(pl);
     } else if (media.mode === 'iframe') {
       var fr = document.createElement('iframe');
       fr.className = 'm26-media-frame' + (media.kind === 'audio' ? ' m26-media-frame-audio' : '');
