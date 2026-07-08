@@ -2,129 +2,137 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>M26 Studio — Imagination Infrastructure · CEPT · 2026</title>
-<meta name="description" content="M26 Studio at CEPT — a living archive of a semester of futures thinking & systems design. Every submission a point, every student a thread.">
+<meta name="description" content="M26 Studio at CEPT — a living archive of a semester of futures thinking & systems design. The whole semester as one field of points; the sections docked on the edges of the screen.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./css/site.css">
 <link rel="stylesheet" href="./css/aa.css">
 </head>
 <body>
 
-<div id="aa-mast"></div>
+<!-- ══ top strip — brand · ticker · week · submit ══════════════════════════ -->
+<header class="aa-top" role="banner">
+  <a class="aa-brand" href="./" aria-label="M26 Studio — home">
+    <span class="aa-brand-block">M26</span>
+    <span class="aa-brand-word">
+      <b>M26 Studio</b>
+      <span>Imagination Infrastructure · CEPT · 2026</span>
+    </span>
+  </a>
+  <div class="aa-tick" id="aa-tick" aria-hidden="true"></div>
+  <span class="aa-top-week aa-kicker">WK <b><span data-aa="week">—</span></b>/<span data-aa="weeks">18</span></span>
+  <a class="aa-top-cta" data-form-link href="#" target="_blank" rel="noopener noreferrer">Submit ↗</a>
+</header>
 
-<main class="aa-page" id="main">
+<!-- ══ the stage — the living canvas IS the middle of the room ═════════════ -->
+<div class="aa-stage" id="aa-stage"></div>
+<p class="aa-stage-hint" aria-hidden="true">scroll to travel · drag to orbit · click a point</p>
 
-  <!-- 00 · hero — the studio's name, said at full volume -->
-  <section class="aa-hero aa-wrap">
-    <div class="aa-hero-top">
-      <span class="aa-kicker aa-reveal">M26 Studio · CEPT University · Monsoon 2026</span>
-      <span class="aa-kicker aa-reveal" data-d="1">Week <b><span data-aa="week">—</span></b> of <span data-aa="weeks">18</span></span>
+<!-- ══ the edges — one bar per section, docked left / right / bottom ═══════ -->
+<button class="aa-edge aa-edge-left" type="button" data-bar="studio" aria-expanded="false" aria-controls="panel-studio">
+  <span class="edge-num">01</span><span class="edge-word">Studio</span><span class="edge-arr">→</span>
+</button>
+<button class="aa-edge aa-edge-right" type="button" data-bar="work" aria-expanded="false" aria-controls="panel-work">
+  <span class="edge-num">02</span><span class="edge-word">Work</span><span class="edge-arr">←</span>
+</button>
+<button class="aa-edge aa-edge-bottom" type="button" data-bar="cohort" aria-expanded="false" aria-controls="panel-cohort">
+  <span class="edge-num">03</span><span class="edge-word">The Cohort</span>
+  <span class="edge-tail"><span data-aa="students">0</span> students · <span data-aa="subs">0</span> submissions <span class="edge-arr">↑</span></span>
+</button>
+
+<!-- ══ 01 · STUDIO — slides in from the left ═══════════════════════════════ -->
+<section class="aa-panel aa-panel-left" id="panel-studio" aria-hidden="true" aria-label="The studio">
+  <span class="ghostnum" aria-hidden="true">01</span>
+  <div class="aa-panel-in">
+    <div class="aa-phead">
+      <h2 class="aa-ptitle">The <em>Studio</em></h2>
+      <button class="aa-pclose" type="button" aria-label="Close panel">✕</button>
     </div>
-    <h1 class="aa-display aa-reveal">
-      Imagination<br>
-      <span class="ghost">Infra&shy;structure</span>
-    </h1>
-    <p class="aa-hero-sub aa-reveal" data-d="1">
-      A design studio at CEPT for <em>futures thinking</em> &amp; <em>systems design</em> —
-      run as a living archive. Every submission becomes a point; every student, a thread through the semester.
+
+    <p class="aa-statement">
+      Imagination is <em>infrastructure</em> — something a city runs on,
+      something you can plan, build, and maintain.
     </p>
-    <div class="aa-hero-meta aa-reveal" data-d="2">
-      <div class="aa-fig"><b data-aa="students">0</b><span>Students</span></div>
-      <div class="aa-fig"><b data-aa="subs">0</b><span>Submissions</span></div>
-      <div class="aa-fig"><b><span data-aa="week">—</span>/<span data-aa="weeks">18</span></b><span>Week</span></div>
+    <div class="aa-prose">
+      <p>M26 is a design studio at CEPT for futures thinking and systems design.
+      Over eighteen weeks the cohort files its thinking as it happens — a note,
+      a sketch, a film, a reading, a model — and the archive assembles itself
+      around them, in public, in real time.</p>
+      <p>The studio does not wait for a final review to make the work visible.
+      The record is the pedagogy: the semester accumulates as the field of points
+      behind this page — every point a real submission, every thread of colour
+      one student's line through time.</p>
     </div>
-  </section>
 
-  <!-- 01 · the canvas, set into the page as an instrument -->
-  <section class="aa-section aa-wrap" id="canvas">
-    <div class="aa-sechead aa-reveal">
-      <span class="num">01</span>
-      <h2>The Canvas</h2>
-      <a class="aa-more" id="aa-canvas-full" href="canvas.html">Full screen →</a>
+    <div class="aa-subhead"><span class="num">01·A</span><h3>How it works</h3></div>
+    <div class="aa-hows">
+      <div class="aa-note"><b>1 — FILE</b><br>A student files work through a Google Form:
+        who, what kind, an attachment or a note. Any hour, any day — the record keeps the timestamp.</div>
+      <div class="aa-note"><b>2 — COMMIT</b><br>A script moves each entry from the form's sheet into
+        <b>data/submissions.csv</b> in the studio's repository — one row, one work, one point.</div>
+      <div class="aa-note"><b>3 — MIRROR</b><br>This site reads that file and nothing else.
+        What you see is a strict 1:1 mirror of the record — nothing invented, nothing curated away.</div>
     </div>
-    <div class="aa-window aa-reveal" data-d="1">
-      <div class="aa-window-bar">
-        <span class="lamp" aria-hidden="true"></span>
-        <span class="label">Living archive — point cloud · drag to orbit · scroll to travel</span>
-        <a class="aa-more" id="aa-canvas-full2" href="canvas.html">Open →</a>
-      </div>
-      <div class="aa-window-stage" id="aa-canvas-stage">
-        <div class="aa-window-poster" id="aa-canvas-poster">
-          <div class="glyphs" aria-hidden="true">◆ ○ ■ ◇ ╳ ▚</div>
-          <h3>The semester as one field of points</h3>
-          <p>Each point is a real submission; each thread of colour, one student moving through eighteen weeks. Switch the instrument on and play.</p>
-          <button class="aa-btn" type="button" id="aa-canvas-on">Switch on the canvas</button>
-        </div>
-      </div>
-    </div>
-  </section>
+    <p><a class="aa-btn aa-btn--solid" data-form-link href="#" target="_blank" rel="noopener noreferrer">Submit work ↗</a></p>
 
-  <!-- 02 · latest work — straight from the record -->
-  <section class="aa-section aa-wrap" id="latest">
-    <div class="aa-sechead aa-reveal">
-      <span class="num">02</span>
-      <h2>Latest Work</h2>
-      <a class="aa-more" id="aa-work-more" href="work.html">All submissions →</a>
-    </div>
-    <div id="aa-latest" class="aa-reveal" data-d="1"></div>
-  </section>
+    <div class="aa-subhead"><span class="num">01·B</span><h3>Calendar</h3></div>
+    <div id="aa-weeks-host"></div>
 
-  <!-- 03 · the cohort -->
-  <section class="aa-section aa-wrap" id="cohort">
-    <div class="aa-sechead aa-reveal">
-      <span class="num">03</span>
-      <h2>The Cohort</h2>
-      <a class="aa-more" id="aa-people-more" href="people.html">The ledger →</a>
-    </div>
-    <div id="aa-cohort" class="aa-reveal" data-d="1"></div>
-  </section>
+    <blockquote id="aa-quote" class="aa-pquote"></blockquote>
+    <p id="aa-quote-name" class="aa-kicker" style="margin:14px 0 0"></p>
 
-  <!-- 04 · the studio, in one breath -->
-  <section class="aa-section aa-wrap" id="about">
-    <div class="aa-sechead aa-reveal">
-      <span class="num">04</span>
-      <h2>The Studio</h2>
-      <a class="aa-more" id="aa-studio-more" href="studio.html">About the studio →</a>
-    </div>
-    <div class="aa-cols">
-      <p class="aa-statement aa-reveal" data-d="1">
-        Work is filed <em>as it happens</em> — a note, a sketch, a film, a reading —
-        and the archive assembles itself around the cohort.
-      </p>
-      <div>
-        <div class="aa-note aa-reveal" data-d="2">
-          <b>HOW IT WORKS</b> — a Google Form feeds a sheet; a script commits each
-          entry to <b>data/submissions.csv</b>; the site you are reading mirrors that
-          file 1:1. Nothing is curated away, and nothing is invented.
-          <br><a id="aa-submit-link" href="#" target="_blank" rel="noopener noreferrer">SUBMIT WORK ↗</a>
-        </div>
-      </div>
-    </div>
-  </section>
+    <p class="aa-pfoot">M26 Studio · CEPT University · 2026 — the record:
+      <a data-page-link="data/submissions.csv" href="data/submissions.csv">submissions.csv</a> ·
+      <a data-page-link="data/students.csv" href="data/students.csv">students.csv</a></p>
+  </div>
+</section>
 
-</main>
+<!-- ══ 02 · WORK — slides in from the right ════════════════════════════════ -->
+<section class="aa-panel aa-panel-right" id="panel-work" aria-hidden="true" aria-label="The work">
+  <span class="ghostnum" aria-hidden="true">02</span>
+  <div class="aa-panel-in">
+    <div class="aa-phead">
+      <h2 class="aa-ptitle">The <em>Work</em></h2>
+      <button class="aa-pclose" type="button" aria-label="Close panel">✕</button>
+    </div>
+    <p class="aa-plede">Every submission, in the order it arrived — <em>nothing curated away.</em></p>
+    <div id="aa-work-filters"></div>
+    <div id="aa-work-grid"></div>
+  </div>
+</section>
 
-<div id="aa-foot"></div>
+<!-- ══ 03 · THE COHORT — rises from the bottom ═════════════════════════════ -->
+<section class="aa-panel aa-panel-bottom" id="panel-cohort" aria-hidden="true" aria-label="The cohort">
+  <span class="ghostnum" aria-hidden="true">03</span>
+  <div class="aa-panel-in">
+    <div class="aa-phead">
+      <h2 class="aa-ptitle">The <em>Cohort</em></h2>
+      <button class="aa-pclose" type="button" aria-label="Close panel">✕</button>
+    </div>
+    <p class="aa-plede">One row per student — click a name to open <em>everything they have filed.</em></p>
+    <div id="aa-cohort-host"></div>
+    <p class="aa-pfoot">The full register with dossiers lives in
+      <a data-page-link="people.html" href="people.html">the ledger →</a></p>
+  </div>
+</section>
 
 <noscript>
-  <div style="padding:48px;font:14px/1.7 ui-sans-serif,system-ui;max-width:60ch">
-    <p>M26 STUDIO · CEPT · 2026 — this site reads the studio's submission records and
-    needs JavaScript to display them. The records themselves are plain files:
+  <div style="position:fixed;inset:0;z-index:200;background:#f3f1ea;padding:48px;font:14px/1.7 ui-sans-serif,system-ui">
+    <p style="max-width:60ch">M26 STUDIO · CEPT · 2026 — this site reads the studio's submission
+    records and needs JavaScript to display them. The records themselves are plain files:
     <a href="data/submissions.csv">data/submissions.csv</a> ·
-    <a href="data/students.csv">data/students.csv</a></p>
+    <a href="data/students.csv">data/students.csv</a> —
+    and the archive is readable at <a href="people.html">people.html</a>.</p>
   </div>
 </noscript>
 
 <script src="./js/m26-core.js"></script>
 <script src="./js/viewer.js"></script>
-<script src="./js/aa-shell.js"></script>
-<script src="./js/aa-home.js"></script>
-<script>
-  AAShell.mount({ active: 'home' });
-  AAHome.init();
-</script>
+<script src="./js/aa-work.js"></script>
+<script src="./js/aa-app.js"></script>
+<script>AAApp.init();</script>
 </body>
 </html>

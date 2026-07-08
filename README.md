@@ -1,14 +1,16 @@
 # Imagination Infrastructure — M26 Studio · CEPT · 2026
 
-A live studio website built as **static HTML/CSS/JS** — no build step, no framework runtime beyond a vendored React. The site is organised like a school's website — a masthead with mega-navigation, a marquee of the latest submissions, and numbered sections — and every page reads the *same two CSVs*:
+A live studio website built as **static HTML/CSS/JS** — no build step, no framework runtime beyond a vendored React. The site is **one fixed screen — no page scroll, ever**: the living canvas (the 3D point-cloud of every submission) fills the middle of the viewport, and the sections are docked as labelled bars on the screen's edges. Clicking a bar slides its panel in over the canvas; the bar again, ✕, or Esc slides it home. Panels scroll internally.
 
-1. **Home** (`index.html`) — the institution's front door: hero, the canvas set into a fixed window (switch it on to play), latest work, the cohort index, the studio in one breath.
-2. **Studio** (`studio.html`) — the brief, how the pipeline works, the 18-week calendar, one attributed voice per visit.
-3. **Work** (`work.html`) — every submission as a filterable wall (week / type / student); click a plate for a full-width detail fold with the media rendered in place.
-4. **People** (`people.html`) — **the ledger**: one row per student, a per-week activity strip, a submission tally. Click a row for a **dossier** (portrait, bio, links, per-week graph, and every work banded by week). Deep link: `people.html#<slug>`.
-5. **The canvas** (`canvas.html`) — the scroll-driven 3D point-cloud of every submission. Each dot is one real submission; each coloured thread is one student's route through the weeks. `?embed` strips the links that would navigate the homepage's iframe window.
+- **The stage** — `canvas.html?embed` in a frameless iframe: the cloud opens directly on the settled iso structure (the title landing was removed) and the journey ends at the last submissions (the quote outro and embedded ledger were removed). Scroll to travel, drag to orbit, click a point.
+- **01 · STUDIO** (left edge) — the brief, how the pipeline works, the 18-week calendar, one attributed voice per visit.
+- **02 · WORK** (right edge) — every submission as a filterable wall (week / type / student); click a plate for a full-width detail fold with the media rendered in place.
+- **03 · THE COHORT** (bottom edge) — the roster as an index; clicking a student opens WORK filtered to them.
+- **Top strip** — brand, a ticker of the latest submissions, the week counter, SUBMIT.
 
-`archive.html` is now a redirect stub → `people.html` (old links and bookmarks keep working, `?sandbox` preserved).
+Deep links: `#studio` / `#work` / `#cohort` open a panel; `#work=<slug>` opens WORK filtered to one student. On phones the side bars fold into a bottom tab row and every panel becomes a rising sheet.
+
+Auxiliary pages: **`people.html`** keeps THE LEDGER (full register + dossiers, deep link `#<slug>`) as a plain page linked from the cohort panel; `canvas.html` is the cloud standalone; `archive.html`, `studio.html`, `work.html` are redirect stubs so old links keep working (`?sandbox` preserved).
 
 Everything on the site derives from data. Until the CSVs are filled, the site is honestly empty (the cloud shows `PTS 000`, the ledger says "No students on the roster yet"). Nothing is fabricated.
 
@@ -39,20 +41,19 @@ Push `site/` to any static host — **GitHub Pages**, Netlify, Vercel, Cloudflar
 
 ```
 site/
-├── index.html            HOME — hero, canvas window, latest work, cohort index (institution chrome)
-├── studio.html           STUDIO — brief, how it works, calendar, a voice
-├── work.html             WORK — the full record as a filterable wall + detail folds
-├── people.html           PEOPLE — the ledger + dossiers under the institution chrome
-├── canvas.html           THE CANVAS — 3D scroll experience (a Design Component; embeds the ledger at the end of the dive; ?embed for the homepage window)
-├── archive.html          redirect stub → people.html (keeps old links alive)
+├── index.html            THE ONE-SCREEN SITE — canvas stage + edge bars + sliding panels (studio/work/cohort)
+├── canvas.html           THE CANVAS — 3D experience (a Design Component; opens on the iso structure, ends at the last submissions; ?embed hides links that would navigate the stage iframe)
+├── people.html           THE LEDGER — full register + dossiers, plain page (deep link #<slug>)
+├── studio.html           redirect stub → ./#studio
+├── work.html             redirect stub → ./#work
+├── archive.html          redirect stub → people.html
 ├── css/
-│   ├── site.css           Cloud/ledger chrome (skip link, sandbox badge, focus/expand panel, outro, viewer)
-│   └── aa.css             THE INSTITUTION SKELETON — masthead, mega-nav, marquee, grids, index lists, windows, footer
+│   ├── site.css           Cloud/ledger chrome (skip link, sandbox badge, focus/expand panel, viewer)
+│   └── aa.css             THE ONE-SCREEN INSTITUTION — top strip, edge bars, panels, grain, grids, index, calendar
 ├── js/
 │   ├── m26-core.js        CONFIG + CSV parsing + row interpretation + the ?sandbox switch (window.M26). SHARED by every page.
-│   ├── aa-shell.js        Shared chrome: masthead + mega-nav + mobile overlay + marquee + footer + glyph field + reveals (window.AAShell).
-│   ├── aa-home.js         Homepage: canvas window (poster → iframe), latest-work grid, cohort index (window.AAHome).
-│   ├── aa-work.js         Work page: filters, plates, detail folds, #key deep link (window.AAWork).
+│   ├── aa-app.js          The room: edge bars + sliding panels + hash routing + ticker + cohort + studio extras (window.AAApp).
+│   ├── aa-work.js         The work wall: filters, plates, detail folds, filterStudent API (window.AAWork).
 │   ├── archive-ledger.js  The ledger table + the dossier panel (window.M26ArchiveLedger). #slug deep link.
 │   ├── discourse.js       Persistent comments via a Google-Sheet-backed Apps Script (window.M26Discourse).
 │   └── viewer.js          Media rendering (image / video / audio / pdf) shared by every page.
@@ -120,9 +121,13 @@ To point at your own backend, edit the three values in `CONFIG` (`m26-core.js`):
 
 ---
 
-## What changed in this session (the institution skeleton)
+## What changed in this session (the one-screen institution)
 
-The site grew a school-style shell: fixed navigation instead of scroll-only wayfinding. `index.html` (the cloud) moved to `canvas.html`; the new `index.html` is a conventional homepage that frames the cloud in a fixed, switch-on window (`canvas.html?embed` in an iframe — the 3D runtime only loads when asked). New pages `studio.html`, `work.html`, `people.html` share one chrome (`js/aa-shell.js` + `css/aa.css`): masthead + mega-nav (desktop), full-screen numbered index overlay (mobile), a marquee of the latest submissions, a faint drifting glyph field behind every page, and a footer with the outline wordmark. The typography adds Archivo (grotesque display) alongside the existing Space Mono / IBM Plex Mono / Spectral. `archive-ledger.js` gained a `#<slug>` deep link; nothing else in the cloud/ledger code paths changed. All data rules hold: strict 1:1 mirror of the CSVs, honest empty states, `textContent` only for untrusted values, `?sandbox` preserved across every internal link.
+The site became a single fixed screen — no page scroll. `index.html` (the cloud) had already moved to `canvas.html`; the new `index.html` is a room: the cloud fills the middle as a frameless, always-on iframe stage, and STUDIO / WORK / THE COHORT are docked as bars on the left / right / bottom edges (top strip: brand, live ticker, week, SUBMIT). Clicking a bar slides its panel over the canvas (`js/aa-app.js` + `css/aa.css`); panels scroll internally; `#studio` / `#work` / `#cohort` / `#work=<slug>` deep-link. On phones the bars fold into a bottom tab row and panels rise as sheets.
+
+The cloud itself was recut in `canvas.html`: it now opens directly on the settled iso structure (`minScroll()` — the title landing is unreachable) and the journey stops just short of the dive's dark run-out (`maxScroll() = cloudEnd() − 420`); the quote outro and the embedded end-of-dive ledger were removed along with their controller script. THE LEDGER survives as the plain `people.html` (linked from the cohort panel; `#<slug>` deep link).
+
+The look: Archivo grotesque colliding with italic Spectral in panel titles, ghost outline numerals behind each page, film grain over the whole room, slow panel choreography. All data rules hold: strict 1:1 mirror of the CSVs, honest empty states, `textContent` only for untrusted values, `?sandbox` preserved everywhere.
 
 ---
 

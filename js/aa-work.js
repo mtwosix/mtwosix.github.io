@@ -40,7 +40,18 @@
         paint();
       });
       c.setAttribute('data-g', key);
+      c.setAttribute('data-v', String(v));
       host.appendChild(c);
+    });
+  }
+
+  /* re-sync every chip's pressed state to the current filter state */
+  function syncChips() {
+    var host = document.getElementById('aa-work-filters');
+    if (!host) return;
+    host.querySelectorAll('.aa-chip').forEach(function (c) {
+      var k = c.getAttribute('data-g');
+      c.setAttribute('aria-pressed', String(state[k]) === c.getAttribute('data-v') ? 'true' : 'false');
     });
   }
 
@@ -227,7 +238,7 @@
   }
 
   function init() {
-    AAShell.data().then(function (d) {
+    M26.loadAll().then(function (d) {
       D = d;
       buildFilters();
       paint();
@@ -242,5 +253,16 @@
     });
   }
 
-  window.AAWork = { init: init };
+  /* the cohort index drives this: show one student's record (or 'all') */
+  function filterStudent(idx) {
+    if (!D) return;
+    state.student = idx;
+    state.week = 'all'; state.type = 'all';
+    syncChips();
+    paint();
+    var host = document.getElementById('aa-work-grid');
+    if (host && host.closest('.aa-panel')) host.closest('.aa-panel').scrollTop = 0;
+  }
+
+  window.AAWork = { init: init, filterStudent: filterStudent };
 })();

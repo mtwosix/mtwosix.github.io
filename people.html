@@ -3,58 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>People — M26 Studio · Imagination Infrastructure · CEPT · 2026</title>
-<meta name="description" content="The cohort of M26 Studio — the ledger: one rule per student, a per-week activity strip, and a dossier of everything each student has filed.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<title>The Ledger — M26 Studio · Imagination Infrastructure · CEPT · 2026</title>
+<meta name="description" content="The full register of M26 Studio — one rule per student, a per-week activity strip, and a dossier of everything each student has filed. Deep link: people.html#slug.">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./css/site.css">
-<link rel="stylesheet" href="./css/aa.css">
+<style>
+  html, body { margin: 0; background: #f3f1ea; }
+</style>
 </head>
 <body>
-
-<div id="aa-mast"></div>
-
-<main class="aa-page" id="main">
-
-  <section class="aa-hero aa-wrap" style="padding-bottom:0">
-    <div class="aa-hero-top">
-      <span class="aa-kicker aa-reveal">Section 03 · The cohort</span>
-      <span class="aa-kicker aa-reveal" data-d="1"><b><span data-aa="students">0</span></b> students · <b><span data-aa="active">0</span></b> active</span>
-    </div>
-    <h1 class="aa-display aa-reveal">People</h1>
-    <p class="aa-hero-sub aa-reveal" data-d="1">
-      The ledger — one rule per student, a strip of their weeks,
-      and a dossier of <em>everything they have filed</em>. Click a row.
-    </p>
-  </section>
-
-  <!-- THE LEDGER — rendered by js/archive-ledger.js from the same two CSVs
-       as everything else. Its own chrome (back-link) is hidden by aa.css;
-       the masthead above is the wayfinding now. -->
-  <section class="aa-section" style="border-top:0;padding-top:12px">
-    <div id="m26-archive-page" class="aa-reveal"></div>
-  </section>
-
-</main>
-
-<div id="aa-foot"></div>
-
+<!-- THE LEDGER — the studio's full register, rendered from data/students.csv +
+     data/submissions.csv (+ optional data/profiles.json) by js/archive-ledger.js.
+     Reachable from the cohort panel on the one-screen front page; its back link
+     returns there. Deep link: #<slug> opens that student's dossier. -->
+<div id="m26-archive-page"></div>
 <noscript>
   <div style="padding:48px;font:14px/1.7 ui-sans-serif,system-ui;max-width:60ch">
-    <p>This page reads the studio's records and needs JavaScript to display them:
-    <a href="data/students.csv">data/students.csv</a> ·
-    <a href="data/submissions.csv">data/submissions.csv</a></p>
+    <p style="font:10px ui-monospace,monospace;letter-spacing:.26em;color:#6c685f">M26 STUDIO · CEPT · 2026</p>
+    <h1 style="font-family:Spectral,Georgia,serif;font-weight:300">Imagination Infrastructure — the ledger</h1>
+    <p>This page reads the studio's submission records and needs JavaScript to display them
+       (there is no animation here — it is a plain, scrollable page).</p>
+    <p>Without JavaScript you can still read the records directly:
+       <a href="data/submissions.csv">data/submissions.csv</a> ·
+       <a href="data/students.csv">data/students.csv</a></p>
   </div>
 </noscript>
-
 <script src="./js/m26-core.js"></script>
 <script src="./js/viewer.js"></script>
-<script src="./js/discourse.js"></script>
 <script src="./js/archive-ledger.js"></script>
-<script src="./js/aa-shell.js"></script>
 <script>
-  AAShell.mount({ active: 'people' });
   M26ArchiveLedger.render(document.getElementById('m26-archive-page'), { embedded: false });
 </script>
 </body>
