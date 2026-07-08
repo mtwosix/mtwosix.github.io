@@ -94,7 +94,7 @@
 .m26-focus-ui {
   position: absolute; inset: 0;
   pointer-events: none;
-  color: #ece9e2;
+  color: var(--ink); /* the dive stays on cream paper now — the focus type is ink */
   opacity: 0; /* the render loop fades this in on arrival and out during route flights */
 }
 .m26-focus-name {
@@ -109,7 +109,7 @@
   position: absolute;
   left: calc(50% + 86px); bottom: calc(50% + 44px);
   font: 10px var(--mono); letter-spacing: .3em; text-transform: uppercase;
-  color: #8d90ab;
+  color: var(--ink-60);
 }
 .m26-focus-meta {
   position: absolute;
@@ -117,7 +117,7 @@
   font: 11px var(--mono); letter-spacing: .18em; text-transform: uppercase;
   line-height: 2;
 }
-.m26-focus-meta2 { color: #8d90ab; }
+.m26-focus-meta2 { color: var(--ink-60); }
 .m26-focus-actions {
   position: absolute;
   right: calc(50% + 86px); top: calc(50% + 44px);
@@ -126,20 +126,20 @@
 .m26-focus-expand {
   display: inline-block; pointer-events: auto; cursor: pointer;
   font: 11px var(--mono); letter-spacing: .22em;
-  color: #ece9e2;
-  border-bottom: 1px dashed rgba(236, 233, 226, .45);
+  color: var(--ink);
+  border-bottom: 1px dashed rgba(29, 27, 23, .45);
   padding-bottom: 4px;
   transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
-.m26-focus-expand:hover { color: #fff; border-bottom-color: #fff; }
+.m26-focus-expand:hover { color: #8a5a34; border-bottom-color: #8a5a34; }
 .m26-focus-close {
   position: absolute; top: 26px; right: 30px;
   pointer-events: auto; cursor: pointer;
   font: 10px var(--mono); letter-spacing: .26em;
-  color: #8d90ab;
+  color: var(--ink-60);
   transition: color var(--dur) var(--ease);
 }
-.m26-focus-close:hover { color: #ece9e2; }
+.m26-focus-close:hover { color: var(--ink); }
 @media (max-width: 720px) {
   .m26-focus-name { right: auto; left: 18px; bottom: calc(50% + 96px); text-align: left; max-width: 80vw; font-size: clamp(16px, 5vw, 24px); }
   .m26-focus-week { left: 18px; bottom: calc(50% + 66px); }

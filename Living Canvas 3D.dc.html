@@ -42,7 +42,7 @@
     .m26-cohort-b{font-size:12px !important;letter-spacing:.16em !important;margin-top:9px !important}
   }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&family=Archivo:wght@800;900&display=swap" rel="stylesheet">
 </helmet>
 
 <div ref="{{ wrapRef }}" style="position:fixed;inset:0;background:#f3f1ea;cursor:default;touch-action:none">
@@ -65,11 +65,8 @@
     </div>
   </div>
 
-  <!-- cohort dwell caption -->
-  <div ref="{{ cohortRef }}" style="position:absolute;top:7.5%;left:0;right:0;text-align:center;opacity:0;will-change:opacity">
-    <div class="m26-cohort-a" style="font:11px 'Space Mono',ui-monospace,monospace;letter-spacing:.3em;color:#cdcfe4">[ THE COHORT · {{ cohortCount }} STUDENTS ]</div>
-    <div class="m26-cohort-b" style="margin-top:7px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#8d90ab">each thread a student — scroll to travel their works</div>
-  </div>
+  <!-- (the cohort dwell caption is retired — the field speaks for itself) -->
+  <div ref="{{ cohortRef }}" style="display:none"></div>
 
   <!-- landing chrome -->
   <div ref="{{ landingRef }}" style="position:absolute;inset:0;color:#171512;opacity:0;visibility:hidden">
@@ -103,8 +100,8 @@
       <div class="m26-focus-actions">
         <div onClick="{{ expand }}" class="m26-focus-expand">[ EXPAND ↗ ]</div>
       </div>
-      <div style="position:absolute;bottom:0;left:0;right:0;border-top:1px solid rgba(191,194,218,.22);background:rgba(6,6,12,.5);overflow:hidden">
-        <div style="display:inline-block;white-space:nowrap;will-change:transform;animation:m26tick 30s linear infinite;padding:9px 0;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.18em;color:#8d90ab"><span style="padding-right:70px">{{ tickerText }}</span><span style="padding-right:70px">{{ tickerText }}</span></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;border-top:1px solid rgba(29,27,23,.22);background:rgba(243,241,234,.6);overflow:hidden">
+        <div style="display:inline-block;white-space:nowrap;will-change:transform;animation:m26tick 30s linear infinite;padding:9px 0;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.18em;color:#6c685f"><span style="padding-right:70px">{{ tickerText }}</span><span style="padding-right:70px">{{ tickerText }}</span></div>
       </div>
       <div onClick="{{ exitFocus }}" class="m26-focus-close">[ ✕ CLOSE ]</div>
     </div>
@@ -219,6 +216,14 @@
 
 </x-dc>
 
+<!-- The journey's last word — fades in as the scroll reaches its end, set huge and
+     bold along the foot of the page. Opacity is driven by the render loop. -->
+<div id="m26-fin" aria-hidden="true" style="position:fixed;left:0;right:0;bottom:4vh;z-index:15;pointer-events:none;opacity:0;
+  text-align:center;font-family:'Archivo','Helvetica Neue',ui-sans-serif,sans-serif;font-weight:900;
+  font-size:clamp(40px,9.6vw,168px);line-height:.88;letter-spacing:-.03em;text-transform:uppercase;color:#1d1b17;white-space:nowrap">
+  Imagination<br>Infrastructure
+</div>
+
 <!-- The quote outro and the embedded ledger that used to sit past the cloud's end are
      gone: the journey now ends at the last submission, and all wayfinding lives in the
      page that frames this canvas (index.html). -->
@@ -285,7 +290,8 @@ class Component extends DCLogic {
   _bph1 = Math.random()*6.283185; _bph2 = Math.random()*6.283185;
 
   rnd(i){ const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
-  hue(si, l){ const s = this.students[si]; return `hsl(${s ? s.h : 0}, 78%, ${l || 66}%)`; }
+  // one ink for everyone — the field reads as a drawing, not as colour coding
+  hue(si, l){ return '#1d1b17'; }
   _stg(si){ const S=['◆','○','■','◇','●','□','▲','△','┼','╳','▚','▞','▌','▐','╱','╲','▀','▄','▙','▜']; si=si|0; return S[((si%S.length)+S.length)%S.length]; }
 
   // ascii air — pre-rendered dither-glyph textures (ink for the paper iso, fog for the deep);
@@ -800,34 +806,26 @@ class Component extends DCLogic {
       // idle shimmer the field flickers through until a student is singled out
       const FLK = ['·',':','.','\'','▖','▝','░','·',':','▒'];
       const gfont = fs => '700 ' + fs.toFixed(1) + 'px "Space Mono", ui-monospace, monospace';
-      // one glyph per point. No white bokeh sprite — depth reads through dimmer, sparser marks.
+      // one DOT per point (the glyph alphabet is retired — the field is dots and lines now)
+      const dotAt = (c, x, y, r) => { c.beginPath(); c.arc(x, y, r, 0, 6.2832); c.fill(); };
       const disc = (x, y, r, blur, alpha, col, glyph) => {
         ctx.fillStyle = col;
         if (blur <= 0.4){
-          ctx.globalAlpha = alpha; ctx.font = gfont(Math.max(17, Math.min(40, r*5.2)));
-          ctx.fillText(glyph, x, y);
+          ctx.globalAlpha = alpha;
+          dotAt(ctx, x, y, Math.max(2.1, Math.min(8, r*1.05)));
         } else {
           const fade = Math.max(0.14, 1 - blur/7.5);
-          ctx.globalAlpha = alpha*fade*0.72; ctx.font = gfont(Math.max(13, Math.min(28, (r+blur)*3)));
-          ctx.fillText(blur > 3.2 ? '·' : ':', x, y);
+          ctx.globalAlpha = alpha*fade*0.72;
+          dotAt(ctx, x, y, Math.max(1.6, Math.min(7, r*0.7 + blur*0.5)));
         }
       };
-      // soft depth-of-field glyph: five offset stamps approximate a bokeh blur on any 2d context
-      // (no ctx.filter — works everywhere, cheap at this point count)
+      // soft depth-of-field dot: alpha falls with blur, radius grows a touch — cheap bokeh
       const blurText = (c, glyph, x, y, fs, col, alpha, bl) => {
-        c.fillStyle = col; c.font = gfont(fs);
-        if (bl < 0.35){ c.globalAlpha = alpha; c.fillText(glyph, x, y); return; }
-        if (bl < 2.2){
-          c.globalAlpha = alpha*0.34;
-          c.fillText(glyph, x, y);
-          for (let i = 0; i < 4; i++){ const a2 = i*1.5708 + 0.6; c.fillText(glyph, x + Math.cos(a2)*bl, y + Math.sin(a2)*bl); }
-        } else {
-          // heavy bokeh: two rings of stamps so the copies fuse into one soft disc
-          c.globalAlpha = alpha*0.21;
-          c.fillText(glyph, x, y);
-          for (let i = 0; i < 3; i++){ const a2 = i*2.094 + 0.4; c.fillText(glyph, x + Math.cos(a2)*bl*0.5, y + Math.sin(a2)*bl*0.5); }
-          for (let i = 0; i < 6; i++){ const a2 = i*1.047 + 1.1; c.fillText(glyph, x + Math.cos(a2)*bl, y + Math.sin(a2)*bl); }
-        }
+        c.fillStyle = col;
+        const r = Math.max(1.6, Math.min(24, fs*0.17));
+        if (bl < 0.35){ c.globalAlpha = alpha; dotAt(c, x, y, r); return; }
+        c.globalAlpha = alpha*Math.max(0.16, 1 - bl/6);
+        dotAt(c, x, y, r + bl*0.7);
       };
       // per-segment gates so lines never hard-cut at the near clip plane or pop in/out of the far bokeh --
       // they ease to transparent well before either happens.
@@ -848,8 +846,7 @@ class Component extends DCLogic {
         if (alpha<=0.003) return;
         ctx.globalAlpha=alpha; ctx.beginPath(); seg(a,b); ctx.stroke();
       };
-      // ascii route lines — glyphs stepped along the segment; '—|/\\' picked by screen angle
-      const lineChar = (dx, dy) => { let a=Math.atan2(dy,dx)*57.2958; if(a<0)a+=180; if(a<22.5||a>=157.5)return '—'; if(a<67.5)return '\\'; if(a<112.5)return '|'; return '/'; };
+      // route lines — plain, continuous strokes (the ascii dashes are retired)
       const asciiSeg = (a, b, alpha, fixedCh, size, col, flowOff) => {
         let ax=a.ccx, ay=a.ccy, ad=a.cdepth, bx=b.ccx, by=b.ccy, bd=b.cdepth;
         if (ad<NEAR && bd<NEAR) return;
@@ -857,20 +854,11 @@ class Component extends DCLogic {
         else if (bd<NEAR){ const tt=(NEAR-bd)/(ad-bd); bx+=(ax-bx)*tt; by+=(ay-by)*tt; bd=NEAR; }
         const ea=effOf(ad), eb=effOf(bd);
         const x0=cx+ax*ea, y0=cy+ay*ea, x1=cx+bx*eb, y1=cy+by*eb;
-        const dx=x1-x0, dy=y1-y0, L=Math.hypot(dx,dy); if (L<2) return;
-        // route dashes (no fixed glyph) are drawn as an em-dash rotated to the segment's screen
-        // direction, so the dashes visibly run ALONG the route; comment/other lines keep their glyph
-        const rotDash = !fixedCh; const ang = rotDash ? Math.atan2(dy,dx) : 0;
-        const ch = fixedCh || '—'; const step=Math.max(8.5, size*1.1), n=Math.floor(L/step);
-        if (col) ctx.fillStyle=col; ctx.font=gfont(size);
-        const off = flowOff ? (flowOff%1) : 0;
-        // slow pulse breathing down the line — brightness swells travel with the flow
-        const gt = this._gt || 0;
-        for (let i=1;i<n;i++){ const f=(i+off)/n; if (f>=1) continue; const pulse = 0.72 + 0.28*Math.sin(gt*0.0016 - f*7.5);
-          const px=x0+dx*f, py=y0+dy*f;
-          if (rotDash){ ctx.save(); ctx.translate(px,py); ctx.rotate(ang); ctx.globalAlpha=alpha*pulse; ctx.fillText('—',0,0); ctx.restore(); }
-          else { ctx.globalAlpha = alpha*pulse; ctx.fillText(ch, px, py); }
-        }
+        if (Math.hypot(x1-x0, y1-y0) < 2) return;
+        ctx.strokeStyle = col || inkStr;
+        ctx.lineWidth = fixedCh ? 0.8 : 1;   // comment threads a touch finer than routes
+        ctx.globalAlpha = alpha;
+        ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
       };
       const asciiSegGated = (a, b, baseAlpha, ch, size, flowOff) => {
         if (a.cdepth<NEAR && b.cdepth<NEAR) return;
@@ -980,6 +968,13 @@ class Component extends DCLogic {
       else { this.revAlpha += (0-this.revAlpha)*0.10; if (this.revAlpha<0.02) this.revFrac=0; }
 
       const lr = this.landingRef.current; if (lr){ const lo = Math.max(0, 1 - titleDiss*1.8); lr.style.opacity = lo; lr.style.visibility = lo <= 0.01 ? 'hidden' : 'visible'; }
+      // the last word — "Imagination Infrastructure" inks in over the final stretch of the dive
+      const fin = this._finEl || (this._finEl = document.getElementById('m26-fin'));
+      if (fin){
+        const ms = this.maxScroll();
+        const fo = Math.max(0, Math.min(1, (this.scroll - (ms - 560)) / 500));
+        fin.style.opacity = (this.focus == null && !this.state.expanded ? fo : 0).toFixed(3);
+      }
       // the masthead dissolves into ascii dust as it is scrolled — before the camera moves
       // (reversible on scroll-up)
       if (this._titleChars){
@@ -1002,8 +997,9 @@ class Component extends DCLogic {
       if (wrap) wrap.style.cursor = (this.focus==null && (this.hoverId!=null||this.hoverComment!=null)) ? 'pointer' : 'default';
 
       // ===== draw =====
-      const bg = lerp3([243,241,234],[6,6,12], entryT);
-      const lc = lerp3([92,88,80],[150,155,185], entryT);
+      // the page never goes dark — the dive stays on the same cream paper
+      const bg = [243,241,234];
+      const lc = [92,88,80];
       const hueL = lerp(46,66,entryT);
       if (holdLight > 0.001){ bg[0]=Math.round(lerp(bg[0],249,holdLight)); bg[1]=Math.round(lerp(bg[1],247,holdLight)); bg[2]=Math.round(lerp(bg[2],241,holdLight)); }
       ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
@@ -1015,13 +1011,13 @@ class Component extends DCLogic {
       // scene colour instead of a pale rectangle
       if (this._lastBg !== bgStr){ this._lastBg = bgStr; wrap.style.background = bgStr; }
 
-      if (entryT > 0.02){ const vg = ctx.createRadialGradient(cx,cy*0.9,0,cx,cy,Math.max(W,H)*0.72); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,'+(0.5*entryT).toFixed(3)+')'); ctx.fillStyle=vg; ctx.fillRect(0,0,W,H); }
+      if (entryT > 0.02){ const vg = ctx.createRadialGradient(cx,cy*0.9,0,cx,cy,Math.max(W,H)*0.72); vg.addColorStop(0,'rgba(29,27,23,0)'); vg.addColorStop(1,'rgba(29,27,23,'+(0.09*entryT).toFixed(3)+')'); ctx.fillStyle=vg; ctx.fillRect(0,0,W,H); }
 
       // ascii air — a fluid breathing void of glyphs on the paper (rebuilt ~22fps), decluttering
       // and dissolving as the dive begins; the fog texture still carries the deep space
       if (!this._fieldW || this._fieldW !== W || this._fieldH !== H){ this._mkFields(W, H); this._air = null; }
       {
-        const aInk = 0.5*Math.max(0, 1 - entryT/0.46)*(1 - holdLight*0.5), aFog = 0.055*entryT;
+        const aInk = 0.5*Math.max(0, 1 - entryT/0.46)*(1 - holdLight*0.5), aFog = 0; // fog belonged to the dark dive — retired with it
         if (aInk > 0.004){
           if (!this._air || t - (this._airLast||0) >= 45){ this._airLast = t; this._paintAir(t, entryT, W, H); }
           ctx.globalAlpha = aInk; ctx.drawImage(this._air, 0, 0);
@@ -1032,7 +1028,7 @@ class Component extends DCLogic {
 
       // ink: dark on the cream page → light in the dark space. Plain source-over avoids
       // the difference-blend flips that were turning dots white / haloing them.
-      const ink = lerp3([20,18,15],[232,233,244], entryT);
+      const ink = [20,18,15]; // ink stays ink — the paper never darkens under it
       const inkStr = 'rgb('+ink.join(',')+')';
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = inkStr; ctx.lineCap = 'round'; ctx.lineWidth=1;
@@ -1152,7 +1148,7 @@ class Component extends DCLogic {
         const acol = this.hue(ap.student, 68);
         const pulse = 1 + 0.12*Math.sin(t*0.004);
         ctx.globalAlpha = 0.95; ctx.fillStyle = acol; ctx.shadowBlur = 18; ctx.shadowColor = acol;
-        ctx.font = gfont(Math.max(14, ap.rad*4)); ctx.fillText(stg(ap.student), ap.sx, ap.sy); ctx.shadowBlur = 0;
+        dotAt(ctx, ap.sx, ap.sy, Math.max(3.2, ap.rad*1.2)); ctx.shadowBlur = 0;
         ctx.globalAlpha = 0.7; ctx.strokeStyle = acol; ctx.lineWidth = 1.3;
         ctx.beginPath(); ctx.arc(ap.sx, ap.sy, ap.rad*2.6*pulse, 0, 6.2832); ctx.stroke();
         ctx.globalAlpha = 1;
@@ -1164,7 +1160,7 @@ class Component extends DCLogic {
         const col = this.hue(this.selectedStudent, hueL);
         ctx.fillStyle = col; ctx.shadowBlur = lerp(2,7,entryT); ctx.shadowColor = this.hue(this.selectedStudent,60);
         for (let i=0;i<r.length-1;i++) asciiSeg(this.pts[r[i]], this.pts[r[i+1]], 0.78, null, 8.5, col); ctx.shadowBlur=0;
-        for (let i=0;i<r.length;i++){ const pp=this.pts[r[i]]; if(!pp.vis) continue; ctx.globalAlpha=0.95; ctx.fillStyle=col; ctx.shadowBlur=lerp(3,8,entryT); ctx.shadowColor=this.hue(this.selectedStudent,60); ctx.font=gfont(Math.max(10, pp.rad*3.8)); ctx.fillText(stg(this.selectedStudent), pp.sx, pp.sy); ctx.shadowBlur=0; }
+        for (let i=0;i<r.length;i++){ const pp=this.pts[r[i]]; if(!pp.vis) continue; ctx.globalAlpha=0.95; ctx.fillStyle=col; ctx.shadowBlur=lerp(3,8,entryT); ctx.shadowColor=this.hue(this.selectedStudent,60); dotAt(ctx, pp.sx, pp.sy, Math.max(2.4, pp.rad*1.1)); ctx.shadowBlur=0; }
         ctx.globalAlpha=1;
       }
 
@@ -1178,7 +1174,7 @@ class Component extends DCLogic {
         let acc=0;
         for (let i=0;i<segLen.length;i++){ if(acc+segLen[i]<=budget){ asciiSeg(cps[i], cps[i+1], this.revAlpha*0.9, null, 8.5, revCol); this.revLitSet.add(r[i+1]); acc+=segLen[i]; } else { const f=segLen[i]>0?(budget-acc)/segLen[i]:0; const stub={ccx:cps[i].ccx+(cps[i+1].ccx-cps[i].ccx)*f, ccy:cps[i].ccy+(cps[i+1].ccy-cps[i].ccy)*f, cdepth:cps[i].cdepth+(cps[i+1].cdepth-cps[i].cdepth)*f}; asciiSeg(cps[i], stub, this.revAlpha*0.9, null, 8.5, revCol); break; } }
         this.revLitSet.add(r[0]); ctx.shadowBlur=0; ctx.globalAlpha=1;
-        for (const p of order){ if(!this.revLitSet.has(p.id)) continue; ctx.globalAlpha=1; ctx.fillStyle=this.hue(p.student,hueL); ctx.shadowBlur=lerp(3,7,entryT); ctx.shadowColor=this.hue(p.student,64); ctx.font=gfont(Math.max(10, p.rad*3.8)); ctx.fillText(stg(p.student), p.sx, p.sy); ctx.shadowBlur=0; }
+        for (const p of order){ if(!this.revLitSet.has(p.id)) continue; ctx.globalAlpha=1; ctx.fillStyle=this.hue(p.student,hueL); ctx.shadowBlur=lerp(3,7,entryT); ctx.shadowColor=this.hue(p.student,64); dotAt(ctx, p.sx, p.sy, Math.max(2.4, p.rad*1.1)); ctx.shadowBlur=0; }
       }
 
       // focus: dim the field, highlight the route line, spotlight the dot (+ light streak on travel)
@@ -1204,7 +1200,7 @@ class Component extends DCLogic {
             ctx.moveTo(fp.sx+hb-Lb, fp.sy+hb); ctx.lineTo(fp.sx+hb, fp.sy+hb); ctx.lineTo(fp.sx+hb, fp.sy+hb-Lb);
             ctx.stroke();
             ctx.globalAlpha = this.focusBlend*uiK; ctx.fillStyle = col; ctx.shadowBlur = 22*uiK; ctx.shadowColor = col;
-            ctx.font = gfont(Math.min(38, Math.max(16, fp.rad*3.8))); ctx.fillText(stg(fp.student), fp.sx, fp.sy); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+            dotAt(ctx, fp.sx, fp.sy, Math.min(11, Math.max(4.5, fp.rad*1.1))); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
           }
         }
       }

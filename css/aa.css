@@ -558,39 +558,67 @@ a.aa-top-cta:hover { background: var(--rust); }
 .aa-qs li:first-child { border-top: 1px solid var(--ink); }
 .aa-qs li em { font-style: italic; color: var(--rust); }
 
-/* the semester arc — six numbered stations */
-.aa-arc {
-  display: grid; gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  margin-bottom: 6px;
+/* an AA-style facts table — ruled rows, mono label / plain value */
+.aa-facts { border-top: 1px solid var(--ink); margin-bottom: 6px; }
+.aa-facts > div {
+  display: grid; grid-template-columns: minmax(110px, 170px) 1fr;
+  gap: 18px; align-items: baseline;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--hairline);
+}
+.aa-facts dt, .aa-facts .k {
+  margin: 0;
+  font: 700 9.5px var(--mono2); letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-60);
+}
+.aa-facts dd, .aa-facts .v {
+  margin: 0;
+  font: 400 14px/1.6 var(--grot);
+}
+@media (max-width: 560px) { .aa-facts > div { grid-template-columns: 1fr; gap: 5px; } }
+
+/* the semester arc — a ruled register, one row per phase */
+.aa-steps { border-top: 1px solid var(--ink); margin-bottom: 6px; }
+.aa-steps > div {
+  display: grid; grid-template-columns: 40px minmax(150px, 230px) 1fr;
+  gap: 16px; align-items: baseline;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--hairline);
+}
+.aa-steps .n { font: 400 10.5px var(--mono2); letter-spacing: .14em; color: var(--rust); }
+.aa-steps .t { font: 800 13px var(--grot); letter-spacing: .06em; text-transform: uppercase; }
+.aa-steps .d { font: 400 13.5px/1.6 var(--grot); color: var(--ink-60); }
+@media (max-width: 560px) {
+  .aa-steps > div { grid-template-columns: 40px 1fr; }
+  .aa-steps .d { grid-column: 2; }
 }
 
-/* what you'll make — plates of possibility */
+/* what you'll make — dotted plates, the school's provisional border */
 .aa-make { display: flex; flex-wrap: wrap; gap: 8px; }
 .aa-make span {
-  border: 1px solid var(--ink);
-  padding: 9px 14px;
-  font: 700 10px var(--mono2); letter-spacing: .16em; text-transform: uppercase;
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  border: 1px dashed rgba(29, 27, 23, .5);
+  padding: 10px 16px;
+  font: 400 11px var(--mono2); letter-spacing: .14em; text-transform: uppercase;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
-.aa-make span:hover { background: var(--ink); color: var(--paper); }
+.aa-make span:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
-/* ---- the student workspace header (work panel, filtered) -------------------------- */
+/* ---- the student page (work panel, filtered) — headshot + a casual about --------- */
 
 .aa-workstu {
-  display: flex; align-items: center; gap: 18px;
   border: 1px solid var(--ink);
-  padding: 14px 16px;
+  padding: 16px 18px;
   margin-bottom: 16px;
   background: var(--paper-2);
 }
+.aa-workstu .head { display: flex; align-items: center; gap: 18px; }
 .aa-workstu .ph {
   flex: none; width: 76px; height: 92px; overflow: hidden;
   border: 2px solid var(--ink);
   border-left-width: 5px; /* the student's colour, set inline */
   background: var(--paper-3);
 }
-.aa-workstu .ph canvas { display: block; width: 100%; height: 100%; }
+.aa-workstu .ph canvas, .aa-workstu .ph img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .aa-workstu .who { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .aa-workstu .who b {
   font: 800 clamp(20px, 2.6vw, 30px)/1 var(--grot);
@@ -601,10 +629,16 @@ a.aa-top-cta:hover { background: var(--rust); }
   font: 400 9.5px var(--mono2); letter-spacing: .2em; text-transform: uppercase;
   color: var(--ink-60);
 }
-.aa-workstu .aa-btn { margin-left: auto; flex: none; }
-@media (max-width: 560px) {
-  .aa-workstu { flex-wrap: wrap; }
-  .aa-workstu .aa-btn { margin-left: 0; }
+.aa-workstu .about { margin-top: 13px; padding-top: 13px; border-top: 1px dashed rgba(29,27,23,.3); }
+.aa-workstu .about .bio { margin: 0 0 7px; font: 300 15.5px/1.55 var(--serif); font-style: italic; max-width: 64ch; }
+.aa-workstu .about .facts { margin: 0; font: 400 12.5px/1.7 var(--grot); color: var(--ink-60); max-width: 70ch; }
+.aa-workstu .about .links { margin: 9px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.aa-workstu .about .links:empty { display: none; }
+.aa-workstu .about .links a {
+  text-decoration: none; color: var(--rust);
+  border: 1px dashed rgba(138, 90, 52, .5);
+  padding: 5px 10px;
+  font: 400 10px var(--mono2); letter-spacing: .14em; text-transform: uppercase;
 }
 
 /* ---- calendar strip --------------------------------------------------------------- */

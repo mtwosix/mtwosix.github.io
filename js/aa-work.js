@@ -175,11 +175,6 @@
     if (sub.text) side.appendChild(el('p', 'note', sub.text));
 
     var row = el('div', 'row');
-    if (sub.studentIndex >= 0) {
-      var dossier = el('a', 'aa-btn', 'Dossier →');
-      dossier.href = M26.pageUrl('people.html', '#' + M26.slugFor(sub.student));
-      row.appendChild(dossier);
-    }
     var close = el('button', 'aa-btn', 'Close ✕');
     close.type = 'button';
     close.addEventListener('click', function (e) { e.stopPropagation(); closeDetail(); });
@@ -206,28 +201,93 @@
     g.beginPath(); g.ellipse(W / 2, H * 1.02, W * 0.36, H * 0.30, 0, Math.PI, 0); g.fill();
     return cv;
   }
+  /* optional student profiles (bio / links / photo) — same file the ledger reads */
+  var _profiles = null;
+  function profiles() {
+    if (_profiles) return _profiles;
+    var url = M26.SANDBOX ? 'data/sandbox/profiles.json' : 'data/profiles.json';
+    _profiles = fetch(url, { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .catch(function () { return {}; });
+    return _profiles;
+  }
+  function safeHttp(u) {
+    u = String(u == null ? '' : u).trim();
+    return /^https?:\/\//i.test(u) ? u : '';
+  }
+
   function studentHeader() {
     var host = document.getElementById('aa-work-student');
     if (!host) return;
     host.textContent = '';
     if (!D || state.student === 'all' || !D.roster[state.student]) return;
     var i = state.student, name = D.roster[i];
-    var count = D.submissions.filter(function (s) { return s.studentIndex === i; }).length;
+    var mine = D.submissions.filter(function (s) { return s.studentIndex === i; })
+      .sort(function (a, b) { return a.t - b.t; });
 
     var box = el('div', 'aa-workstu');
+
+    var head = el('div', 'head');
     var ph = el('span', 'ph');
     ph.style.borderLeftColor = M26.colorFor(i, D.roster.length, 46);
     ph.appendChild(silhouette(76, 92));
-    box.appendChild(ph);
+    head.appendChild(ph);
     var side = el('div', 'who');
     side.appendChild(el('b', null, name));
-    side.appendChild(el('span', null,
-      'Student ' + ('0' + (i + 1)).slice(-2) + ' · ' + count + (count === 1 ? ' submission' : ' submissions') + ' on record'));
-    box.appendChild(side);
-    var all = el('button', 'aa-btn', 'View everyone →');
-    all.type = 'button';
-    all.addEventListener('click', function () { filterStudent('all'); });
-    box.appendChild(all);
+    side.appendChild(el('span', null, 'Student ' + ('0' + (i + 1)).slice(-2) + ' · M26 · CEPT · 2026'));
+    head.appendChild(side);
+    box.appendChild(head);
+
+    /* the about — a casual page for the student: their bio when they write one,
+       and an honest reading of their record meanwhile */
+    var about = el('div', 'about');
+    var bioP = el('p', 'bio');
+    about.appendChild(bioP);
+
+    var facts = el('p', 'facts');
+    if (!mine.length) {
+      facts.textContent = 'Nothing on the record yet — this page fills up the moment ' + name + ' files their first work.';
+    } else {
+      var weeks = {};
+      mine.forEach(function (s) { weeks[s.week] = 1; });
+      var kinds = {};
+      mine.forEach(function (s) { kinds[s.kind] = (kinds[s.kind] || 0) + 1; });
+      var top = Object.keys(kinds).sort(function (a, b) { return kinds[b] - kinds[a]; })[0];
+      facts.textContent = mine.length + (mine.length === 1 ? ' work' : ' works') + ' filed across '
+        + Object.keys(weeks).length + (Object.keys(weeks).length === 1 ? ' week' : ' weeks')
+        + ' — first on ' + mine[0].longDate + ', latest on ' + mine[mine.length - 1].longDate
+        + (top ? '. Mostly ' + top + 's.' : '.');
+    }
+    about.appendChild(facts);
+    var links = el('p', 'links');
+    about.appendChild(links);
+    box.appendChild(about);
+
+    profiles().then(function (pf) {
+      var p = pf && pf[M26.slugFor(name)];
+      bioP.textContent = p && p.role ? p.role : '';
+      if (p && p.bio) { bioP.textContent = (p.role ? p.role + ' — ' : '') + p.bio; }
+      else if (!p || !p.role) { bioP.textContent = 'No bio yet — this space is ' + name + '’s to write.'; }
+      if (p && p.links) {
+        Object.keys(p.links).forEach(function (k) {
+          var u = safeHttp(p.links[k]);
+          if (!u) return;
+          var a = el('a', null, k + ' ↗');
+          a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer';
+          links.appendChild(a);
+        });
+      }
+      if (p && p.photo) {
+        var u2 = String(p.photo).trim();
+        if (u2 && !/^[a-z][a-z0-9+.-]*:/i.test(u2) || /^https?:\/\//i.test(u2)) {
+          var img = document.createElement('img');
+          img.alt = name; img.loading = 'lazy';
+          img.onload = function () { ph.textContent = ''; ph.appendChild(img); };
+          img.src = u2;
+        }
+      }
+    });
+
     host.appendChild(box);
   }
 
