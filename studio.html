@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio — M26 · Imagination Infrastructure · CEPT · 2026</title>
+<meta name="description" content="About M26 Studio at CEPT — the brief, how the living archive works, and the semester calendar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/site.css">
+<link rel="stylesheet" href="./css/aa.css">
+</head>
+<body>
+
+<div id="aa-mast"></div>
+
+<main class="aa-page" id="main">
+
+  <section class="aa-hero aa-wrap" style="padding-bottom:0">
+    <div class="aa-hero-top">
+      <span class="aa-kicker aa-reveal">Section 01 · The studio</span>
+      <span class="aa-kicker aa-reveal" data-d="1">CEPT University · Monsoon 2026</span>
+    </div>
+    <h1 class="aa-display aa-reveal">Studio</h1>
+  </section>
+
+  <!-- the brief -->
+  <section class="aa-section aa-wrap" id="brief">
+    <div class="aa-sechead aa-reveal">
+      <span class="num">01·A</span>
+      <h2>The Brief</h2>
+    </div>
+    <div class="aa-cols">
+      <p class="aa-statement aa-reveal" data-d="1">
+        Imagination is <em>infrastructure</em> — something a city runs on,
+        something you can plan, build, and maintain.
+      </p>
+      <div class="aa-prose aa-reveal" data-d="2">
+        <p>M26 is a design studio at CEPT for futures thinking and systems design.
+        Over eighteen weeks the cohort files its thinking as it happens — a note,
+        a sketch, a film, a reading, a model — and the archive assembles itself
+        around them, in public, in real time.</p>
+        <p>The studio does not wait for a final review to make the work visible.
+        The record is the pedagogy: the semester accumulates as a field of points
+        you can enter, orbit, and read — every point a real submission, every
+        thread of colour one student's line through time.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- how it works -->
+  <section class="aa-section aa-wrap" id="how">
+    <div class="aa-sechead aa-reveal">
+      <span class="num">01·B</span>
+      <h2>How It Works</h2>
+      <a class="aa-more" id="aa-submit-2" href="#" target="_blank" rel="noopener noreferrer">Submit work ↗</a>
+    </div>
+    <div class="aa-cols">
+      <div class="aa-note aa-reveal" data-d="1">
+        <b>1 — FILE</b><br>
+        A student files work through a Google Form: who, what kind, an
+        attachment or a note. Any hour, any day — the record keeps the timestamp.
+      </div>
+      <div class="aa-note aa-reveal" data-d="2">
+        <b>2 — COMMIT</b><br>
+        A script moves each entry from the form's sheet into
+        <b>data/submissions.csv</b> in the studio's repository — one row,
+        one work, one point.
+      </div>
+      <div class="aa-note aa-reveal" data-d="3">
+        <b>3 — MIRROR</b><br>
+        This site reads that file and nothing else. What you see is a strict
+        1:1 mirror of the record — nothing invented, nothing curated away.
+      </div>
+    </div>
+  </section>
+
+  <!-- calendar -->
+  <section class="aa-section aa-wrap" id="calendar">
+    <div class="aa-sechead aa-reveal">
+      <span class="num">01·C</span>
+      <h2>Calendar</h2>
+      <span class="aa-kicker">Week <b><span data-aa="week">—</span></b> of <span data-aa="weeks">18</span></span>
+    </div>
+    <div id="aa-weeks-host" class="aa-reveal" data-d="1"></div>
+    <p class="aa-hero-sub aa-reveal" data-d="2" style="max-width:60ch">
+      Eighteen weeks, one record. The current week is inked;
+      the weeks behind it are the archive; the weeks ahead are <em>still blank paper</em>.
+    </p>
+  </section>
+
+  <!-- a voice -->
+  <section class="aa-section aa-wrap" id="voice">
+    <blockquote id="aa-quote" class="aa-statement aa-reveal" style="border-left:2px solid var(--rust);padding-left:clamp(16px,3vw,34px);margin:0"></blockquote>
+    <p id="aa-quote-name" class="aa-kicker aa-reveal" data-d="1" style="margin:18px 0 0;padding-left:clamp(16px,3vw,34px)"></p>
+  </section>
+
+</main>
+
+<div id="aa-foot"></div>
+
+<script src="./js/m26-core.js"></script>
+<script src="./js/aa-shell.js"></script>
+<script>
+  AAShell.mount({ active: 'studio' });
+
+  (function () {
+    'use strict';
+    document.getElementById('aa-submit-2').href = M26.CONFIG.formUrl;
+
+    /* the calendar strip — pure calendar facts (start date + length), no data */
+    var host = document.getElementById('aa-weeks-host');
+    var strip = document.createElement('div');
+    strip.className = 'aa-weeks';
+    var now = M26.weekOf(new Date());
+    var start = M26.semesterStartDate();
+    var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    for (var w = 1; w <= M26.CONFIG.weeks; w++) {
+      var cell = document.createElement('div');
+      cell.className = 'aa-week' + (w === now ? ' now' : (w < now ? ' past' : ''));
+      var b = document.createElement('b');
+      b.textContent = ('0' + w).slice(-2);
+      var d = new Date(start.getTime() + (w - 1) * 7 * 86400000);
+      var tag = document.createElement('span');
+      tag.textContent = d.getDate() + ' ' + MON[d.getMonth()];
+      var tick = document.createElement('span');
+      tick.className = 'tick';
+      tick.textContent = w === now ? '● NOW' : (w < now ? '—' : '·');
+      cell.appendChild(b); cell.appendChild(tag); cell.appendChild(tick);
+      strip.appendChild(cell);
+    }
+    host.appendChild(strip);
+
+    /* one voice per visit — the studio's standing list of real, attributed quotes */
+    var q = M26.QUOTES[Math.floor(Math.random() * M26.QUOTES.length)];
+    document.getElementById('aa-quote').textContent = '“' + q.text + '”';
+    document.getElementById('aa-quote-name').textContent = '— ' + q.name;
+  })();
+</script>
+</body>
+</html>

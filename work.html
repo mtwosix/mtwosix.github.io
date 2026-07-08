@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work — M26 Studio · Imagination Infrastructure · CEPT · 2026</title>
+<meta name="description" content="Every submission of M26 Studio's Imagination Infrastructure semester — filterable by week, type and student. A strict mirror of the studio record.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/site.css">
+<link rel="stylesheet" href="./css/aa.css">
+</head>
+<body>
+
+<div id="aa-mast"></div>
+
+<main class="aa-page" id="main">
+
+  <section class="aa-hero aa-wrap" style="padding-bottom:0">
+    <div class="aa-hero-top">
+      <span class="aa-kicker aa-reveal">Section 02 · The record, in full</span>
+      <span class="aa-kicker aa-reveal" data-d="1"><b><span data-aa="subs">0</span></b> submissions · week <span data-aa="week">—</span></span>
+    </div>
+    <h1 class="aa-display aa-reveal">Work</h1>
+    <p class="aa-hero-sub aa-reveal" data-d="1">
+      Every submission, in the order it arrived — notes, sketches, films, readings.
+      <em>Nothing curated away.</em>
+    </p>
+  </section>
+
+  <section class="aa-section aa-wrap" id="latest">
+    <div id="aa-work-filters" class="aa-reveal"></div>
+    <div id="aa-work-grid" class="aa-reveal" data-d="1"></div>
+  </section>
+
+</main>
+
+<div id="aa-foot"></div>
+
+<noscript>
+  <div style="padding:48px;font:14px/1.7 ui-sans-serif,system-ui;max-width:60ch">
+    <p>This page reads the studio's submission records and needs JavaScript to display
+    them. The records themselves are plain files:
+    <a href="data/submissions.csv">data/submissions.csv</a> ·
+    <a href="data/students.csv">data/students.csv</a></p>
+  </div>
+</noscript>
+
+<script src="./js/m26-core.js"></script>
+<script src="./js/viewer.js"></script>
+<script src="./js/aa-shell.js"></script>
+<script src="./js/aa-work.js"></script>
+<script>
+  AAShell.mount({ active: 'work' });
+  AAWork.init();
+</script>
+</body>
+</html>
