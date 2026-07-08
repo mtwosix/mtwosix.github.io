@@ -322,16 +322,19 @@
     if (e.detail.mode === 'archive') toArchive(); else toCloud();
   });
 
-  // at the very top of the archive, a firm upward scroll returns to the cloud
+  // at the very top of the archive, escaping back into the cloud takes a SUSTAINED upward
+  // scroll — the ledger holds you with a little pressure (the accumulator is heavy and
+  // decays fast), and only a determined pull breaks the seal and drops you straight into
+  // the point cloud
   var upAcc = 0, upT = 0;
   window.addEventListener('wheel', function(e){
     if (mode !== 'archive') return;
     if (window.scrollY > 0 || e.deltaY >= 0){ upAcc = 0; return; }
     var now = performance.now();
-    if (now - upT > 700) upAcc = 0;
+    if (now - upT > 500) upAcc = 0;
     upT = now;
-    upAcc += -e.deltaY;
-    if (upAcc > 140){ upAcc = 0; toCloud(); }
+    upAcc += -e.deltaY * 0.45; // scrolls "count" for less than half — the pressure
+    if (upAcc > 560){ upAcc = 0; toCloud(); }
   }, { passive: true });
 
   // the CSVs are re-polled while the page is open; refresh the rendered archive when
@@ -902,7 +905,7 @@ class Component extends DCLogic {
       // as if breathing — two slow off-beat waves so it never feels mechanical; fades out once the dive begins.
       const breatheFade = Math.max(0, 1 - persp/0.45);
       const bt = t*0.001;
-      const globalBreathe = 1 + breatheFade*0.034*(Math.sin(bt*(6.283185/10.5)+this._bph1) + 0.55*Math.sin(bt*(6.283185/16.2)+this._bph2))/1.55;
+      const globalBreathe = 1; // no structure-scale breathing — the cloud holds its size (zero-g stillness)
       const proj = (mx,my,mz) => { let dx=mx-RC.x,dy=my-RC.y,dz=mz-RC.z; let x1=dx*cosY+dz*sinY,z1=-dx*sinY+dz*cosY; let y1=dy*cosX-z1*sinX; z1=dy*sinX+z1*cosX; const wx=RC.x+x1,wy=RC.y+y1,wz=RC.z+z1; const relZ=camZ-wz; const perspS=this.focal/Math.max(40,relZ); const eff=(this.ORTHO+(perspS-this.ORTHO)*persp)*globalBreathe*holdScale; return { sx:cx+(wx-LK.x)*eff, sy:cy+(wy-LK.y)*eff, relZ, eff, camx:wx-LK.x, camy:wy-LK.y, skip: persp>0.45 && relZ<8 }; };
       const NEAR = 34; // near plane for line clipping
       const effOf = d => (this.ORTHO + (this.focal/Math.max(40,d) - this.ORTHO)*persp)*globalBreathe*holdScale;
@@ -1009,7 +1012,7 @@ class Component extends DCLogic {
       // watery ebb and flow: each point drifts on its own slow pair of waves — strongest in
       // the white iso (points visibly spread apart and gather), present again around a
       // focused point (which itself stays perfectly still at the centre)
-      const wobAmp = Math.max(30*breatheFade, 11*this.focusBlend);
+      const wobAmp = Math.max(16*breatheFade, 9*this.focusBlend);
       // entry choreography: at the landing the points lie DISPERSED across the whole screen;
       // as the masthead dissolves they drift into their true structure positions (staggered
       // per point), finishing early in the grow band so the routes draw between settled points.
@@ -1032,8 +1035,10 @@ class Component extends DCLogic {
       for (const p of this.pts){
         let wobX = 0, wobY = 0;
         if (wobAmp > 0.1 && p.id !== this.focus){
-          wobX = Math.sin(t*0.00023*p.spd + p.phase*2.3)*wobAmp;
-          wobY = Math.sin(t*0.00017*p.spd + p.phase)*wobAmp;
+          // zero-gravity drift: each point floats on its own very slow pair of waves —
+          // some barely move, some glide, none of them pulse
+          wobX = Math.sin(t*0.00006*p.spd + p.phase*2.3)*wobAmp;
+          wobY = Math.sin(t*0.000045*p.spd + p.phase)*wobAmp;
         }
         const pr = proj(p.x + wobX, p.y + wobY, p.z);
         // always update sx/sy + camera-space coords so segments never draw stale
@@ -1089,8 +1094,7 @@ class Component extends DCLogic {
         } else p._es = 1;
         p.blur = persp>0.05 ? blurOf(pr.relZ) : 0;
         if (pr.skip){ p.vis=false; continue; }
-        const breath=1+0.3*Math.sin(t*0.0018*p.spd+p.phase);
-        p.rad=Math.max(0.7,p.baseR*pr.eff*breath);
+        p.rad=Math.max(0.7,p.baseR*pr.eff); // steady size — no pulsing
         // iso: full alpha → solid black via difference. 3D: depth-fade so far dots merge into the dark bg.
         const nearFade = Math.max(0, Math.min(1, (pr.relZ-NEAR)/120));
         const depthBright = Math.max(0.12, Math.min(1, 1-(pr.relZ-300)/2400));
@@ -1103,8 +1107,7 @@ class Component extends DCLogic {
         cm.sx=pr.sx; cm.sy=pr.sy; cm.relZ=pr.relZ; cm.ccx=pr.camx; cm.ccy=pr.camy; cm.cdepth=pr.relZ;
         cm.blur = persp>0.05 ? blurOf(pr.relZ) : 0;
         if (pr.skip){ cm.vis=false; continue; }
-        const breath=1+0.3*Math.sin(t*0.0018*cm.spd+cm.phase);
-        cm.crad=Math.max(0.5,cm.baseR*pr.eff*breath);
+        cm.crad=Math.max(0.5,cm.baseR*pr.eff); // steady size — no pulsing
         const nearFadeC = Math.max(0, Math.min(1, (pr.relZ-NEAR)/120));
         const depthBrightC = Math.max(0.10, Math.min(1, 1-(pr.relZ-300)/2400));
         cm.depthA = lerp(0.9, depthBrightC, entryT) * (persp>0.05 ? nearFadeC : 1);

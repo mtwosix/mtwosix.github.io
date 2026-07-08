@@ -358,21 +358,9 @@
   margin: 0; padding: 0 22px; position: relative; z-index: 2;
   max-width: min(38ch, 88vw); opacity: 0; will-change: transform, opacity;
 }
-/* ASCII-dither field that seals over the cloud in the dark — a faint glyph weave */
-#m26-outro-dither {
-  position: absolute; inset: 0; z-index: 1; opacity: 0; pointer-events: none;
-  color: rgba(236, 233, 226, .5);
-  font: 13px/12px var(--mono); letter-spacing: 1px;
-  overflow: hidden; white-space: pre-wrap; word-break: break-all;
-  background:
-    radial-gradient(120% 120% at 50% 45%, transparent 42%, rgba(6,6,12,.55) 100%);
-  -webkit-mask-image: radial-gradient(130% 100% at 50% 50%, #000 30%, transparent 78%);
-          mask-image: radial-gradient(130% 100% at 50% 50%, #000 30%, transparent 78%);
-}
-#m26-outro-dither::before {
-  content: '░░▒░░·:░▒▓▒░·░░:▒░░▓▒░:·░▒░░▒▓░·:░▒░░·▒░▓▒░:░·▒░░▒▓▒·:░░▒░▓░·:▒░░·░▒▓▒░:·░▒░░▒░▓·:░▒░▒░·░▓▒░:▒░·░▒░▓▒░:·░▒▒░░▓·:░▒░·▒░▓░:▒░░▒·░▓▒░:·▒░░▒▓▒░·:░▒░▓░·▒░░:▓▒░·░▒░▒▓·:░░▒▓▒░·:░▒░░▓▒·:▒░·░▒▓░░:▒▓░·▒░░▒:░▓▒░·░▒▒▓·:░▒░·▒░▓▒░:░▒▓▒░·░▒:▓░·▒░░▒▓░:·▒░▒░░▓▒:·░▒░▓░·░▒:▓▒░·░▒░▒:▓░▒░·░▒▓░:▒░·░▒▒░▓:▒░·▒░▓▒░░:▒▓░·░▒░▒:';
-  position: absolute; inset: -10% -2%;
-}
+/* The old ascii-dither weave over the quote is retired — the quote sits on clean darkness.
+   The element stays in the DOM (the outro JS still animates its opacity) but renders nothing. */
+#m26-outro-dither { display: none; }
 .m26-outro-quote p {
   font-family: var(--serif); font-weight: 300; font-style: italic;
   font-size: clamp(17px, 2.7vw, 32px); line-height: 1.6;

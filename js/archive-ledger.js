@@ -340,9 +340,7 @@
     card.appendChild(el('div', 'm26l-dither', DITHER));
     var ch = el('div', 'm26l-cardhead');
     ch.appendChild(el('h1', 'm26l-title', 'ARCHIVE / LEDGER'));
-    ch.appendChild(el('div', 'm26l-source', 'SOURCE — ' + ((M26.CONFIG.submissionsCsv || '').toUpperCase()) + ' · NOTHING INVENTED'));
     card.appendChild(ch);
-    card.appendChild(el('p', 'm26l-sub', 'A living archive that grows week by week — it starts empty and fills as the cohort submits their work.'));
 
     /* stats + sort */
     var strip = el('div', 'm26l-strip');
@@ -371,11 +369,14 @@
     legend.appendChild(leg('ROW →', 'opens their dossier'));
     card.appendChild(legend);
 
-    /* newest work — what the cohort just filed */
-    if (subs.length) {
+    /* newest work — what the cohort just filed. Images only: this strip is a photo rail,
+       so pdf/audio/text entries wait for the dossier instead of rendering as buttons. */
+    var recent = subs.slice().sort(function (a, b) { return b.t - a.t; })
+      .filter(function (r) { return M26.resolveMedia(r).mode === 'img'; })
+      .slice(0, 6);
+    if (recent.length) {
       var latestWk = 0;
       subs.forEach(function (r) { if (r.week > latestWk) latestWk = r.week; });
-      var recent = subs.slice().sort(function (a, b) { return b.t - a.t; }).slice(0, 6);
       var lat = el('div', 'm26l-latest');
       var lt = el('div', 'm26l-latest-tag');
       lt.appendChild(el('b', null, '◷ NEWEST WORK'));
@@ -644,54 +645,33 @@
       return art;
     }
 
-    /* portrait: profile.photo → constellation of the student's works in their colour */
+    /* portrait: profile.photo → a quiet default-person placeholder (the instagram kind) */
     function renderPortrait(box, student) {
       box.textContent = '';
       var photo = student.profile && safeUrl(student.profile.photo);
       if (photo) {
         var img = new Image();
         img.alt = student.name;
-        img.onerror = function () { constellation(box, student); };
+        img.onerror = function () { placeholderPortrait(box, student); };
         img.src = photo;
         box.appendChild(img);
         return;
       }
-      constellation(box, student);
+      placeholderPortrait(box, student);
     }
-    function constellation(box, student) {
+    function placeholderPortrait(box, student) {
       box.textContent = '';
       var cv = document.createElement('canvas');
       var W = 210, H = 250, dpr = Math.min(window.devicePixelRatio || 1, 2);
       cv.width = W * dpr; cv.height = H * dpr;
       var g = cv.getContext('2d'); g.scale(dpr, dpr);
-      g.fillStyle = '#fbfaf5'; g.fillRect(0, 0, W, H);
-      // faint week grid
-      g.strokeStyle = 'rgba(29,27,23,.06)'; g.lineWidth = 1;
-      for (var x = 0; x <= W; x += 26) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
-      // big student glyph, watermark
-      g.fillStyle = 'rgba(29,27,23,.06)';
-      g.font = '700 150px "Space Mono", monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      var wm = (student.mark && !MARK_IMG.test(student.mark)) ? student.mark : (student.name.charAt(0) || '·').toUpperCase();
-      g.fillText(wm, W / 2, H / 2 + 8);
-      // one dot per work, laid along the weeks
-      var works = student.works, span = Math.max(1, wMax - 1);
-      function rnd(i) { var s = Math.sin(i * 12.9898) * 43758.5453; return s - Math.floor(s); }
-      // connecting thread
-      var pts = works.map(function (r, i) {
-        var px = 24 + ((r.week - 1) / span) * (W - 48);
-        var py = 40 + rnd(student.index * 7 + i * 3.3) * (H - 80);
-        return { x: px, y: py };
-      });
-      if (pts.length > 1) {
-        g.strokeStyle = student.colorSoft; g.lineWidth = 1; g.globalAlpha = 0.5;
-        g.beginPath(); pts.forEach(function (p, i) { i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y); }); g.stroke();
-        g.globalAlpha = 1;
-      }
-      pts.forEach(function (p) {
-        g.fillStyle = student.color; g.beginPath(); g.arc(p.x, p.y, 3.6, 0, 6.2832); g.fill();
-      });
+      g.fillStyle = '#eceae2'; g.fillRect(0, 0, W, H);
+      // grey silhouette: head + shoulders, clipped at the frame's bottom edge
+      g.fillStyle = '#b9b5aa';
+      g.beginPath(); g.arc(W / 2, H * 0.40, W * 0.185, 0, 6.2832); g.fill();
+      g.beginPath(); g.ellipse(W / 2, H * 0.96, W * 0.34, H * 0.26, 0, Math.PI, 0); g.fill();
       box.appendChild(cv);
-      box.appendChild(el('div', 'm26l-portrait-tag', 'CONSTELLATION · ' + works.length + ' PT'));
+      box.appendChild(el('div', 'm26l-portrait-tag', 'NO PORTRAIT YET'));
     }
   }
 
