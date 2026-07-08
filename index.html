@@ -1,1453 +1,212 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Imagination Infrastructure — M26 Studio · CEPT · 2026</title>
-<!-- React is vendored locally so the live site has no runtime dependency on a
-     third-party CDN; support.js sees window.React and skips its unpkg fetch. -->
-<script src="./vendor/react.production.min.js"></script>
-<script src="./vendor/react-dom.production.min.js"></script>
-<script src="./js/m26-core.js"></script>
-<script src="./js/discourse.js"></script>
-<script src="./js/viewer.js"></script>
-<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>M26 Studio — Imagination Infrastructure · CEPT · 2026</title>
+<meta name="description" content="M26 Studio at CEPT — a living archive of a semester of futures thinking & systems design. The whole semester as one field of points; the sections docked on the edges of the screen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./css/site.css">
+<link rel="stylesheet" href="./css/aa.css">
 </head>
 <body>
-<a class="m26-skip" href="archive.html">Skip the 3D experience — open the archive page</a>
-<x-dc>
-<helmet>
-<style>
-  *{box-sizing:border-box}
-  @keyframes m26blink{0%,55%{opacity:1}56%,100%{opacity:0}}
-  @keyframes m26tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  html,body{margin:0;height:100%;overflow:hidden;background:#f3f1ea;font-family:ui-sans-serif,system-ui,sans-serif}
-  /* ---- phone format: bigger, cleaner type; the technical HUD gives way to the content ---- */
-  @media(max-width:720px){
-    .m26-hud{display:none !important}
-    .m26-scrollhint{font-size:13px !important;letter-spacing:.42em !important;bottom:58px !important}
-    #m26-orient{max-width:86vw !important;padding:12px 16px !important}
-    #m26-orient div{font-size:15px !important;line-height:1.55 !important}
-    .m26-subline{font-size:13px !important;letter-spacing:.3em !important}
-    .m26-corner-link{font-size:12px !important;letter-spacing:.1em !important}
-    .m26-cohort-a{font-size:14px !important;letter-spacing:.26em !important}
-    .m26-cohort-b{font-size:12px !important;letter-spacing:.16em !important;margin-top:9px !important}
-  }
-</style>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-</helmet>
 
-<div ref="{{ wrapRef }}" style="position:fixed;inset:0;background:#f3f1ea;cursor:default;touch-action:none">
-  <canvas ref="{{ canvasRef }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
-</div>
+<!-- ══ top strip — brand · ticker · week · submit ══════════════════════════ -->
+<header class="aa-top" role="banner">
+  <a class="aa-brand" href="./" aria-label="M26 Studio — home">
+    <span class="aa-brand-block">M26</span>
+    <span class="aa-brand-word">
+      <b>M26 Studio</b>
+      <span>Imagination Infrastructure · CEPT · 2026</span>
+    </span>
+  </a>
+  <div class="aa-tick" id="aa-tick" aria-hidden="true"></div>
+  <span class="aa-top-week aa-kicker">WK <b><span data-aa="week">—</span></b>/<span data-aa="weeks">18</span></span>
+  <a class="aa-top-cta" data-form-link href="#" target="_blank" rel="noopener noreferrer">Submit ↗</a>
+</header>
 
-<!-- overlay chrome (pointer-none except interactive cards) -->
-<div style="position:fixed;inset:0;pointer-events:none;z-index:20">
+<!-- ══ the stage — the living canvas IS the middle of the room ═════════════ -->
+<div class="aa-stage" id="aa-stage"></div>
+<p class="aa-stage-hint" aria-hidden="true">scroll to travel · drag to orbit · click a point</p>
 
-  <!-- hover caption — pure type, no decoration -->
-  <div ref="{{ phRef }}" class="m26-hoverph" style="display:none">
-    <div ref="{{ phCapRef }}" class="m26-hoverph-chip"></div>
-  </div>
+<!-- ══ the edges — one bar per section, docked left / right / bottom ═══════ -->
+<button class="aa-edge aa-edge-left" type="button" data-bar="studio" aria-expanded="false" aria-controls="panel-studio">
+  <span class="edge-num">01</span><span class="edge-word">Studio</span><span class="edge-arr">→</span>
+</button>
+<button class="aa-edge aa-edge-right" type="button" data-bar="work" aria-expanded="false" aria-controls="panel-work">
+  <span class="edge-num">02</span><span class="edge-word">Work</span><span class="edge-arr">←</span>
+</button>
+<button class="aa-edge aa-edge-bottom" type="button" data-bar="people" aria-expanded="false" aria-controls="panel-people">
+  <span class="edge-num">03</span><span class="edge-word">People</span>
+  <span class="edge-tail"><span data-aa="students">0</span> students · <span data-aa="subs">0</span> submissions <span class="edge-arr">↑</span></span>
+</button>
 
-  <!-- comment preview bubble -->
-  <div ref="{{ previewRef }}" style="position:absolute;top:0;left:0;display:none;max-width:248px;will-change:transform">
-    <div style="background:rgba(10,10,16,.85);border:1px solid rgba(120,125,160,.32);padding:9px 12px;backdrop-filter:blur(5px)">
-      <div ref="{{ previewAuthorRef }}" style="font:600 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.1em;color:#bfc2da"></div>
-      <div ref="{{ previewTextRef }}" style="font:12px/1.45 ui-sans-serif;color:#e6e7f0;margin-top:4px"></div>
+<!-- ══ 01 · STUDIO — slides in from the left ═══════════════════════════════ -->
+<section class="aa-panel aa-panel-left" id="panel-studio" aria-hidden="true" aria-label="The studio">
+  <span class="ghostnum" aria-hidden="true">01</span>
+  <div class="aa-panel-in">
+    <div class="aa-phead">
+      <h2 class="aa-ptitle">The <em>Studio</em></h2>
+      <button class="aa-pclose" type="button" aria-label="Close panel">✕</button>
     </div>
-  </div>
 
-  <!-- cohort dwell caption -->
-  <div ref="{{ cohortRef }}" style="position:absolute;top:7.5%;left:0;right:0;text-align:center;opacity:0;will-change:opacity">
-    <div class="m26-cohort-a" style="font:11px 'Space Mono',ui-monospace,monospace;letter-spacing:.3em;color:#cdcfe4">[ THE COHORT · {{ cohortCount }} STUDENTS ]</div>
-    <div class="m26-cohort-b" style="margin-top:7px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#8d90ab">each thread a student — scroll to travel their works</div>
-  </div>
+    <p class="aa-plede">An L3 studio at CEPT University, co-taught by
+      <em>Alifiya Mutaher</em> and <em>Dhaval Kothari</em> (Lagori Collective)
+      with <em>Ankita Trivedi</em> (Faculty of Design, CEPT).
+      Mon, Thu &amp; Fri · 10.30am–1.30pm IST.</p>
 
-  <!-- landing chrome -->
-  <div ref="{{ landingRef }}" style="position:absolute;inset:0;color:#171512">
-    <div style="position:absolute;inset:24px;border:1px dashed rgba(29,27,23,.32)"></div>
-    <div style="position:absolute;top:50%;left:0;right:0;text-align:center;transform:translateY(-52%)">
-      <div ref="{{ titleRef }}" style="display:inline-block;font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:clamp(38px,6vw,84px);line-height:1.04;letter-spacing:-.02em;color:#1d1b17"><div style="white-space:nowrap"><sc-for list="{{ titleL1 }}" as="c" hint-placeholder-count="13"><span data-ic style="display:inline-block;color:{{ c.color }}">{{ c.ch }}</span></sc-for></div><div style="white-space:nowrap"><sc-for list="{{ titleL2 }}" as="c" hint-placeholder-count="14"><span data-ic style="display:inline-block;color:{{ c.color }}">{{ c.ch }}</span></sc-for></div></div>
-      <div ref="{{ subRef }}" class="m26-subline" style="display:block;margin-top:22px;font:11px 'Space Mono',ui-monospace,monospace;letter-spacing:.26em;color:#6c685f"><span ref="{{ subInnerRef }}" style="display:inline-block">M26 STUDIO · CEPT · 2026</span></div>
-      <!-- orientation: tells a first-time visitor what this is and how to read it.
-           Sits on a paper chip so it never collides with the ascii dust behind it. -->
-      <div id="m26-orient" style="display:inline-block;max-width:440px;margin:20px auto 0;padding:11px 18px;background:rgba(243,241,234,.94);border:1px solid rgba(29,27,23,.35);text-align:center">
-        <div style="font:600 clamp(12px,1.4vw,14px)/1.5 'Space Mono',ui-monospace,monospace;color:#1d1b17">A design studio at CEPT for futures thinking &amp; systems design.</div>
-      </div>
-      <div ref="{{ dataStatusRef }}" style="display:none;margin-top:12px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.18em;color:#8a8678"></div>
+    <p class="aa-statement">
+      Imagination infrastructure — <em>the set of conditions that allow
+      collective imagination to arise, stay, and return.</em>
+    </p>
+    <div class="aa-prose">
+      <p>A good workshop can bring a room together to imagine its future in a
+      single morning. The harder thing is making that imagination stay: visions
+      are recorded, summarised and carried away, while the capacity that
+      produced them rarely returns to the people who did the imagining.
+      Communities across South Asia are invited to imagine again and again,
+      often starting from nothing each time.</p>
+      <p>The problem is the absence of infrastructure that lets collective
+      imagination persist, deepen, and compound where it is made — the rhythms,
+      spaces, rituals, archives, institutions and governance forms through
+      which people keep rehearsing, revising, and carrying forward what they
+      have imagined together. For designers it shifts the question from
+      <i>what can we make</i> to <i>what conditions must exist for a future to
+      be rehearsed and sustained</i>.</p>
     </div>
-    <a href="archive.html" class="m26-corner-link">THE LEDGER — browse everyone →</a>
-    <div class="m26-hud" style="position:absolute;bottom:9px;left:26px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;color:#6c685f">ROT <span ref="{{ rotReadRef }}">+0.58 / −0.65</span> · FOCAL 820</div>
-    <div class="m26-hud" style="position:absolute;bottom:9px;right:26px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;color:#6c685f">PTS <span ref="{{ ptsReadRef }}">000</span> · POLL 15S · <span style="color:hsl(122,55%,34%)">LIVE ●</span></div>
-    <div class="m26-scrollhint" style="position:absolute;bottom:44px;left:0;right:0;text-align:center;font:700 11px 'Space Mono',ui-monospace,monospace;letter-spacing:.3em;color:#171512">SCROLL<span style="display:inline-block;animation:m26blink 1.1s steps(1) infinite">▍</span></div>
+
+    <div class="aa-subhead"><span class="num">01·A</span><h3>The questions</h3></div>
+    <ul class="aa-qs">
+      <li>How do people begin to <em>imagine together</em>?</li>
+      <li>Where are futures <em>already being rehearsed</em> in South Asian urban life?</li>
+      <li>What does collective imagination need to <em>become durable</em>?</li>
+      <li>What <em>practices, rituals, institutions and governance forms</em> could help future imaginaries gather force over time?</li>
+    </ul>
+
+    <div class="aa-subhead"><span class="num">01·B</span><h3>The semester — a research-led arc</h3></div>
+    <div class="aa-arc">
+      <div class="aa-note"><b>01 — MAPPING SYSTEMS</b><br>Frame an inquiry within interconnected urban systems.</div>
+      <div class="aa-note"><b>02 — FIELD RESEARCH</b><br>A four-day immersion in Bengaluru with Biome Environmental Trust — urban water, lived expertise, real contexts.</div>
+      <div class="aa-note"><b>03 — SYNTHESIS</b><br>Cluster and analyse the conditions that enable futures.</div>
+      <div class="aa-note"><b>04 — DESIGNING INTERVENTIONS</b><br>Translate insights into futures that sustain collective imagination.</div>
+      <div class="aa-note"><b>05 — PROTOTYPES</b><br>Build participatory tools, artefacts, rituals, platforms.</div>
+      <div class="aa-note"><b>06 — SHARE</b><br>Present through prototypes, narratives, and materials.</div>
+    </div>
+
+    <div class="aa-subhead"><span class="num">01·C</span><h3>The format</h3></div>
+    <div class="aa-hows">
+      <div class="aa-note"><b>TRI-BRID</b><br>In-person sessions at CEPT, online interactions, and field-based work in Bengaluru.</div>
+      <div class="aa-note"><b>GUEST PRACTITIONERS</b><br>Sessions with practitioners across design, urban systems, and community-based practices.</div>
+      <div class="aa-note"><b>LIVE INQUIRIES</b><br>Grounded in Lagori Collective's ongoing inquiries on urban heat, water, mobility, and care.</div>
+    </div>
+
+    <div class="aa-subhead"><span class="num">01·D</span><h3>What you'll make</h3></div>
+    <p class="aa-plede" style="margin-bottom:12px">Prototypes of imagination infrastructures —
+      interventions that let communities sustain collective imagination and rehearse possible futures.</p>
+    <div class="aa-make">
+      <span>Participatory tools</span><span>Speculative artefacts</span><span>Rituals</span>
+      <span>Games</span><span>Digital platforms</span><span>Governance models</span>
+    </div>
+    <p style="margin-top:18px"><a class="aa-btn aa-btn--solid" data-form-link href="#" target="_blank" rel="noopener noreferrer">Submit work ↗</a></p>
+
+    <div class="aa-subhead"><span class="num">01·E</span><h3>Calendar</h3></div>
+    <div id="aa-weeks-host"></div>
+
+    <blockquote id="aa-quote" class="aa-pquote"></blockquote>
+    <p id="aa-quote-name" class="aa-kicker" style="margin:14px 0 0"></p>
+
+    <p class="aa-pfoot">Lagori Collective is an experimental research and design studio
+      working to expand the conditions under which multiple futures remain possible.
+      · The record: <a data-page-link="data/submissions.csv" href="data/submissions.csv">submissions.csv</a> ·
+      <a data-page-link="data/students.csv" href="data/students.csv">students.csv</a></p>
   </div>
+</section>
 
-  <!-- focus view — type set around the still point at the centre of the screen:
-       name upper-left, week/position upper-right, kind/date/type lower-right,
-       expand lower-left; close in the screen corner -->
-  <sc-if value="{{ showCard }}" hint-placeholder-val="{{ false }}">
-    <div class="m26-focus-ui">
-      <div class="m26-focus-name" style="color:{{ focusColor }}">{{ focusName }}</div>
-      <div class="m26-focus-week">W{{ focusWeek }} · {{ focusPos }}</div>
-      <div class="m26-focus-meta">
-        <div>{{ focusKind }} · {{ focusDate }}</div>
-        <div class="m26-focus-meta2">{{ focusType }} submission</div>
-      </div>
-      <div class="m26-focus-actions">
-        <div onClick="{{ expand }}" class="m26-focus-expand">[ EXPAND ↗ ]</div>
-      </div>
-      <div style="position:absolute;bottom:0;left:0;right:0;border-top:1px solid rgba(191,194,218,.22);background:rgba(6,6,12,.5);overflow:hidden">
-        <div style="display:inline-block;white-space:nowrap;will-change:transform;animation:m26tick 30s linear infinite;padding:9px 0;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.18em;color:#8d90ab"><span style="padding-right:70px">{{ tickerText }}</span><span style="padding-right:70px">{{ tickerText }}</span></div>
-      </div>
-      <div onClick="{{ exitFocus }}" class="m26-focus-close">[ ✕ CLOSE ]</div>
+<!-- ══ 02 · WORK — slides in from the right ════════════════════════════════ -->
+<section class="aa-panel aa-panel-right" id="panel-work" aria-hidden="true" aria-label="The work">
+  <span class="ghostnum" aria-hidden="true">02</span>
+  <div class="aa-panel-in">
+    <div class="aa-phead">
+      <h2 class="aa-ptitle">The <em>Work</em></h2>
+      <button class="aa-pclose" type="button" aria-label="Close panel">✕</button>
     </div>
-  </sc-if>
+    <p class="aa-plede">Every submission, in the order it arrived — <em>nothing curated away.</em></p>
+    <div id="aa-work-student"></div>
+    <div id="aa-work-filters"></div>
+    <div id="aa-work-grid"></div>
+  </div>
+</section>
 
-  <!-- expanded submission box -->
-  <sc-if value="{{ expanded }}" hint-placeholder-val="{{ false }}">
-    <div class="m26-xpanel" style="position:absolute;inset:4% 5%;background:#f6f4ee;border:2px solid #1d1b17;box-shadow:0 30px 90px rgba(0,0,0,.45);pointer-events:auto;display:flex;flex-direction:column;color:#1d1b17;overflow:hidden">
-      <div aria-hidden="true" style="position:absolute;top:7px;left:7px;width:15px;height:15px;border-top:2px solid #8a5a34;border-left:2px solid #8a5a34;z-index:4;pointer-events:none"></div>
-      <div aria-hidden="true" style="position:absolute;top:7px;right:7px;width:15px;height:15px;border-top:2px solid #8a5a34;border-right:2px solid #8a5a34;z-index:4;pointer-events:none"></div>
-      <div aria-hidden="true" style="position:absolute;bottom:7px;left:7px;width:15px;height:15px;border-bottom:2px solid #8a5a34;border-left:2px solid #8a5a34;z-index:4;pointer-events:none"></div>
-      <div aria-hidden="true" style="position:absolute;bottom:7px;right:7px;width:15px;height:15px;border-bottom:2px solid #8a5a34;border-right:2px solid #8a5a34;z-index:4;pointer-events:none"></div>
-      <div style="overflow:hidden;white-space:nowrap;font:10px 'Space Mono',ui-monospace,monospace;color:rgba(29,27,23,.3);padding:8px 14px 0;user-select:none" aria-hidden="true">▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓▓▒░░▒▓</div>
-      <div class="m26-x-head" style="display:flex;align-items:stretch;gap:20px;padding:20px 28px;border-bottom:1px solid rgba(29,27,23,.16)">
-        <div style="flex:none;width:72px;height:72px;border:1px solid #1d1b17;background:#fff;display:flex;align-items:center;justify-content:center;font:700 38px 'Space Mono',ui-monospace,monospace;color:{{ focusColor }}">{{ focusSym }}</div>
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center">
-          <div style="font:700 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.22em;color:#8a5a34">WEEK {{ focusWeek }} · ENTRY {{ focusPos }}</div>
-          <div style="font:700 clamp(22px,2.3vw,30px) 'Space Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.01em;line-height:1.05;margin-top:6px">{{ focusName }}</div>
-        </div>
-        <div onClick="{{ closeExpand }}" style="flex:none;cursor:pointer;font:700 11px 'Space Mono',ui-monospace,monospace;letter-spacing:.12em;color:#6c685f;white-space:nowrap">[ ✕ CLOSE ]</div>
-      </div>
-      <div style="display:flex;border-bottom:1px solid rgba(29,27,23,.16)">
-        <div style="flex:1;padding:11px 28px;border-right:1px solid rgba(29,27,23,.12)"><div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#9a958c">KIND</div><div style="font:700 12px 'Space Mono',ui-monospace,monospace;text-transform:uppercase;margin-top:5px">{{ focusKind }}</div></div>
-        <div style="flex:1;padding:11px 20px;border-right:1px solid rgba(29,27,23,.12)"><div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#9a958c">TYPE</div><div style="font:700 12px 'Space Mono',ui-monospace,monospace;text-transform:uppercase;margin-top:5px">{{ focusType }}</div></div>
-        <div style="flex:1;padding:11px 20px"><div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#9a958c">LOGGED</div><div style="font:700 12px 'Space Mono',ui-monospace,monospace;text-transform:uppercase;margin-top:5px">{{ focusDate }}</div></div>
-      </div>
-      <div class="m26-x-cols" style="flex:1;overflow:auto;padding:26px 28px;display:flex;gap:34px">
-        <div style="flex:1.5;min-width:0">
-          <div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.24em;color:#8a5a34;margin-bottom:12px">◈ ARTIFACT</div>
-          <div ref="{{ mediaRef }}" class="m26-media"></div>
-          <div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.24em;color:#8a5a34;margin:26px 0 10px">TRANSCRIPT</div>
-          <div style="font:300 16px/1.8 Spectral,Georgia,serif;max-width:60ch">{{ focusText }}</div>
-        </div>
-        <div class="m26-x-side" style="flex:1;min-width:250px;border-left:1px dashed rgba(29,27,23,.3);padding-left:26px;display:flex;flex-direction:column">
-          <div style="display:flex;align-items:baseline;justify-content:space-between">
-            <div style="font:700 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em">◍ DISCOURSE</div>
-            <div style="font:700 10px 'Space Mono',ui-monospace,monospace;color:#8a5a34">[{{ focusCommentCount }}]</div>
-          </div>
-          <div aria-hidden="true" style="font:10px 'Space Mono',ui-monospace,monospace;color:rgba(29,27,23,.22);overflow:hidden;white-space:nowrap;margin:8px 0 16px">░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓</div>
-          <sc-if value="{{ discourseStatus }}" hint-placeholder-val="{{ false }}">
-            <div style="font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.06em;color:#8a5a34;margin:-6px 0 12px">{{ discourseStatus }}</div>
-          </sc-if>
-          <sc-if value="{{ discourseEmpty }}" hint-placeholder-val="{{ false }}">
-            <div style="font:11px/1.6 'Space Mono',ui-monospace,monospace;letter-spacing:.04em;color:#9a958c;margin-bottom:14px">// no signal yet — open the channel below</div>
-          </sc-if>
-          <div style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:18px">
-            <sc-for list="{{ focusComments }}" as="cm" hint-placeholder-count="3">
-              <div style="position:relative;padding-left:14px">
-                <div aria-hidden="true" style="position:absolute;left:0;top:3px;bottom:3px;width:2px;background:rgba(138,90,52,.45)"></div>
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-                  <div style="flex:1;min-width:0">
-                    <div style="font:700 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a5a34">{{ cm.author }}</div>
-                    <div style="font:14px/1.55 Spectral,Georgia,serif;color:#2a2820;margin-top:4px">{{ cm.text }}</div>
-                  </div>
-                  <div onClick="{{ cm.toggle }}" title="continue discourse" style="flex:none;cursor:pointer;height:22px;min-width:34px;padding:0 7px;border:1px solid {{ cm.ringColor }};background:{{ cm.ringBg }};color:{{ cm.ringText }};display:flex;align-items:center;justify-content:center;gap:3px;font:10px 'Space Mono',ui-monospace,monospace">↷ {{ cm.count }}</div>
-                  <div onClick="{{ cm.del }}" title="delete your comment" style="flex:none;cursor:pointer;width:26px;height:26px;border:1px dashed rgba(29,27,23,.35);color:#8a5a34;display:{{ cm.delDisplay }};align-items:center;justify-content:center;font:11px 'Space Mono',ui-monospace,monospace">✕</div>
-                </div>
-                <sc-if value="{{ cm.open }}" hint-placeholder-val="{{ false }}">
-                  <div style="margin-top:12px;margin-left:12px;border-left:1px solid rgba(29,27,23,.16);padding-left:14px;display:flex;flex-direction:column;gap:12px">
-                    <sc-for list="{{ cm.replies }}" as="rp" hint-placeholder-count="2">
-                      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-                        <div style="flex:1;min-width:0"><div style="font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:#8a5a34">↳ {{ rp.author }}</div><div style="font:13px/1.5 Spectral,Georgia,serif;color:#3a372f;margin-top:2px">{{ rp.text }}</div></div>
-                        <div onClick="{{ rp.del }}" title="delete your reply" style="flex:none;cursor:pointer;width:20px;height:20px;border:1px dashed rgba(29,27,23,.3);color:#8a5a34;display:{{ rp.delDisplay }};align-items:center;justify-content:center;font:10px 'Space Mono',ui-monospace,monospace">✕</div>
-                      </div>
-                    </sc-for>
-                    <sc-if value="{{ needName }}" hint-placeholder-val="{{ false }}">
-                      <div style="display:flex;gap:6px">
-                        <input ref="{{ replyFirstRef }}" placeholder="First name" style="flex:1;min-width:0;font:12px ui-sans-serif;padding:8px 10px;border:1px solid rgba(29,27,23,.28);background:#fff;color:#1d1b17;outline:none" />
-                        <input ref="{{ replyLastRef }}" placeholder="Last name" style="flex:1;min-width:0;font:12px ui-sans-serif;padding:8px 10px;border:1px solid rgba(29,27,23,.28);background:#fff;color:#1d1b17;outline:none" />
-                        <div onClick="{{ submitReplyName }}" title="save name" style="cursor:pointer;font:12px 'Space Mono',ui-monospace,monospace;padding:8px 12px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">→</div>
-                      </div>
-                    </sc-if>
-                    <sc-if value="{{ hasName }}" hint-placeholder-val="{{ true }}">
-                      <div style="display:flex;gap:7px">
-                        <input ref="{{ replyInputRef }}" placeholder="reply as {{ userName }}…" style="flex:1;font:12px ui-sans-serif;padding:8px 10px;border:1px solid rgba(29,27,23,.28);background:#fff;color:#1d1b17;outline:none" />
-                        <div onClick="{{ cm.postReply }}" style="cursor:pointer;font:10px 'Space Mono',ui-monospace,monospace;padding:8px 11px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">REPLY</div>
-                      </div>
-                    </sc-if>
-                  </div>
-                </sc-if>
-              </div>
-            </sc-for>
-          </div>
-          <sc-if value="{{ needName }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:16px;font:10px 'Space Mono',ui-monospace,monospace;letter-spacing:.04em;color:#9a958c">first time here — add your name to join the discourse (shown as “First L.”)</div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <input ref="{{ firstRef }}" placeholder="First name" style="flex:1;min-width:0;font:13px ui-sans-serif;padding:10px 12px;border:1px solid rgba(29,27,23,.3);background:#fff;color:#1d1b17;outline:none" />
-              <input ref="{{ lastRef }}" placeholder="Last name" style="flex:1;min-width:0;font:13px ui-sans-serif;padding:10px 12px;border:1px solid rgba(29,27,23,.3);background:#fff;color:#1d1b17;outline:none" />
-              <div onClick="{{ submitName }}" title="save name" style="cursor:pointer;font:13px 'Space Mono',ui-monospace,monospace;padding:10px 15px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">→</div>
-            </div>
-          </sc-if>
-          <sc-if value="{{ hasName }}" hint-placeholder-val="{{ true }}">
-            <div style="margin-top:16px;font:700 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:#9a958c">{{ postingAs }}</div>
-            <div style="display:flex;margin-top:8px;border:1px solid #1d1b17;background:#fff">
-              <span style="font:700 14px 'Space Mono',ui-monospace,monospace;color:#8a5a34;padding:0 4px 0 12px;display:flex;align-items:center">&gt;</span>
-              <input ref="{{ expandInputRef }}" placeholder="add to the discourse…" style="flex:1;font:13px 'Space Mono',ui-monospace,monospace;padding:11px 8px;border:0;background:transparent;color:#1d1b17;outline:none" />
-              <div onClick="{{ postComment }}" style="cursor:pointer;font:700 11px 'Space Mono',ui-monospace,monospace;letter-spacing:.12em;padding:11px 16px;background:#1d1b17;color:#f6f4ee;display:flex;align-items:center">POST →</div>
-            </div>
-          </sc-if>
-        </div>
-      </div>
+<!-- ══ 03 · PEOPLE — rises from the bottom ═════════════════════════════════ -->
+<section class="aa-panel aa-panel-bottom" id="panel-people" aria-hidden="true" aria-label="People">
+  <span class="ghostnum" aria-hidden="true">03</span>
+  <div class="aa-panel-in">
+    <div class="aa-phead">
+      <h2 class="aa-ptitle">The <em>People</em></h2>
+      <button class="aa-pclose" type="button" aria-label="Close panel">✕</button>
     </div>
-  </sc-if>
-</div>
 
-<div ref="{{ nextArrowRef }}" onClick="{{ goNext }}" style="position:fixed;top:0;left:0;display:none;z-index:25;pointer-events:auto;cursor:pointer;width:38px;height:38px;align-items:center;justify-content:center;border:1px solid rgba(236,233,226,.6);background:rgba(6,6,12,.55);backdrop-filter:blur(4px)">
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#ece9e2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="13" y2="8"></line><polyline points="8,3 13,8 8,13"></polyline></svg>
-</div>
-<div ref="{{ prevArrowRef }}" onClick="{{ goPrev }}" style="position:fixed;top:0;left:0;display:none;z-index:25;pointer-events:auto;cursor:pointer;width:38px;height:38px;align-items:center;justify-content:center;border:1px solid rgba(236,233,226,.6);background:rgba(6,6,12,.55);backdrop-filter:blur(4px)">
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#ece9e2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="13" y2="8"></line><polyline points="8,3 13,8 8,13"></polyline></svg>
-</div>
+    <div class="aa-subhead" style="margin-top:0"><span class="num">03·A</span><h3>Studio leads</h3></div>
+    <div class="aa-people">
+      <figure class="aa-person">
+        <span class="ph"><img src="uploads/people/alifiya-mutaher.jpg" alt="Alifiya Mutaher" loading="lazy"></span>
+        <figcaption><b>Alifiya Mutaher</b><span>Cofounder, Lagori Collective</span></figcaption>
+      </figure>
+      <figure class="aa-person">
+        <span class="ph"><img src="uploads/people/dhaval-kothari.jpg" alt="Dhaval Kothari" loading="lazy"></span>
+        <figcaption><b>Dhaval Kothari</b><span>Cofounder, Lagori Collective</span></figcaption>
+      </figure>
+      <figure class="aa-person">
+        <span class="ph"><img src="uploads/people/ankita-trivedi.jpg" alt="Ankita Trivedi" loading="lazy"></span>
+        <figcaption><b>Ankita Trivedi</b><span>Senior Assistant Professor, CEPT</span></figcaption>
+      </figure>
+    </div>
 
-</x-dc>
+    <div class="aa-subhead"><span class="num">03·B</span><h3>Guest lecturers</h3></div>
+    <div class="aa-people">
+      <figure class="aa-person">
+        <span class="ph"><img src="uploads/people/anna-biswas.jpg" alt="Anna Biswas" loading="lazy"></span>
+        <figcaption><b>Anna Biswas</b><span>Managing Director – India, Forum for the Future</span></figcaption>
+      </figure>
+      <figure class="aa-person">
+        <span class="ph"><img src="uploads/people/vishwanath-s.jpg" alt="Vishwanath S" loading="lazy"></span>
+        <figcaption><b>Vishwanath S</b><span>Director, Biome Environmental Solutions</span></figcaption>
+      </figure>
+      <figure class="aa-person">
+        <span class="ph"><img src="uploads/people/reema-deshpande.jpg" alt="Reema Deshpande" loading="lazy"></span>
+        <figcaption><b>Reema Deshpande</b><span>Cofounder, Lagori Collective</span></figcaption>
+      </figure>
+      <figure class="aa-person">
+        <span class="ph"><img src="uploads/people/ishita-jain.jpg" alt="Ishita Jain" loading="lazy"></span>
+        <figcaption><b>Ishita Jain</b><span>Cofounder, LMNO</span></figcaption>
+      </figure>
+    </div>
 
-<!-- The threshold between the cloud and the archive: past the last submission the dive
-     runs out into darkness, one voice appears in white, the dark gives way to paper,
-     and the page descends into the students. Entirely scroll-driven — scrolling back
-     up plays it in reverse. -->
-<div id="m26-outro" aria-hidden="true">
-  <div id="m26-outro-dither"></div>
-  <blockquote class="m26-outro-quote">
-    <p id="m26-outro-text"></p>
-    <footer id="m26-outro-name"></footer>
-  </blockquote>
-</div>
+    <div class="aa-subhead"><span class="num">03·C</span><h3>Students</h3></div>
+    <p class="aa-plede">One row per student — click a name to open <em>everything they have filed.</em></p>
+    <div id="aa-students-host"></div>
 
-<!-- The archive — the same two CSVs as the cloud, read the ordinary way. Also reachable
-     directly (and without the 3D piece) at archive.html. -->
-<section id="m26-archive" aria-label="Submission archive" tabindex="-1"></section>
-<script src="./js/archive-ledger.js"></script>
-<script>
-(function(){
-  'use strict';
-  var section = document.getElementById('m26-archive');
-  var outro = document.getElementById('m26-outro');
-  var outroQuote = outro.querySelector('.m26-outro-quote');
-  var outroDither = outro.querySelector('#m26-outro-dither');
-  var docEl = document.documentElement;
-  var mode = 'cloud';
-  var rendered = false;
+    <p class="aa-pfoot">The full register with dossiers lives in
+      <a data-page-link="people.html" href="people.html">the ledger →</a></p>
+  </div>
+</section>
 
-  // keep the sandbox switch alive across the page links (skip link + corner link)
-  if (M26.SANDBOX){
-    var skipA = document.querySelector('.m26-skip');
-    if (skipA) skipA.href = M26.pageUrl('archive.html');
-    var fixLinks = setInterval(function(){
-      var corner = document.querySelector('.m26-corner-link');
-      if (corner){ corner.href = M26.pageUrl('archive.html'); clearInterval(fixLinks); }
-    }, 300); // the corner link appears once the template mounts
-    setTimeout(function(){ clearInterval(fixLinks); }, 10000);
-  }
+<noscript>
+  <div style="position:fixed;inset:0;z-index:200;background:#f3f1ea;padding:48px;font:14px/1.7 ui-sans-serif,system-ui">
+    <p style="max-width:60ch">M26 STUDIO · CEPT · 2026 — this site reads the studio's submission
+    records and needs JavaScript to display them. The records themselves are plain files:
+    <a href="data/submissions.csv">data/submissions.csv</a> ·
+    <a href="data/students.csv">data/students.csv</a> —
+    and the archive is readable at <a href="people.html">people.html</a>.</p>
+  </div>
+</noscript>
 
-  // one voice per visit
-  var q = M26.QUOTES[Math.floor(Math.random() * M26.QUOTES.length)];
-  document.getElementById('m26-outro-text').textContent = q.text;
-  document.getElementById('m26-outro-name').textContent = '— ' + q.name;
-  if (q.text.length > 140) outroQuote.classList.add('m26-outro-long');
-
-  function renderArchive(){
-    rendered = true;
-    M26ArchiveLedger.render(section, { embedded: true, onReturn: toCloud });
-  }
-
-  var lerp = function (a, b, t) { return a + (b - a) * t; };
-  var ramp = function (f, a, b) { return Math.max(0, Math.min(1, (f - a) / (b - a))); };
-  var ease = function (x) { return x * x * (3 - 2 * x); };
-
-  // the cloud reports 0..1 progress through the threshold; everything below derives from it
-  window.addEventListener('m26:handoff', function(e){
-    var f = e.detail.frac;
-    if (f <= 0){
-      outro.style.display = 'none';
-      section.classList.remove('m26-revealing');
-      return;
-    }
-    if (!rendered) renderArchive();
-
-    var seal = ease(ramp(f, 0.00, 0.15));  // darkness seals over the cloud
-    var qin  = ease(ramp(f, 0.10, 0.34));  // the quote arrives in white
-    var xf   = ease(ramp(f, 0.55, 0.80));  // dark gives way to paper, white inks in
-    var down = ease(ramp(f, 0.80, 1.00));  // the page descends into the students
-
-    outro.style.display = 'flex';
-    outro.style.background = 'rgba(' + Math.round(lerp(6, 243, xf)) + ',' + Math.round(lerp(6, 241, xf))
-      + ',' + Math.round(lerp(12, 234, xf)) + ',' + seal.toFixed(3) + ')';
-    outroQuote.style.color = 'rgb(' + Math.round(lerp(240, 29, xf)) + ',' + Math.round(lerp(239, 27, xf))
-      + ',' + Math.round(lerp(233, 23, xf)) + ')';
-    outroQuote.style.opacity = (qin * (1 - down)).toFixed(3);
-    outroQuote.style.transform = 'translateY(' + ((1 - qin) * 30 - down * 52).toFixed(1) + 'px)';
-    // the dither field is densest in full dark, dissolving as paper inks in
-    if (outroDither) outroDither.style.opacity = (seal * (1 - xf) * 0.5).toFixed(3);
-
-    section.classList.toggle('m26-revealing', down > 0);
-    section.style.setProperty('--m26-arrive', down.toFixed(4));
-  });
-
-  function toArchive(){
-    if (mode === 'archive') return;
-    mode = 'archive';
-    if (!rendered) renderArchive();
-    docEl.classList.add('m26-archive-mode');
-    window.scrollTo(0, 0);
-    section.focus({ preventScroll: true });
-    // scrollbars may have appeared — let the canvas re-measure the viewport
-    window.dispatchEvent(new Event('resize'));
-  }
-  function toCloud(){
-    if (mode === 'cloud') return;
-    mode = 'cloud';
-    docEl.classList.remove('m26-archive-mode');
-    // drop the archive out immediately — it must never re-cover the screen on the way
-    // out (this was the white rectangle at the top when scrolling back up)
-    section.classList.remove('m26-revealing');
-    section.style.setProperty('--m26-arrive', '0');
-    window.scrollTo(0, 0);
-    if (window.__m26Cloud) window.__m26Cloud.exitArchive();
-    // scrollbars just vanished — re-measure so the canvas fills the widened viewport
-    window.dispatchEvent(new Event('resize'));
-  }
-  window.addEventListener('m26:mode', function(e){
-    if (e.detail.mode === 'archive') toArchive(); else toCloud();
-  });
-
-  // at the very top of the archive, escaping back into the cloud takes a SUSTAINED upward
-  // scroll — the ledger holds you with a little pressure (the accumulator is heavy and
-  // decays fast), and only a determined pull breaks the seal and drops you straight into
-  // the point cloud
-  var upAcc = 0, upT = 0;
-  window.addEventListener('wheel', function(e){
-    if (mode !== 'archive') return;
-    if (window.scrollY > 0 || e.deltaY >= 0){ upAcc = 0; return; }
-    var now = performance.now();
-    if (now - upT > 500) upAcc = 0;
-    upT = now;
-    upAcc += -e.deltaY * 0.45; // scrolls "count" for less than half — the pressure
-    if (upAcc > 560){ upAcc = 0; toCloud(); }
-  }, { passive: true });
-
-  // the CSVs are re-polled while the page is open; refresh the rendered archive when
-  // they change (only while the cloud is up, so we never yank the page under a reader)
-  window.addEventListener('m26:data', function(){
-    if (rendered && mode === 'cloud') renderArchive();
-  });
-})();
-</script>
-<script type="text/x-dc" data-dc-script>
-class Component extends DCLogic {
-  state = { focus: null, expanded: false, openThread: null, userName: (typeof localStorage !== 'undefined' && localStorage.getItem('m26_name')) || null };
-
-  wrapRef = React.createRef();
-  canvasRef = React.createRef();
-  phRef = React.createRef();
-  phCapRef = React.createRef();
-  landingRef = React.createRef();
-  previewRef = React.createRef();
-  previewAuthorRef = React.createRef();
-  previewTextRef = React.createRef();
-  expandInputRef = React.createRef();
-  replyInputRef = React.createRef();
-  firstRef = React.createRef();
-  lastRef = React.createRef();
-  nextArrowRef = React.createRef();
-  prevArrowRef = React.createRef();
-  titleRef = React.createRef();
-  subRef = React.createRef();
-  subInnerRef = React.createRef();
-  cohortRef = React.createRef();
-  replyFirstRef = React.createRef();
-  replyLastRef = React.createRef();
-  mediaRef = React.createRef();
-  dataStatusRef = React.createRef();
-  rotReadRef = React.createRef();
-  ptsReadRef = React.createRef();
-  entryT = 0; travel = null;
-
-  mx = 0; my = 0; mpx = null; mpy = null; _moved = false;
-  scroll = 0; targetScroll = 0;
-  rotX = 0.58; rotY = -0.65; tRotX = 0.58; tRotY = -0.65;
-  hoverId = null; hoverComment = null; previewIdx = null;
-  focus = null; expanded = false; focusBlend = 0; nextId = null; prevId = null; selectedStudent = null;
-  _coarse = (typeof matchMedia !== 'undefined') && matchMedia('(pointer: coarse)').matches;
-  // phone-format: coarse pointer or narrow screen — the journey is compressed (fewer swipes
-  // to cross the cloud) and the chrome is retuned by the mobile media query in <style>
-  _mobile = (typeof matchMedia !== 'undefined') && (matchMedia('(pointer: coarse)').matches || matchMedia('(max-width: 720px)').matches);
-  revStudent = null; hoverStart = null; revFrac = 0; revAlpha = 0; revLitSet = new Set();
-  focal = 820; center = { x: 0, y: 0, z: -1360 };
-  rc = { x: 0, y: 0, z: -1360 }; look = { x: 0, y: 0 }; camZcur = 1600;
-  ENTRY = this._mobile ? 950 : 1400; ORTHO = 0.34;  DELAY = 380; DUR = 950; HOLD = 0;
-  // middle stage: the masthead disperses (DISPERSE_LEN of scroll) with the camera held at the
-  // iso view, then the routes grow in (GROW_LEN) still held — only then does the camera release
-  // into its rotation + dive. On phones every band is compressed — same journey, far fewer swipes.
-  DISPERSE_LEN = this._mobile ? 400 : 700; GROW_LEN = this._mobile ? 1150 : 2200;
-  // scroll spent per week of the dive (the camera still travels 160 world-units per week —
-  // WK_SCROLL only sets how much scrolling that costs)
-  WK_SCROLL = this._mobile ? 95 : 160;
-  _bph1 = Math.random()*6.283185; _bph2 = Math.random()*6.283185;
-
-  rnd(i){ const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
-  hue(si, l){ const s = this.students[si]; return `hsl(${s ? s.h : 0}, 78%, ${l || 66}%)`; }
-  _stg(si){ const S=['◆','○','■','◇','●','□','▲','△','┼','╳','▚','▞','▌','▐','╱','╲','▀','▄','▙','▜']; si=si|0; return S[((si%S.length)+S.length)%S.length]; }
-
-  // ascii air — pre-rendered dither-glyph textures (ink for the paper iso, fog for the deep);
-  // two drawImage calls per frame, rebuilt on resize / once the webfont lands
-  // fluid breathing void — an offscreen glyph field rebuilt ~22fps: slow drifting waves + a
-  // concentric ripple + a central hole whose radius breathes, so it grows and contracts like
-  // clouds/water. Declutters (thins) as the dive begins (entryT), then the caller fades it out.
-  _paintAir(t, entryT, W, H){
-    let c = this._air;
-    if (!c || c.width !== W || c.height !== H){ c = this._air = document.createElement('canvas'); c.width = W; c.height = H; this._airCW = 0; }
-    const g = c.getContext('2d');
-    if (!this._airCW){ g.font = '400 12px "Space Mono", ui-monospace, monospace'; this._airCW = (g.measureText('0000000000').width/10) || 7.3; }
-    const cw = this._airCW, lh = 15;
-    const cols = Math.ceil(W/cw)+1, rows = Math.ceil(H/lh)+1;
-    g.clearRect(0,0,W,H);
-    g.font = '400 12px "Space Mono", ui-monospace, monospace';
-    g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = '#1d1b17'; g.globalAlpha = 1;
-    const RAMP = ' ···::░░▒▓', N = RAMP.length;
-    const tf = t*0.001;
-    const voidR = 0.30 + 0.17*Math.sin(tf*0.5), ampB = 0.9 + 0.14*Math.sin(tf*0.33);
-    const dRaw = Math.max(0, Math.min(1, entryT/0.5)); const dCut = dRaw*dRaw*(3-2*dRaw)*0.62;
-    const ccx = (cols-1)/2, ccy = (rows-1)/2, halfH = ccy*lh;
-    for (let r=0;r<rows;r++){ const ay=(r-ccy)*lh; let line='';
-      for (let c2=0;c2<cols;c2++){ const ax=(c2-ccx)*cw;
-        const d=Math.hypot(ax,ay)/halfH, de=Math.hypot(ax/(halfH*1.55),ay/halfH);
-        let w=Math.sin(ax*0.011+tf*0.55)+Math.sin(ay*0.015-tf*0.42)+Math.sin((ax+ay)*0.008+tf*0.7)+Math.sin(d*6-tf*0.9); w*=0.25;
-        const edge=Math.max(0,1-Math.pow(de*0.86,2.4)), hole=Math.exp(-(d/voidR)*(d/voidR)*1.5);
-        const v=(0.46+w*0.5)*ampB*edge - hole*0.72 - dCut;
-        line += v<=0.02 ? ' ' : RAMP[Math.min(N-1,(v*N)|0)];
-      }
-      g.fillText(line, 0, r*lh + lh*0.5);
-    }
-  }
-
-  _mkFields(W, H){
-    this._fieldW = W; this._fieldH = H;
-    const make = (col) => {
-      const f = document.createElement('canvas');
-      f.width = W + 80; f.height = H + 80;
-      const fx = f.getContext('2d');
-      fx.font = '700 11px "Space Mono", ui-monospace, monospace';
-      fx.textAlign = 'center'; fx.textBaseline = 'middle';
-      const gl = '·:;=+*#';
-      const step = 27;
-      for (let y = step/2; y < f.height; y += step){
-        for (let x = step/2; x < f.width; x += step){
-          const n = this.rnd(x*13.77 + y*7.31);
-          if (n < 0.62) continue;
-          const ch = gl[Math.min(gl.length-1, Math.floor((n-0.62)/0.38*gl.length))];
-          fx.globalAlpha = 0.25 + 0.75*this.rnd(x*3.1 + y*1.7);
-          fx.fillStyle = col;
-          fx.fillText(ch, x, y);
-        }
-      }
-      return f;
-    };
-    this._fieldInk = make('#1d1b17');
-    this._fieldFog = make('#bfc2da');
-  }
-
-  // scramble-resolve: glyph noise settles into the real text, left to right (textContent only —
-  // CSV values stay untrusted plain text)
-  _scrambleTo(el, final){
-    if (typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches){ el.textContent = final; return; }
-    const chars = '░▒▓▖▗▘▝▚▞:·';
-    const t0 = performance.now(), dur = 300, n = final.length;
-    const step = () => {
-      if (!el.isConnected) return;
-      const k = Math.min(1, (performance.now() - t0) / dur);
-      const res = Math.floor(k * n);
-      let s = final.slice(0, res);
-      for (let i = res; i < n; i++) s += final[i] === ' ' ? ' ' : chars[(Math.random()*chars.length)|0];
-      el.textContent = s;
-      if (k < 1) requestAnimationFrame(step);
-    };
-    step();
-  }
-
-  // quiet status line under the subtitle — only ever shown when a CSV fetch fails
-  _setDataStatus(msg){
-    const el = this.dataStatusRef && this.dataStatusRef.current; if (!el) return;
-    el.textContent = msg || '';
-    el.style.display = msg ? 'block' : 'none';
-  }
-
-  // hover caption — built with textContent (never innerHTML): Name/Kind come from the
-  // CSVs, which are public form input and must not be interpreted as HTML
-  _setHoverCap(p){
-    const cap = this.phCapRef.current; if (!cap) return;
-    cap.textContent = '';
-    cap.style.borderLeftColor = this.hue(p.student, 62);
-    const name = document.createElement('div');
-    name.className = 'm26-hoverph-name';
-    name.style.color = this.hue(p.student, 72);
-    const meta = document.createElement('div');
-    meta.className = 'm26-hoverph-meta';
-    cap.appendChild(name);
-    cap.appendChild(meta);
-    this._scrambleTo(name, p.name);
-    this._scrambleTo(meta, p.kind + ' · ' + p.dateStr);
-  }
-
-  // where the dive passes the last real submission (derived from the data, not a fixed number)
-  cloudEnd(){ return this.ENTRY + this.HOLD + 900 + Math.max(0, ((this._maxWeek||1)-1))*this.WK_SCROLL + 500 + this.DISPERSE_LEN + this.GROW_LEN; }
-  // …then the outro: darkness → a quote in white → cream → the archive. Scroll-driven, reversible.
-  // Touch screens get a much shorter span — a couple of swipes, not a slog.
-  outroLen(){ return this._coarse ? 1250 : 2600; }
-  maxScroll(){ return this.cloudEnd() + this.outroLen(); }
-
-  // fit the whole flat-iso structure comfortably on screen for the hold: the bounding box of every
-  // point in the fixed iso camera space (rotY -0.65 / rotX 0.58, orthographic), scaled so it fills
-  // ~78% width / ~74% height with margins, and its centre so the look-offset can centre it
-  _fitHold(W,H){
-    const pts = this.pts;
-    if (!pts || !pts.length){ this._holdFit = null; return; }
-    const RC = this.center, ry = -0.65, rx = 0.58;
-    const cosY = Math.cos(ry), sinY = Math.sin(ry), cosX = Math.cos(rx), sinX = Math.sin(rx);
-    let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
-    for (const p of pts){
-      const dx = p.x-RC.x, dy = p.y-RC.y, dz = p.z-RC.z;
-      const x1 = dx*cosY + dz*sinY, z1 = -dx*sinY + dz*cosY;
-      const y1 = dy*cosX - z1*sinX;
-      const wx = RC.x + x1, wy = RC.y + y1;
-      if (wx<minX) minX=wx; if (wx>maxX) maxX=wx; if (wy<minY) minY=wy; if (wy>maxY) maxY=wy;
-    }
-    const spanX = Math.max(1, maxX-minX), spanY = Math.max(1, maxY-minY);
-    const sX = (W*0.78)/(spanX*this.ORTHO), sY = (H*0.74)/(spanY*this.ORTHO);
-    this._holdFit = { scale: Math.min(sX, sY), cx: (minX+maxX)/2, cy: (minY+maxY)/2 };
-  }
-
-  // CSV parsing + row interpretation live in js/m26-core.js (window.M26), shared with the
-  // archive view so both views read the two CSVs identically. There is deliberately no
-  // fallback roster: until data/students.csv loads, the site is honestly empty.
-
-  build(){
-    if (this.pts) return;
-    this._generate(this._roster || []);
-  }
-
-  // Sets up the roster + the empty timeline scaffolding for a given set of names. Called once at mount
-  // with the roster and again whenever data/students.csv changes. It intentionally creates NO points and
-  // NO comments — the cloud is populated ONLY by real rows from submissions.csv (see loadSubmissions).
-  _generate(NAMES){
-    this.students = NAMES.map((name, i) => ({ name, h: M26.hueFor(i, NAMES.length) }));
-
-    // week-grid / timeline scaffolding — kept so real submissions know where to sit in space + time.
-    // Semester calendar facts (start date, planned weeks) come from M26.CONFIG; weeks beyond the
-    // planned span keep working via clusterFor(), so the cloud grows with the data.
-    const WEEKS = M26.CONFIG.weeks;
-    const wc = [];
-    for (let w = 1; w <= WEEKS; w++) wc.push({ x: (this.rnd(w*7+3)-0.5)*460, y: (this.rnd(w*7+11)-0.5)*360 });
-    this.semBase = M26.semesterStartDate();
-    this.WEEKS = WEEKS; this.wc = wc;
-
-    // empty cloud — no fabricated points or critique. Real work arrives via loadSubmissions();
-    // real, visitor-typed discourse lives in the shared backend (js/discourse.js).
-    this.pts = [];
-    this.routes = this.students.map(() => []);
-    this.routeIdx = {};
-    this.comments = [];
-    this._subSeen = new Set();
-    this._subCsvText = null;
-  }
-
-  // Roster pipeline: reads data/students.csv (one "Name" per row) at load. Add, remove, or rename a
-  // student there and — on next load — the whole cloud regenerates around the new roster (colours
-  // respace evenly across everyone, each student's thread rebuilt, real submissions re-merged in).
-  async loadRoster(){
-    let names;
-    try {
-      names = await M26.loadRosterNames();
-      this._setDataStatus(null);
-    } catch (e) { this._setDataStatus('DATA UNAVAILABLE — RETRYING'); return; } // poll retries every 15s
-    // an empty roster is a legitimate (if sad) state — show it honestly rather than keeping stale names
-    const current = this.students.map(s => s.name);
-    if (names.length === current.length && names.every((n,i)=>n===current[i])) return; // unchanged
-    this._roster = names;
-    this._generate(names);
-    this._subSeen = new Set();
-    this.focus = null; this.expanded = false; this.selectedStudent = null; this.hoverId = null; this.hoverComment = null; this.previewIdx = null;
-    this.setState({ focus: null, expanded: false });
-    await this.loadSubmissions();
-    this.forceUpdate();
-  }
-
-  clusterFor(w){ if (this.wc[w-1]) return this.wc[w-1]; return { x: (this.rnd(w*7+3)-0.5)*460, y: (this.rnd(w*7+11)-0.5)*360 }; }
-
-  // Publishing pipeline: reads data/submissions.csv and rebuilds the cloud as a direct mirror of it —
-  // every dot is a real row, adds/edits/removals all reflected. Points sit on the week grid by date and
-  // in their student's colour thread. Rows appearing during a live session briefly pulse as "just arrived".
-  async loadSubmissions(){
-    let text;
-    try {
-      text = await M26.fetchCsv(M26.CONFIG.submissionsCsv);
-      this._setDataStatus(null);
-    } catch (e) { this._setDataStatus('DATA UNAVAILABLE — RETRYING'); return; } // poll retries every 15s
-    if (text === this._subCsvText) return; // unchanged — leave the cloud (and any interaction) untouched
-    const firstLoad = this._subCsvText === null;
-    this._subCsvText = text;
-    const norm = M26.normalizeSubmissions(text, this.students.map(s => s.name));
-    if (norm.unmatched.length) console.warn('[m26] ' + norm.unmatched.length + ' submission(s) skipped — Student not on the roster:', norm.unmatched.map(r => r.student));
-    if (norm.invalid) console.warn('[m26] ' + norm.invalid + ' submission row(s) skipped — missing/invalid Student or Date');
-
-    const prevSeen = this._subSeen || new Set();
-    const seen = new Set();
-    const pts = [];
-    for (const row of norm.matched){
-      const cl = this.clusterFor(row.week);
-      const id = pts.length, s = id*3+5;
-      seen.add(row.key);
-      pts.push({ id, student: row.studentIndex, week: row.week, t: row.t, subKey: row.key,
-        x: cl.x + (this.rnd(s)-0.5)*300, y: cl.y + (this.rnd(s+1)-0.5)*300, z: -(row.week-1)*160 + (this.rnd(s+2)-0.5)*110,
-        baseR: 5.2, phase: this.rnd(s+6)*6.28, spd: 0.6+this.rnd(s+7)*0.9,
-        kind: row.kind, subType: row.type,
-        subText: row.text, image: row.image || null,
-        dateStr: row.dateStr, time: row.time,
-        name: row.student, real: true,
-        justArrived: (!firstLoad && !prevSeen.has(row.key)) ? performance.now() : null,
-        vis:false, sx:0, sy:0, rad:0, relZ:1, depthA:0 });
-    }
-    this._subSeen = seen;
-    this.pts = pts;
-    // how deep the dive goes derives from the actual data extent (deepest week), so scrolling
-    // always reaches the true end of the cloud no matter how the semester grows
-    this._maxWeek = pts.reduce((m,p) => Math.max(m, p.week), 1);
-    this.routes = this.students.map((_, si) => pts.filter(p => p.student===si).sort((a,b)=>a.t-b.t).map(p=>p.id));
-    this.routeIdx = {}; this.routes.forEach(r => r.forEach((pid,i)=> this.routeIdx[pid]=i));
-    // a rebuild reassigns point ids — clear any interaction pointing at a now-stale index
-    if (!firstLoad){
-      this.focus = null; this.expanded = false; this.selectedStudent = null;
-      this.hoverId = null; this.hoverComment = null; this.previewIdx = null; this.travel = null; this._armed = null;
-      if (this.previewRef && this.previewRef.current) this.previewRef.current.style.display = 'none';
-      this.setState({ focus: null, expanded: false });
-    }
-    this.forceUpdate();
-    window.dispatchEvent(new CustomEvent('m26:data')); // archive section re-renders from the same CSVs
-  }
-
-  componentDidMount(){
-    this.build();
-    this._subSeen = new Set();
-    // small bridge so the archive controller (plain script in this page) can send us back to the cloud
-    this._bridge = { exitArchive: this.exitArchive, enterArchive: this.enterArchive };
-    window.__m26Cloud = this._bridge;
-    this.loadRoster();
-    this.loadSubmissions();
-    this._subPoll = setInterval(() => { this.loadRoster(); this.loadSubmissions(); }, 15000);
-    // persistent discourse (Google-Sheet-backed; see js/discourse.js + pipeline/README.md)
-    M26Discourse.load().then(() => this.forceUpdate());
-    this._discPoll = setInterval(() => {
-      M26Discourse.load().then(() => { if (this.state.focus != null) this.forceUpdate(); });
-    }, 45000);
-    // cached soft sprite for cheap bokeh discs (drawImage ≫ per-point radial gradient)
-    const spr = document.createElement('canvas'); spr.width = spr.height = 64;
-    const sctx = spr.getContext('2d');
-    const sg = sctx.createRadialGradient(32,32,0,32,32,32);
-    sg.addColorStop(0,'rgba(255,255,255,1)'); sg.addColorStop(0.34,'rgba(255,255,255,1)'); sg.addColorStop(1,'rgba(255,255,255,0)');
-    sctx.fillStyle = sg; sctx.fillRect(0,0,64,64);
-    this._soft = spr;
-    // signal masthead — per-character handles so it can dissolve into ascii dust on entry
-    this._titleChars = null;
-    const grabTitle = () => { const tl=this.titleRef.current; if(!tl) return; const els=tl.querySelectorAll('[data-ic]'); if(!els.length) return; this._titleChars = Array.prototype.slice.call(els).map((el,i)=>({el, base:el.textContent, seed:this.rnd(i*2.3+1), dir:this.rnd(i*3.1+2)*6.283})); };
-    grabTitle(); setTimeout(grabTitle, 80); setTimeout(grabTitle, 400);
-    const cv = this.canvasRef.current, wrap = this.wrapRef.current;
-    const ctx = cv.getContext('2d');
-    let W = 0, H = 0, dpr = 1;
-    // overlay canvas ABOVE the landing chrome: during the dispersed landing, the points
-    // nearest the camera draw here, passing IN FRONT of the masthead and the orientation
-    // chip — the title sits inside the cloud, not on top of it. Pointer-transparent.
-    const ov = document.createElement('canvas');
-    ov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6';
-    wrap.appendChild(ov);
-    const octx = ov.getContext('2d');
-    this._octx = octx;
-    const resize = () => { dpr = Math.min(window.devicePixelRatio||1,2); W = wrap.clientWidth; H = wrap.clientHeight; cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); ov.width = W*dpr; ov.height = H*dpr; octx.setTransform(dpr,0,0,dpr,0,0); };
-    resize(); this._resize = resize; window.addEventListener('resize', resize);
-
-    // fit the title's width to the sub-line width
-    const titleFit = () => {}; // the SIGNAL masthead sizes via CSS clamp — no fitting
-    this._titleFit = titleFit; titleFit();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { titleFit(); this._fieldW = 0; });
-    setTimeout(titleFit, 350);
-    const _resize0 = this._resize; this._resize = () => { _resize0(); titleFit(); }; window.removeEventListener('resize', resize); window.addEventListener('resize', this._resize);
-
-    this._wheel = (e) => { if (this.handoff) return; e.preventDefault(); if (this.focus != null) return; this.targetScroll = Math.max(0, Math.min(this.maxScroll(), this.targetScroll + e.deltaY*0.9)); };
-    wrap.addEventListener('wheel', this._wheel, { passive:false });
-    // keyboard travel — arrows/page/space move through the cloud, Escape backs out of focus
-    this._key = (e) => {
-      if (this.handoff) return;
-      const tag = e.target && e.target.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      if (e.key === 'Escape'){
-        if (this.state.expanded) this.closeExpand();
-        else if (this.focus != null) this.exitFocus();
-        return;
-      }
-      if (this.focus != null) return;
-      const step = (e.key===' '&&!e.shiftKey)||e.key==='PageDown' ? 640 : (e.key===' '&&e.shiftKey)||e.key==='PageUp' ? -640
-        : e.key==='ArrowDown' ? 260 : e.key==='ArrowUp' ? -260 : e.key==='Home' ? -1e9 : e.key==='End' ? 1e9 : 0;
-      if (!step) return;
-      e.preventDefault();
-      this.targetScroll = Math.max(0, Math.min(this.maxScroll(), this.targetScroll + step));
-    };
-    window.addEventListener('keydown', this._key);
-    this._move = (e) => { const r = wrap.getBoundingClientRect(); this.mx = ((e.clientX-r.left)/r.width)*2-1; this.my = ((e.clientY-r.top)/r.height)*2-1; this.mpx = e.clientX-r.left; this.mpy = e.clientY-r.top; this._moved = true; };
-    wrap.addEventListener('mousemove', this._move);
-    this._click = () => {
-      // iso / white view: allow student-route selection only (no focus/turntable)
-      if (this.entryT < 0.82 && this.focus == null){
-        if (this.hoverId != null){
-          const st = this.pts[this.hoverId].student;
-          this.selectedStudent = (this.selectedStudent === st ? null : st);
-        } else { this.selectedStudent = null; }
-        return;
-      }
-      if (this.focus == null && this.hoverComment != null){
-        const cm = this.comments[this.hoverComment]; this.previewIdx = this.hoverComment;
-        this.previewAuthorRef.current.textContent = cm.author;
-        this.previewTextRef.current.textContent = '“' + cm.text + '”';
-        this.previewRef.current.style.display = 'block';
-        return;
-      }
-      if (this.focus == null && this.hoverId != null){
-        this.focus = this.hoverId; this.expanded = false; this.previewIdx = null; this.travel = null;
-        this.previewRef.current.style.display = 'none';
-        this.setState({ focus: this.focus, expanded: false });
-        return;
-      }
-      // background click → release
-      if (this.focus != null || this.previewIdx != null){
-        this.focus = null; this.expanded = false; this.previewIdx = null;
-        this.previewRef.current.style.display = 'none';
-        this.setState({ focus: null, expanded: false });
-      }
-    };
-    wrap.addEventListener('click', this._click);
-
-    // ---- touch / mobile ----
-    this._hitAt = (px,py) => {
-      if (this.focus != null) return;
-      if (!this._hoverReady) return; // no picking until the structure has settled
-      let bf=null,bfd=1e9,bc=null,bcd=1e9;
-      for (const p of this.pts){ if(!p.vis) continue; const d=Math.hypot(p.sx-px,p.sy-py); if(d<Math.max(22,p.rad+16)&&d<bfd){bfd=d;bf=p;} }
-      for (let ci=0;ci<this.comments.length;ci++){ const cm=this.comments[ci]; if(!cm.vis) continue; const d=Math.hypot(cm.sx-px,cm.sy-py); if(d<Math.max(15,cm.crad+12)&&d<bcd){bcd=d;bc=ci;} }
-      if (bc!=null && (bf==null||bcd<bfd)){ this.hoverComment=bc; if(this.hoverId!=null){ this.hoverId=null; this.phRef.current.style.display='none'; } }
-      else { this.hoverComment=null; this.hoverId = bf?bf.id:null;
-        if (bf){ this.revStudent=bf.student; this.hoverStart=performance.now(); this.revFrac=0; this._setHoverCap(bf); }
-      }
-    };
-    let tStartX=0,tStartY=0,tLastY=0,tMoved=false,tStartT=0;
-    this._tStart = (e) => { if (e.touches.length!==1) return; const r=wrap.getBoundingClientRect(),tc=e.touches[0]; tStartX=tc.clientX-r.left; tStartY=tc.clientY-r.top; tLastY=tc.clientY; tMoved=false; tStartT=performance.now(); };
-    this._tMove = (e) => {
-      if (e.touches.length!==1) return; const r=wrap.getBoundingClientRect(),tc=e.touches[0];
-      const x=tc.clientX-r.left, y=tc.clientY-r.top;
-      if (Math.abs(x-tStartX)+Math.abs(y-tStartY) > 14){
-        if (!tMoved && this._coarse){ this._armed = null; this.hoverId = null; if (this.phRef.current) this.phRef.current.style.display='none'; }
-        tMoved=true;
-      }
-      this.mx=(x/r.width)*2-1; this.my=(y/r.height)*2-1; this.mpx=x; this.mpy=y; this._moved=true;
-      if (this.handoff) return;
-      if (this.focus == null){ e.preventDefault(); const dy=tLastY-tc.clientY; this.targetScroll=Math.max(0, Math.min(this.maxScroll(), this.targetScroll + dy*(this._mobile ? 4.8 : 3.6))); }
-      tLastY=tc.clientY;
-    };
-    // touch: scrolling never selects; in the deep cloud the FIRST tap on a dot arms it
-    // (it shines and shows its caption), a second tap on the same dot opens it
-    this._tEnd = (e) => {
-      if (this.handoff) return;
-      const dt = performance.now()-tStartT;
-      if (tMoved || dt >= 400) return;
-      e.preventDefault();
-      this.mpx = tStartX; this.mpy = tStartY;
-      this._hitAt(tStartX, tStartY);
-      if (this._coarse && this.focus == null && this.entryT >= 0.82){
-        if (this.hoverId != null && this._armed !== this.hoverId){ this._armed = this.hoverId; return; }
-        this._armed = null;
-      }
-      this._click();
-    };
-    wrap.addEventListener('touchstart', this._tStart, { passive:true });
-    wrap.addEventListener('touchmove', this._tMove, { passive:false });
-    wrap.addEventListener('touchend', this._tEnd, { passive:false });
-
-    const lerp = (a,b,t) => a+(b-a)*t;
-    const lerp3 = (A,B,t) => [Math.round(lerp(A[0],B[0],t)), Math.round(lerp(A[1],B[1],t)), Math.round(lerp(A[2],B[2],t))];
-    const ease = x => x*x*(3-2*x);
-    const easeM = x => { const k = 3.6; return (Math.tanh((x-0.5)*k)/Math.tanh(0.5*k))*0.5 + 0.5; }; // ease-in-out, fast middle
-
-    const loop = () => {
-      if (this.handoff){ this._raf = requestAnimationFrame(loop); return; } // archive owns the page — idle cheaply
-      try {
-      const t = performance.now();
-      this._gt = t;
-      this.scroll += (this.targetScroll - this.scroll)*0.09;
-      // end-of-cloud outro: past the last real submission the page reports 0..1 progress through
-      // the quote threshold; the controller below the canvas choreographs it. At 1, scrolling is
-      // handed to the document entirely.
-      {
-        const hf = this.focus != null ? 0 : Math.max(0, Math.min(1, (this.scroll - this.cloudEnd()) / this.outroLen()));
-        if (Math.abs(hf - (this._handFrac || 0)) > 0.0015){
-          this._handFrac = hf;
-          window.dispatchEvent(new CustomEvent('m26:handoff', { detail: { frac: hf } }));
-        }
-        if (hf >= 0.999 && !this.handoff) this.enterArchive();
-      }
-      // middle stage — the camera is held at the iso view (camScroll 0, no rotation) through two
-      // beats: first the masthead disperses (titleDiss 0..1), then the student routes grow in
-      // (growP 0..1). Only past the hold does camScroll advance, releasing the rotation + dive.
-      const holdEnd = this.DISPERSE_LEN + this.GROW_LEN;
-      let camScroll, growP, titleDiss;
-      if (this.scroll <= this.DISPERSE_LEN){ camScroll = 0; titleDiss = this.scroll/this.DISPERSE_LEN; growP = 0; }
-      else if (this.scroll <= holdEnd){ camScroll = 0; titleDiss = 1; growP = (this.scroll - this.DISPERSE_LEN)/this.GROW_LEN; }
-      else { camScroll = this.scroll - holdEnd; titleDiss = 1; growP = 1; }
-      const entryT = ease(Math.min(1, camScroll/this.ENTRY));
-      this.entryT = entryT;
-      const dollyExtra = Math.max(0, camScroll - this.ENTRY - this.HOLD);
-      const past = Math.max(0, camScroll - this.ENTRY);
-      // zoom is decoupled from rotation + perspective: as the masthead disperses the structure is
-      // scaled UP uniformly (a natural push-in — no angle change, the iso stays flat so it keeps
-      // breathing) and pauses there through the route-grow hold. The dive's own perspective zoom
-      // (entryT) takes over afterwards, so this hold-scale relaxes back to 1 as the dive begins.
-      const holdRamp = this.scroll <= this.DISPERSE_LEN ? ease(this.scroll/this.DISPERSE_LEN) : 1;
-      // hb: 1 all through the flat hold, easing to 0 as the dive breaks perspective in
-      const hb = holdRamp * (1 - Math.min(1, entryT/0.35));
-      // auto-fit the whole flat-iso structure to the screen (comfortable side margins), recomputed
-      // on resize / data change; the hold scale + a look-offset centre it, both relaxing into the dive
-      if (!this._holdFit || this._holdFitW!==W || this._holdFitH!==H || this._holdFitN!==(this.pts?this.pts.length:0)){
-        this._fitHold(W,H); this._holdFitW=W; this._holdFitH=H; this._holdFitN=this.pts?this.pts.length:0;
-      }
-      const fitScale = this._holdFit ? this._holdFit.scale : 1;
-      const holdScale = 1 + (fitScale - 1) * hb;
-      // during the hold the paper lifts a touch lighter and the ascii air thins so the structure reads
-      const holdLight = ease(Math.max(0, Math.min(1, titleDiss))) * (1 - Math.min(1, entryT/0.12));
-      // the caption settles in on top once the routes are nearly drawn, then dwells; it fades as
-      // the dive tips into perspective
-      const allLit = Math.max(0, Math.min(1, (growP - 0.45)/0.2)) * (1 - Math.min(1, entryT/0.25));
-      const mRY = this.mx*0.13 + Math.sin(t*7e-5)*0.05, mRX = -this.my*0.10 + Math.cos(t*6e-5)*0.035;
-
-      let rcT, lookT, camZT, rotYT, rotXT, traveling = false;
-      if (this.focus != null){
-        const fp = this.pts[this.focus];
-        this.focusBlend += (1 - this.focusBlend)*0.05;
-        let pos = fp;
-        if (this.travel){
-          const raw = Math.min(1, (t - this.travel.start)/this.travel.dur);
-          this.travel.tp = easeM(raw); traveling = true;
-          const a = this.pts[this.travel.from], b = this.pts[this.travel.to], tp = this.travel.tp;
-          pos = { x: lerp(a.x,b.x,tp), y: lerp(a.y,b.y,tp), z: lerp(a.z,b.z,tp) };
-          if (raw >= 1) this.travel = null;
-        }
-        // elevation view: camera square to the timeline, the point held motionless at the
-        // exact centre of the screen — no turntable. World-z is time, and with the camera
-        // rotated -90° it reads along screen-x: past to the left, future to the right.
-        rcT = pos; lookT = { x: pos.x, y: pos.y }; camZT = pos.z + 340;
-        rotYT = -1.5707963; rotXT = 0;
-      } else {
-        this.focusBlend += (0 - this.focusBlend)*0.06;
-        rcT = this.center; lookT = { x: (this._holdFit ? this._holdFit.cx : 0)*hb, y: (this._holdFit ? this._holdFit.cy : 0)*hb }; camZT = lerp(1600,700,entryT) - dollyExtra*(160/this.WK_SCROLL);
-        rotYT = lerp(-0.65, mRY, entryT); rotXT = lerp(0.58, mRX, entryT);
-      }
-      // arrival key: 0 while flying a route, easing to 1 once the camera settles — drives
-      // the focus type, the arrows, and the encircling ring so nothing jumps
-      if (this.focus != null && !traveling){ if (!this._uiT) this._uiT = t; }
-      else this._uiT = 0;
-      const uiK = this._uiT ? ease(Math.min(1, (t - this._uiT)/620)) : 0;
-      {
-        const fui = document.querySelector('.m26-focus-ui');
-        if (fui) fui.style.opacity = uiK.toFixed(3);
-      }
-      const sm = traveling ? 1 : 0.05, smZ = traveling ? 1 : 0.06;
-      this.rc.x += (rcT.x-this.rc.x)*sm; this.rc.y += (rcT.y-this.rc.y)*sm; this.rc.z += (rcT.z-this.rc.z)*sm;
-      this.look.x += (lookT.x-this.look.x)*sm; this.look.y += (lookT.y-this.look.y)*sm;
-      this.camZcur += (camZT-this.camZcur)*smZ;
-      this.tRotY = rotYT; this.tRotX = rotXT; this.rotY += (this.tRotY-this.rotY)*0.06; this.rotX += (this.tRotX-this.rotX)*0.06;
-
-      const cosY = Math.cos(this.rotY), sinY = Math.sin(this.rotY), cosX = Math.cos(this.rotX), sinX = Math.sin(this.rotX);
-      const cx = W/2, cy = H/2, RC = this.rc, LK = this.look, camZ = this.camZcur, persp = entryT;
-      // living-cloud breath: the iso structure slowly, subtly expands/contracts around its own center,
-      // as if breathing — two slow off-beat waves so it never feels mechanical; fades out once the dive begins.
-      const breatheFade = Math.max(0, 1 - persp/0.45);
-      const bt = t*0.001;
-      const globalBreathe = 1; // no structure-scale breathing — the cloud holds its size (zero-g stillness)
-      const proj = (mx,my,mz) => { let dx=mx-RC.x,dy=my-RC.y,dz=mz-RC.z; let x1=dx*cosY+dz*sinY,z1=-dx*sinY+dz*cosY; let y1=dy*cosX-z1*sinX; z1=dy*sinX+z1*cosX; const wx=RC.x+x1,wy=RC.y+y1,wz=RC.z+z1; const relZ=camZ-wz; const perspS=this.focal/Math.max(40,relZ); const eff=(this.ORTHO+(perspS-this.ORTHO)*persp)*globalBreathe*holdScale; return { sx:cx+(wx-LK.x)*eff, sy:cy+(wy-LK.y)*eff, relZ, eff, camx:wx-LK.x, camy:wy-LK.y, skip: persp>0.45 && relZ<8 }; };
-      const NEAR = 34; // near plane for line clipping
-      const effOf = d => (this.ORTHO + (this.focal/Math.max(40,d) - this.ORTHO)*persp)*globalBreathe*holdScale;
-      // bokeh blur: near points (small depth) and far points soften; a band stays sharp
-      const bokehAmt = Math.max(0, Math.min(1, (persp-0.72)/0.28)); // 0 in iso/transition, ramps in deep
-      const blurOf = d => { if (bokehAmt<=0) return 0; const fD = this.focus!=null ? Math.max(120, this.pts[this.focus].relZ) : 540; return (d < fD ? Math.min(7, (1 - d/fD)*7.5) : Math.min(5, (d-fD)/520)) * bokehAmt; };
-      // draw a line segment, clipped to the near plane so it never pops at the camera
-      const seg = (a, b) => {
-        let ax=a.ccx, ay=a.ccy, ad=a.cdepth, bx=b.ccx, by=b.ccy, bd=b.cdepth;
-        if (ad < NEAR && bd < NEAR) return;
-        if (ad < NEAR){ const tt=(NEAR-ad)/(bd-ad); ax+= (bx-ax)*tt; ay+= (by-ay)*tt; ad=NEAR; }
-        else if (bd < NEAR){ const tt=(NEAR-bd)/(ad-bd); bx+= (ax-bx)*tt; by+= (ay-by)*tt; bd=NEAR; }
-        const ea=effOf(ad), eb=effOf(bd);
-        ctx.moveTo(cx+ax*ea, cy+ay*ea); ctx.lineTo(cx+bx*eb, cy+by*eb);
-      };
-      // bokeh-aware filled disc (soft feathered sprite when out of focus band; dimmer so far points merge into bg)
-      const GLY = ['·',':','▖','░','▒','▒','▓','█'];
-      // each student is one stable symbol — their identity in the field (shared with the archive)
-      // each student is one stable symbol — inline palette (no dependency on core-script version)
-      const STU_INLINE = ['◆','○','■','◇','●','□','▲','△','┼','╳','▚','▞','▌','▐','╱','╲','▀','▄','▙','▜'];
-      const stg = si => STU_INLINE[(((si|0)%STU_INLINE.length)+STU_INLINE.length)%STU_INLINE.length];
-      // idle shimmer the field flickers through until a student is singled out
-      const FLK = ['·',':','.','\'','▖','▝','░','·',':','▒'];
-      const gfont = fs => '700 ' + fs.toFixed(1) + 'px "Space Mono", ui-monospace, monospace';
-      // one glyph per point. No white bokeh sprite — depth reads through dimmer, sparser marks.
-      const disc = (x, y, r, blur, alpha, col, glyph) => {
-        ctx.fillStyle = col;
-        if (blur <= 0.4){
-          ctx.globalAlpha = alpha; ctx.font = gfont(Math.max(17, Math.min(40, r*5.2)));
-          ctx.fillText(glyph, x, y);
-        } else {
-          const fade = Math.max(0.14, 1 - blur/7.5);
-          ctx.globalAlpha = alpha*fade*0.72; ctx.font = gfont(Math.max(13, Math.min(28, (r+blur)*3)));
-          ctx.fillText(blur > 3.2 ? '·' : ':', x, y);
-        }
-      };
-      // soft depth-of-field glyph: five offset stamps approximate a bokeh blur on any 2d context
-      // (no ctx.filter — works everywhere, cheap at this point count)
-      const blurText = (c, glyph, x, y, fs, col, alpha, bl) => {
-        c.fillStyle = col; c.font = gfont(fs);
-        if (bl < 0.35){ c.globalAlpha = alpha; c.fillText(glyph, x, y); return; }
-        if (bl < 2.2){
-          c.globalAlpha = alpha*0.34;
-          c.fillText(glyph, x, y);
-          for (let i = 0; i < 4; i++){ const a2 = i*1.5708 + 0.6; c.fillText(glyph, x + Math.cos(a2)*bl, y + Math.sin(a2)*bl); }
-        } else {
-          // heavy bokeh: two rings of stamps so the copies fuse into one soft disc
-          c.globalAlpha = alpha*0.21;
-          c.fillText(glyph, x, y);
-          for (let i = 0; i < 3; i++){ const a2 = i*2.094 + 0.4; c.fillText(glyph, x + Math.cos(a2)*bl*0.5, y + Math.sin(a2)*bl*0.5); }
-          for (let i = 0; i < 6; i++){ const a2 = i*1.047 + 1.1; c.fillText(glyph, x + Math.cos(a2)*bl, y + Math.sin(a2)*bl); }
-        }
-      };
-      // per-segment gates so lines never hard-cut at the near clip plane or pop in/out of the far bokeh --
-      // they ease to transparent well before either happens.
-      const nearGate = d => persp>0.03 ? Math.max(0, Math.min(1, (d-NEAR)/85)) : 1;
-      const bokehGate = d => { if (bokehAmt<=0) return 1; const b=blurOf(d); return Math.max(0, 1 - Math.min(1, b/6.4)); };
-      // ambient web lines: fully gated (near clip + bokeh blur), so only the in-focus band reads at normal strength
-      const segA = (a, b, baseAlpha) => {
-        if (a.cdepth<NEAR && b.cdepth<NEAR) return;
-        const fa = nearGate(a.cdepth)*bokehGate(a.cdepth), fb = nearGate(b.cdepth)*bokehGate(b.cdepth);
-        const alpha = baseAlpha*Math.min(fa,fb);
-        if (alpha<=0.003) return;
-        ctx.globalAlpha=alpha; ctx.beginPath(); seg(a,b); ctx.stroke();
-      };
-      // highlighted route lines (selected / reveal): stay vivid, only eased near the camera clip so they never pop
-      const segN = (a, b, baseAlpha) => {
-        if (a.cdepth<NEAR && b.cdepth<NEAR) return;
-        const alpha = baseAlpha*Math.min(nearGate(a.cdepth), nearGate(b.cdepth));
-        if (alpha<=0.003) return;
-        ctx.globalAlpha=alpha; ctx.beginPath(); seg(a,b); ctx.stroke();
-      };
-      // ascii route lines — glyphs stepped along the segment; '—|/\\' picked by screen angle
-      const lineChar = (dx, dy) => { let a=Math.atan2(dy,dx)*57.2958; if(a<0)a+=180; if(a<22.5||a>=157.5)return '—'; if(a<67.5)return '\\'; if(a<112.5)return '|'; return '/'; };
-      const asciiSeg = (a, b, alpha, fixedCh, size, col, flowOff) => {
-        let ax=a.ccx, ay=a.ccy, ad=a.cdepth, bx=b.ccx, by=b.ccy, bd=b.cdepth;
-        if (ad<NEAR && bd<NEAR) return;
-        if (ad<NEAR){ const tt=(NEAR-ad)/(bd-ad); ax+=(bx-ax)*tt; ay+=(by-ay)*tt; ad=NEAR; }
-        else if (bd<NEAR){ const tt=(NEAR-bd)/(ad-bd); bx+=(ax-bx)*tt; by+=(ay-by)*tt; bd=NEAR; }
-        const ea=effOf(ad), eb=effOf(bd);
-        const x0=cx+ax*ea, y0=cy+ay*ea, x1=cx+bx*eb, y1=cy+by*eb;
-        const dx=x1-x0, dy=y1-y0, L=Math.hypot(dx,dy); if (L<2) return;
-        // route dashes (no fixed glyph) are drawn as an em-dash rotated to the segment's screen
-        // direction, so the dashes visibly run ALONG the route; comment/other lines keep their glyph
-        const rotDash = !fixedCh; const ang = rotDash ? Math.atan2(dy,dx) : 0;
-        const ch = fixedCh || '—'; const step=Math.max(8.5, size*1.1), n=Math.floor(L/step);
-        if (col) ctx.fillStyle=col; ctx.font=gfont(size);
-        const off = flowOff ? (flowOff%1) : 0;
-        // slow pulse breathing down the line — brightness swells travel with the flow
-        const gt = this._gt || 0;
-        for (let i=1;i<n;i++){ const f=(i+off)/n; if (f>=1) continue; const pulse = 0.72 + 0.28*Math.sin(gt*0.0016 - f*7.5);
-          const px=x0+dx*f, py=y0+dy*f;
-          if (rotDash){ ctx.save(); ctx.translate(px,py); ctx.rotate(ang); ctx.globalAlpha=alpha*pulse; ctx.fillText('—',0,0); ctx.restore(); }
-          else { ctx.globalAlpha = alpha*pulse; ctx.fillText(ch, px, py); }
-        }
-      };
-      const asciiSegGated = (a, b, baseAlpha, ch, size, flowOff) => {
-        if (a.cdepth<NEAR && b.cdepth<NEAR) return;
-        const g=Math.min(nearGate(a.cdepth)*bokehGate(a.cdepth), nearGate(b.cdepth)*bokehGate(b.cdepth));
-        const al=baseAlpha*g; if (al<=0.02) return;
-        asciiSeg(a, b, al, ch, size, inkStr, flowOff);
-      };
-
-      // watery ebb and flow: each point drifts on its own slow pair of waves — strongest in
-      // the white iso (points visibly spread apart and gather), present again around a
-      // focused point (which itself stays perfectly still at the centre)
-      const wobAmp = Math.max(16*breatheFade, 9*this.focusBlend);
-      // entry choreography: at the landing the points lie DISPERSED across the whole screen;
-      // as the masthead dissolves they drift into their true structure positions (staggered
-      // per point), finishing early in the grow band so the routes draw between settled points.
-      const settleP = Math.max(0, Math.min(1, this.scroll / (this.DISPERSE_LEN + this.GROW_LEN*0.45)));
-      this._settleP = settleP;
-      const order = [];
-      for (const p of this.pts){
-        let wobX = 0, wobY = 0;
-        if (wobAmp > 0.1 && p.id !== this.focus){
-          // zero-gravity drift: each point floats on its own very slow pair of waves —
-          // some barely move, some glide, none of them pulse
-          wobX = Math.sin(t*0.00006*p.spd + p.phase*2.3)*wobAmp;
-          wobY = Math.sin(t*0.000045*p.spd + p.phase)*wobAmp;
-        }
-        const pr = proj(p.x + wobX, p.y + wobY, p.z);
-        // always update sx/sy + camera-space coords so segments never draw stale
-        p.sx=pr.sx; p.sy=pr.sy; p.relZ=pr.relZ; p.ccx=pr.camx; p.ccy=pr.camy; p.cdepth=pr.relZ;
-        if (settleP < 1){
-          if (p._sca === undefined){
-            const h = k => { const s = Math.sin(p.id*k + 17.13)*43758.5453; return s - Math.floor(s); };
-            p._sca = h(127.1); p._scb = h(269.5); p._scd = h(419.2)*0.35; // scatter x, y, per-point stagger
-            // scatter DEPTH: -1 far … 0 title plane … +1 near camera. The far side bunches
-            // toward the middle; the near side keeps its reach, so a handful of points
-            // genuinely hang right in front of the lens.
-            const zr = h(631.7)*2 - 1;
-            p._scz = zr >= 0 ? Math.pow(zr, 1.1) : -Math.pow(-zr, 1.6);
-          }
-          const le = Math.max(0, Math.min(1, (settleP - p._scd)/0.65));
-          const es = le*le*(3-2*le);
-          p._es = es;
-          if (es < 1){
-            // the scattered points hold still at their dispersed spots — no drift, no throwing —
-            // and interpolate to their structure position as the scroll settles them
-            const scx = (0.05 + 0.90*p._sca)*W, scy = (0.07 + 0.84*p._scb)*H;
-            p.sx = scx + (p.sx - scx)*es; p.sy = scy + (p.sy - scy)*es;
-            // keep camera-space coords consistent so route/comment segments track the drift
-            p.ccx = (p.sx - cx)/pr.eff; p.ccy = (p.sy - cy)/pr.eff;
-          }
-        } else p._es = 1;
-        p.blur = persp>0.05 ? blurOf(pr.relZ) : 0;
-        if (pr.skip){ p.vis=false; continue; }
-        p.rad=Math.max(0.7,p.baseR*pr.eff); // steady size — no pulsing
-        // iso: full alpha → solid black via difference. 3D: depth-fade so far dots merge into the dark bg.
-        const nearFade = Math.max(0, Math.min(1, (pr.relZ-NEAR)/120));
-        const depthBright = Math.max(0.12, Math.min(1, 1-(pr.relZ-300)/2400));
-        p.depthA = lerp(1.0, depthBright, entryT) * (persp>0.05 ? nearFade : 1);
-        p.vis=(p.sx>-160&&p.sx<W+160&&p.sy>-160&&p.sy<H+160);
-        if (p.vis) order.push(p);
-      }
-      for (const cm of this.comments){
-        const pr = proj(cm.x,cm.y,cm.z);
-        cm.sx=pr.sx; cm.sy=pr.sy; cm.relZ=pr.relZ; cm.ccx=pr.camx; cm.ccy=pr.camy; cm.cdepth=pr.relZ;
-        cm.blur = persp>0.05 ? blurOf(pr.relZ) : 0;
-        if (pr.skip){ cm.vis=false; continue; }
-        cm.crad=Math.max(0.5,cm.baseR*pr.eff); // steady size — no pulsing
-        const nearFadeC = Math.max(0, Math.min(1, (pr.relZ-NEAR)/120));
-        const depthBrightC = Math.max(0.10, Math.min(1, 1-(pr.relZ-300)/2400));
-        cm.depthA = lerp(0.9, depthBrightC, entryT) * (persp>0.05 ? nearFadeC : 1);
-        cm.vis=(cm.sx>-120&&cm.sx<W+120&&cm.sy>-120&&cm.sy<H+120);
-      }
-      // painter's order: while dispersed, depth is the SCATTER depth (far paints first,
-      // near paints last, over it); once settled it's the structure's camera depth again
-      if (settleP < 1) order.sort((a,b)=>((a._scz||0)-(b._scz||0)));
-      else order.sort((a,b)=>b.relZ-a.relZ);
-
-      // hover (only when not focused, and never before the structure has settled into the iso —
-      // the landing/settling phases are for watching, not picking)
-      this._hoverReady = this.scroll >= this.DISPERSE_LEN + this.GROW_LEN*0.55;
-      if (!this._hoverReady && (this.hoverId != null || this.hoverComment != null)){
-        this.hoverId = null; this.hoverComment = null;
-        if (this.phRef.current) this.phRef.current.style.display = 'none';
-      }
-      if (this._hoverReady && this._moved && this.mpx != null && this.focus == null){
-        this._moved = false;
-        let bf=null,bfd=1e9,bc=null,bcd=1e9;
-        for (const p of order){ const d=Math.hypot(p.sx-this.mpx,p.sy-this.mpy); if (d<Math.max(16,p.rad+11)&&d<bfd){ bfd=d; bf=p; } }
-        for (let ci=0; ci<this.comments.length; ci++){ const cm=this.comments[ci]; if(!cm.vis) continue; const d=Math.hypot(cm.sx-this.mpx,cm.sy-this.mpy); if (d<Math.max(11,cm.crad+8)&&d<bcd){ bcd=d; bc=ci; } }
-        if (bc != null && (bf == null || bcd < bfd)){
-          this.hoverComment = bc; if (this.hoverId != null){ this.hoverId = null; this.phRef.current.style.display='none'; }
-        } else {
-          this.hoverComment = null; const nh = bf ? bf.id : null;
-          if (nh !== this.hoverId){
-            this.hoverId = nh;
-            const ph = this.phRef.current;
-            if (nh != null){ const p=this.pts[nh]; this.revStudent=p.student; this.hoverStart=t; this.revFrac=0; this._setHoverCap(p); ph.style.display='block'; }
-            else ph.style.display='none';
-          }
-        }
-      }
-      if (this.focus != null && this.phRef.current) this.phRef.current.style.display = 'none';
-
-      // hover route reveal (state 3)
-      const hovering = this.hoverId != null && this.focus == null;
-      if (hovering){ const el=t-this.hoverStart; this.revFrac=ease(Math.min(1,Math.max(0,(el-this.DELAY)/this.DUR))); this.revAlpha+=(1-this.revAlpha)*0.12; }
-      else { this.revAlpha += (0-this.revAlpha)*0.10; if (this.revAlpha<0.02) this.revFrac=0; }
-
-      const lr = this.landingRef.current; if (lr){ const lo = Math.max(0, 1 - titleDiss*1.8); lr.style.opacity = lo; lr.style.visibility = lo <= 0.01 ? 'hidden' : 'visible'; }
-      // the masthead dissolves into ascii dust as it is scrolled — before the camera moves
-      // (reversible on scroll-up)
-      if (this._titleChars){
-        const diss = Math.max(0, Math.min(1, titleDiss)), dust = '·:░▒▓▖▝';
-        for (let k=0;k<this._titleChars.length;k++){ const tc=this._titleChars[k]; const st=tc.seed*0.4, lp=Math.max(0,Math.min(1,(diss-st)/0.55));
-          if (lp<=0){ if (tc._d){ tc.el.style.transform=''; tc.el.style.opacity=''; if(tc.el.textContent!==tc.base) tc.el.textContent=tc.base; tc._d=false; } continue; }
-          tc._d=true;
-          const dist=lp*70, dx=Math.cos(tc.dir)*dist*0.7, dy=Math.sin(tc.dir)*dist - lp*24, rot=(tc.seed-0.5)*80*lp;
-          tc.el.style.transform='translate('+dx.toFixed(1)+'px,'+dy.toFixed(1)+'px) rotate('+rot.toFixed(1)+'deg) scale('+(1-lp*0.45).toFixed(2)+')';
-          tc.el.style.opacity=(1-lp).toFixed(2);
-          if (lp>0.15) tc.el.textContent = dust[(k*7+((t*0.02)|0))%dust.length];
-        }
-      }
-      if (!this._readT || t - this._readT > 160){
-        this._readT = t;
-        const rr = this.rotReadRef.current; if (rr) rr.textContent = (this.rotX<0?'−':'+')+Math.abs(this.rotX).toFixed(2)+' / '+(this.rotY<0?'−':'+')+Math.abs(this.rotY).toFixed(2);
-        const pr = this.ptsReadRef.current; if (pr) pr.textContent = ('000'+(this.pts?this.pts.length:0)).slice(-3);
-      }
-      if (this.cohortRef.current) this.cohortRef.current.style.opacity = (this.focus==null && this.students.length ? allLit : 0).toFixed(3);
-      if (wrap) wrap.style.cursor = (this.focus==null && (this.hoverId!=null||this.hoverComment!=null)) ? 'pointer' : 'default';
-
-      // ===== draw =====
-      const bg = lerp3([243,241,234],[6,6,12], entryT);
-      const lc = lerp3([92,88,80],[150,155,185], entryT);
-      const hueL = lerp(46,66,entryT);
-      if (holdLight > 0.001){ bg[0]=Math.round(lerp(bg[0],249,holdLight)); bg[1]=Math.round(lerp(bg[1],247,holdLight)); bg[2]=Math.round(lerp(bg[2],241,holdLight)); }
-      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
-      const bgStr = 'rgb('+bg.join(',')+')';
-      ctx.fillStyle = bgStr; ctx.fillRect(0,0,W,H);
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      // keep the wrap behind the canvas the same colour — if the viewport ever outgrows the
-      // canvas bitmap (scrollbars toggling, browser chrome collapsing), the gap shows the
-      // scene colour instead of a pale rectangle
-      if (this._lastBg !== bgStr){ this._lastBg = bgStr; wrap.style.background = bgStr; }
-
-      if (entryT > 0.02){ const vg = ctx.createRadialGradient(cx,cy*0.9,0,cx,cy,Math.max(W,H)*0.72); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,'+(0.5*entryT).toFixed(3)+')'); ctx.fillStyle=vg; ctx.fillRect(0,0,W,H); }
-
-      // ascii air — a fluid breathing void of glyphs on the paper (rebuilt ~22fps), decluttering
-      // and dissolving as the dive begins; the fog texture still carries the deep space
-      if (!this._fieldW || this._fieldW !== W || this._fieldH !== H){ this._mkFields(W, H); this._air = null; }
-      {
-        const aInk = 0.5*Math.max(0, 1 - entryT/0.46)*(1 - holdLight*0.5), aFog = 0.055*entryT;
-        if (aInk > 0.004){
-          if (!this._air || t - (this._airLast||0) >= 45){ this._airLast = t; this._paintAir(t, entryT, W, H); }
-          ctx.globalAlpha = aInk; ctx.drawImage(this._air, 0, 0);
-        }
-        if (aFog > 0.004){ const dx=Math.sin(t*3.1e-5)*16, dy=Math.cos(t*2.3e-5)*12; ctx.globalAlpha=aFog; ctx.drawImage(this._fieldFog, -40+dx, -40+dy); }
-        ctx.globalAlpha=1;
-      }
-
-      // ink: dark on the cream page → light in the dark space. Plain source-over avoids
-      // the difference-blend flips that were turning dots white / haloing them.
-      const ink = lerp3([20,18,15],[232,233,244], entryT);
-      const inkStr = 'rgb('+ink.join(',')+')';
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = inkStr; ctx.lineCap = 'round'; ctx.lineWidth=1;
-      const routeBaseA = lerp(0.62,0.26,entryT);
-      const flowT = (t*0.00035)%1;
-      // routes draw in ALONG THEIR LENGTH during the hold band (title dust → freeze → routes
-      // grow → beat → dive). Driven by growP so they grow only while the camera is held, and
-      // complete before the band ends, leaving a moment to take the whole structure in.
-      const rGrow = Math.max(0, Math.min(1, growP/0.5));
-      for (const r of this.routes){
-        if (rGrow<=0 || r.length<2) continue;
-        const cps = r.map(id=>this.pts[id]);
-        let total=0; const segLen=[]; for (let i=0;i<cps.length-1;i++){ const L=Math.hypot(cps[i+1].sx-cps[i].sx,cps[i+1].sy-cps[i].sy); segLen.push(L); total+=L; }
-        if (total<=0) continue;
-        const budget=rGrow*total; let acc=0;
-        for (let i=0;i<segLen.length;i++){
-          if (acc+segLen[i]<=budget){ asciiSegGated(cps[i], cps[i+1], routeBaseA, null, 9, flowT); acc+=segLen[i]; }
-          else { const f=segLen[i]>0?(budget-acc)/segLen[i]:0; const stub={ccx:cps[i].ccx+(cps[i+1].ccx-cps[i].ccx)*f, ccy:cps[i].ccy+(cps[i+1].ccy-cps[i].ccy)*f, cdepth:cps[i].cdepth+(cps[i+1].cdepth-cps[i].cdepth)*f}; asciiSegGated(cps[i], stub, routeBaseA, null, 9, flowT); break; }
-        }
-      }
-      // comment marks arrive only once the points have settled (they have no scatter of their own)
-      const cmIn = settleP >= 1 ? 1 : Math.max(0, (settleP - 0.75)/0.25);
-      const commentBaseA = lerp(0.4,0.16,entryT) * cmIn;
-      if (cmIn > 0.01) for (const cm of this.comments){ asciiSegGated(this.pts[cm.parent], cm, commentBaseA, '·', 7, flowT); }
-      const glyL = Math.round(lerp(34, 68, entryT));
-      // ---- excitation field: the points hold still (each keeps its own glyph); motion arrives
-      // as a WAVE that sweeps through, not a per-point flicker. A slow diagonal "Mexican wave"
-      // drifts across continuously, and water-droplet ripples spawn at random spots now and then.
-      // A point that the wave reaches briefly swells — brighter and a touch larger — then settles.
-      // front layer housekeeping: live during the dispersed landing, wiped once settled
-      const octx2 = this._octx;
-      if (octx2){
-        if (settleP < 1){ octx2.clearRect(0, 0, W, H); this._ovLive = true; }
-        else if (this._ovLive){ octx2.clearRect(0, 0, W, H); this._ovLive = false; }
-      }
-      if (!this._drops) this._drops = [];
-      if (t - (this._dropLast || 0) > 2600 + (this._dropGap || 0)) {
-        this._dropLast = t; this._dropGap = Math.random() * 3400;
-        if (this._drops.length < 3) this._drops.push({ cx: 0.12 + Math.random() * 0.76, cy: 0.14 + Math.random() * 0.72, t0: t });
-      }
-      if (this._drops.length) this._drops = this._drops.filter(d => (t - d.t0) < 4600);
-      // the Mexican wave breathes in and out (cubed → long calm stretches, occasional swells)
-      // so motion arrives "at times", not as a constant drifting grating.
-      const ambEnv = Math.pow(Math.max(0, Math.sin(t * 0.00020)), 3);
-      const hasDrops = this._drops.length > 0;
-      for (const p of order){
-        const isStatic = (this.revStudent===p.student && this.revAlpha>0.35) || p.id===this.hoverId || p.student===this.selectedStudent;
-        let exc = 0;
-        if (!isStatic){
-          const nx = p.sx / W, ny = p.sy / H;
-          if (ambEnv > 0.01){
-            // slow diagonal crest drifting across — narrow (pow) so only a thin band lifts
-            const c1 = Math.sin((nx * 1.15 + ny * 0.85) * 4.6 - t * 0.00085);
-            exc = ambEnv * Math.pow(c1 > 0 ? c1 : 0, 12);
-            const c2 = Math.sin((ny * 1.1 - nx * 0.5) * 3.8 - t * 0.00052 + 1.7);
-            const e2 = ambEnv * 0.6 * Math.pow(c2 > 0 ? c2 : 0, 16); if (e2 > exc) exc = e2;
-          }
-          // water droplets — expanding rings that fade as they widen
-          if (hasDrops) for (let di = 0; di < this._drops.length; di++){
-            const d = this._drops[di], age = t - d.t0, R = age * 0.00030;
-            const ring = Math.exp(-Math.pow((Math.hypot(nx - d.cx, ny - d.cy) - R) / 0.05, 2));
-            const e = ring * Math.max(0, 1 - age / 4600) * Math.max(0, 1 - R / 1.25);
-            if (e > exc) exc = e;
-          }
-        }
-        const a = Math.min(1, p.depthA * (1 + exc * 1.0));
-        const es = p._es === undefined ? 1 : p._es;
-        if (es >= 1){
-          disc(p.sx, p.sy, p.rad * (1 + exc * 0.45), p.blur, a, this.hue(p.student, glyL), stg(p.student));
-        } else {
-          // dispersed in TRUE PERSPECTIVE: the title holds the middle ground (the focal
-          // plane); optical 1/(z) scaling makes near points loom and far points recede,
-          // and focus falls away with distance from the title plane — a shallow
-          // depth-of-field portrait of the cloud. Near-of-title points draw on the
-          // overlay canvas, crossing OVER the text.
-          const un = 1 - es, dk = p._scz;
-          // DIVE-GRADE perspective: same feel as passing through the deep cloud — the
-          // nearest points loom right at the lens (≈8×), the title plane holds 1×,
-          // the far field recedes to ≈0.53×
-          const persF = 1/(1 - dk*0.88);
-          const sizeF = 1 + (persF - 1)*un;
-          // focus: crisp only in a narrow band at the title plane; blur grows with
-          // distance AND with apparent size, so the close passes melt into soft blobs
-          const bl = 0; // no bokeh — crisp glyphs, size alone carries the depth
-          const fs = Math.max(8, Math.min(170, p.rad*5.2*sizeF));
-          const col = this.hue(p.student, glyL);
-          // atmosphere: the closer to the lens, the softer — but still PRESENT, so the
-          // giants read as shapes floating in front; the far field fades toward the paper.
-          // AND the whole field materialises from nothing: fully transparent at the landing
-          // (es→0), fading to opaque only as the scroll settles each point into position.
-          const aa = a*es*(dk > 0 ? (1 - 0.42*dk*un) : (1 - 0.42*(-dk)*un));
-          if (dk > 0.15){
-            const oA = aa*un, mA = aa*es;
-            if (oA > 0.01) blurText(octx2, stg(p.student), p.sx, p.sy, fs, col, oA, bl);
-            if (mA > 0.01) blurText(ctx, stg(p.student), p.sx, p.sy, fs, col, mA, bl);
-          } else {
-            blurText(ctx, stg(p.student), p.sx, p.sy, fs, col, aa, bl);
-          }
-        }
-      }
-      if (cmIn > 0.01) for (const cm of this.comments){ if(cm.cdepth<=NEAR) continue; disc(cm.sx, cm.sy, cm.crad, cm.blur, cm.depthA*cmIn, inkStr, '·'); }
-      ctx.globalAlpha = 1;
-
-      // freshly-published real submissions: a brief expanding pulse so a new entry visibly "arrives"
-      for (const p of order){
-        if (!p.real || !p.justArrived) continue;
-        const age = t - p.justArrived; if (age > 6000) continue;
-        const k = 1 - age/6000;
-        ctx.globalAlpha = k*0.85; ctx.strokeStyle = inkStr; ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.arc(p.sx, p.sy, p.rad*1.6 + (1-k)*26, 0, 6.2832); ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-
-      // touch: an armed dot (first tap) shines in its student's colour until the second tap
-      if (this._armed != null && this.focus == null && this.pts[this._armed] && this.pts[this._armed].vis){
-        const ap = this.pts[this._armed];
-        const acol = this.hue(ap.student, 68);
-        const pulse = 1 + 0.12*Math.sin(t*0.004);
-        ctx.globalAlpha = 0.95; ctx.fillStyle = acol; ctx.shadowBlur = 18; ctx.shadowColor = acol;
-        ctx.font = gfont(Math.max(14, ap.rad*4)); ctx.fillText(stg(ap.student), ap.sx, ap.sy); ctx.shadowBlur = 0;
-        ctx.globalAlpha = 0.7; ctx.strokeStyle = acol; ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.arc(ap.sx, ap.sy, ap.rad*2.6*pulse, 0, 6.2832); ctx.stroke();
-        ctx.globalAlpha = 1;
-      }
-
-      // persistent selected-student route (locked in iso, stays lit through 3D)
-      if (this.selectedStudent != null && this.focus == null){
-        const r = this.routes[this.selectedStudent];
-        const col = this.hue(this.selectedStudent, hueL);
-        ctx.fillStyle = col; ctx.shadowBlur = lerp(2,7,entryT); ctx.shadowColor = this.hue(this.selectedStudent,60);
-        for (let i=0;i<r.length-1;i++) asciiSeg(this.pts[r[i]], this.pts[r[i+1]], 0.78, null, 8.5, col); ctx.shadowBlur=0;
-        for (let i=0;i<r.length;i++){ const pp=this.pts[r[i]]; if(!pp.vis) continue; ctx.globalAlpha=0.95; ctx.fillStyle=col; ctx.shadowBlur=lerp(3,8,entryT); ctx.shadowColor=this.hue(this.selectedStudent,60); ctx.font=gfont(Math.max(10, pp.rad*3.8)); ctx.fillText(stg(this.selectedStudent), pp.sx, pp.sy); ctx.shadowBlur=0; }
-        ctx.globalAlpha=1;
-      }
-
-      // hover reveal route (hue, on top)
-      this.revLitSet = new Set();
-      if (this.revAlpha > 0.02 && this.revStudent != null && this.focus == null){
-        const r = this.routes[this.revStudent], cps = r.map(id=>this.pts[id]);
-        const segLen=[]; let total=0; for (let i=0;i<cps.length-1;i++){ const L=Math.hypot(cps[i+1].sx-cps[i].sx,cps[i+1].sy-cps[i].sy); segLen.push(L); total+=L; }
-        const budget=this.revFrac*total;
-        const revCol=this.hue(this.revStudent,hueL); ctx.shadowBlur=lerp(2,8,entryT); ctx.shadowColor=this.hue(this.revStudent,64);
-        let acc=0;
-        for (let i=0;i<segLen.length;i++){ if(acc+segLen[i]<=budget){ asciiSeg(cps[i], cps[i+1], this.revAlpha*0.9, null, 8.5, revCol); this.revLitSet.add(r[i+1]); acc+=segLen[i]; } else { const f=segLen[i]>0?(budget-acc)/segLen[i]:0; const stub={ccx:cps[i].ccx+(cps[i+1].ccx-cps[i].ccx)*f, ccy:cps[i].ccy+(cps[i+1].ccy-cps[i].ccy)*f, cdepth:cps[i].cdepth+(cps[i+1].cdepth-cps[i].cdepth)*f}; asciiSeg(cps[i], stub, this.revAlpha*0.9, null, 8.5, revCol); break; } }
-        this.revLitSet.add(r[0]); ctx.shadowBlur=0; ctx.globalAlpha=1;
-        for (const p of order){ if(!this.revLitSet.has(p.id)) continue; ctx.globalAlpha=1; ctx.fillStyle=this.hue(p.student,hueL); ctx.shadowBlur=lerp(3,7,entryT); ctx.shadowColor=this.hue(p.student,64); ctx.font=gfont(Math.max(10, p.rad*3.8)); ctx.fillText(stg(p.student), p.sx, p.sy); ctx.shadowBlur=0; }
-      }
-
-      // focus: dim the field, highlight the route line, spotlight the dot (+ light streak on travel)
-      if (this.focusBlend > 0.02){
-        ctx.globalAlpha = this.focusBlend*0.6; ctx.fillStyle = 'rgb('+bg.join(',')+')'; ctx.fillRect(0,0,W,H); ctx.globalAlpha = 1;
-        if (this.focus != null){
-          const fp = this.pts[this.focus]; const col = this.hue(fp.student,66); const route = this.routes[fp.student];
-          // highlighted route line — skip non-visible nodes so stale sx/sy can't spike the path
-          ctx.shadowBlur = 6; ctx.shadowColor = this.hue(fp.student,60);
-          for (let i=0;i<route.length-1;i++) asciiSeg(this.pts[route[i]], this.pts[route[i+1]], 0.5*this.focusBlend, null, 8.5, col); ctx.shadowBlur = 0;
-          // faint nodes along the route (visible only)
-          ctx.globalAlpha = 0.7*this.focusBlend; ctx.fillStyle = col;
-          for (let i=0;i<route.length;i++){ const pp=this.pts[route[i]]; if(!pp.vis||route[i]===this.focus) continue; ctx.beginPath(); ctx.arc(pp.sx,pp.sy,Math.max(1.4,pp.rad*0.8),0,6.2832); ctx.fill(); }
-          ctx.globalAlpha = 1;
-          // the encircling ring lets go during flight and slowly grows back on arrival (uiK)
-          if (uiK > 0.02){
-            const hb = fp.rad*2.3 + 12*uiK + 2.5*Math.sin(t*0.002)*uiK, Lb = Math.max(6, hb*0.42);
-            ctx.strokeStyle = col; ctx.globalAlpha = 0.85*this.focusBlend*uiK; ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(fp.sx-hb+Lb, fp.sy-hb); ctx.lineTo(fp.sx-hb, fp.sy-hb); ctx.lineTo(fp.sx-hb, fp.sy-hb+Lb);
-            ctx.moveTo(fp.sx+hb-Lb, fp.sy-hb); ctx.lineTo(fp.sx+hb, fp.sy-hb); ctx.lineTo(fp.sx+hb, fp.sy-hb+Lb);
-            ctx.moveTo(fp.sx-hb+Lb, fp.sy+hb); ctx.lineTo(fp.sx-hb, fp.sy+hb); ctx.lineTo(fp.sx-hb, fp.sy+hb-Lb);
-            ctx.moveTo(fp.sx+hb-Lb, fp.sy+hb); ctx.lineTo(fp.sx+hb, fp.sy+hb); ctx.lineTo(fp.sx+hb, fp.sy+hb-Lb);
-            ctx.stroke();
-            ctx.globalAlpha = this.focusBlend*uiK; ctx.fillStyle = col; ctx.shadowBlur = 22*uiK; ctx.shadowColor = col;
-            ctx.font = gfont(Math.min(38, Math.max(16, fp.rad*3.8))); ctx.fillText(stg(fp.student), fp.sx, fp.sy); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
-          }
-        }
-      }
-
-      // travel arrows along the focused student's route (hidden while the box is open)
-      if (this.focus != null && this.focusBlend > 0.5 && !this.expanded){
-        const fp = this.pts[this.focus]; const route = this.routes[fp.student]; const idx = this.routeIdx[this.focus];
-        this.nextId = idx < route.length - 1 ? route[idx+1] : null;
-        this.prevId = idx > 0 ? route[idx-1] : null;
-        // fixed compass: left = back in time, right = forward — matching the elevation axis
-        const arrowGap = Math.min(120, W*0.16);
-        const place = (el, id, dir) => { if (!el) return; if (id == null || uiK < 0.05){ el.style.display='none'; return; } const px=fp.sx+dir*arrowGap, py=fp.sy; el.style.transform='translate('+px+'px,'+py+'px) translate(-50%,-50%)'+(dir<0?' rotate(180deg)':''); el.style.opacity=Math.min(1,(this.focusBlend-0.5)*2.2)*uiK; el.style.display='flex'; };
-        place(this.nextArrowRef.current, this.nextId, 1);
-        place(this.prevArrowRef.current, this.prevId, -1);
-      } else { this.nextId=null; this.prevId=null; if(this.nextArrowRef.current) this.nextArrowRef.current.style.display='none'; if(this.prevArrowRef.current) this.prevArrowRef.current.style.display='none'; }
-
-      // comment preview bubble follows its dot
-      if (this.previewIdx != null){ const cm=this.comments[this.previewIdx]; if (cm.vis && this.focus==null){ this.previewRef.current.style.transform='translate('+cm.sx+'px,'+cm.sy+'px) translate(-50%,-118%)'; this.previewRef.current.style.display='block'; } else this.previewRef.current.style.display='none'; }
-      // hover placeholder follows fragment
-      if (this.hoverId != null && this.focus == null){ const p=this.pts[this.hoverId]; if(p.vis){ this.phRef.current.style.transform='translate('+p.sx+'px,'+p.sy+'px) translate(-50%,-128%)'; this.phRef.current.style.display='block'; } else this.phRef.current.style.display='none'; }
-
-      } catch(e){ if (!this._loopErr){ this._loopErr = 1; console.error('m26 draw error:', e); } }
-      this._raf = requestAnimationFrame(loop);
-    };
-    this._raf = requestAnimationFrame(loop);
-  }
-
-  componentWillUnmount(){ cancelAnimationFrame(this._raf); clearInterval(this._subPoll); clearInterval(this._discPoll); const wrap=this.wrapRef.current; if(wrap){ wrap.removeEventListener('wheel',this._wheel); wrap.removeEventListener('mousemove',this._move); wrap.removeEventListener('click',this._click); wrap.removeEventListener('touchstart',this._tStart); wrap.removeEventListener('touchmove',this._tMove); wrap.removeEventListener('touchend',this._tEnd); } window.removeEventListener('resize',this._resize); window.removeEventListener('keydown',this._key); if (window.__m26Cloud === this._bridge) delete window.__m26Cloud; }
-
-  // media (image / video / audio) for the expanded panel is rendered imperatively via the
-  // shared M26 renderer — plain createElement/textContent, no HTML string paths
-  _renderFocusMedia(){
-    const el = this.mediaRef.current; if (!el) return;
-    const f = this.state.focus;
-    if (f == null || !this.pts[f]){ el.textContent = ''; return; }
-    const p = this.pts[f];
-    M26.renderMediaInto(el, { type: p.subType, image: p.image, text: p.subText, student: p.name, kind: p.kind });
-  }
-  expand = () => { this.expanded = true; this.setState({ expanded: true }, () => this._renderFocusMedia()); };
-  closeExpand = () => { this.expanded = false; this.setState({ expanded: false }); };
-  // ---- hand-off to / back from the archive section at the end of the cloud ----
-  enterArchive = () => {
-    if (this.handoff) return;
-    this.handoff = true;
-    if (this.phRef.current) this.phRef.current.style.display = 'none';
-    if (this.previewRef.current) this.previewRef.current.style.display = 'none';
-    window.dispatchEvent(new CustomEvent('m26:mode', { detail: { mode: 'archive' } }));
-  };
-  exitArchive = () => {
-    if (!this.handoff) return;
-    this.handoff = false;
-    // land directly on the dark quote scene — below the "archive descends" band, so the
-    // archive never re-covers the screen on the way out (the white-rectangle bug)
-    this.targetScroll = Math.max(0, this.cloudEnd() + this.outroLen()*0.35);
-    this.scroll = this.targetScroll + 90; // a breath of ease-in, still inside the quote scene
-    window.dispatchEvent(new CustomEvent('m26:mode', { detail: { mode: 'cloud' } }));
-  };
-  exitFocus = () => {
-    // come to rest via the SHORT path
-    this.rotY = Math.atan2(Math.sin(this.rotY), Math.cos(this.rotY));
-    this.travel = null;
-    this.focus = null; this.expanded = false; this.previewIdx = null;
-    if (this.previewRef.current) this.previewRef.current.style.display='none';
-    this.setState({ focus: null, expanded: false, openThread: null });
-  };
-  // flight to the previous/next point on the route: the ring lets go, the camera eases
-  // along the route, and on arrival the ring grows back around the new point (the type
-  // fades with it — see the uiK block in the render loop)
-  startTravel = (toId) => { if (toId == null || toId === this.focus || this.travel) return; this.travel = { from: this.focus, to: toId, start: performance.now(), dur: 1150, tp: 0 }; this.focus = toId; this.setState({ focus: toId, openThread: null }); };
-  goNext = () => this.startTravel(this.nextId);
-  goPrev = () => this.startTravel(this.prevId);
-  commitName(fn, ln){ fn=(fn||'').trim(); ln=(ln||'').trim(); if(!fn) return; const cap = s => s.charAt(0).toUpperCase()+s.slice(1); const name = cap(fn) + (ln ? ' '+ln[0].toUpperCase()+'.' : ''); try { localStorage.setItem('m26_name', name); } catch(e){} this.setState({ userName: name }); }
-  submitName = () => { this.commitName(this.firstRef.current && this.firstRef.current.value, this.lastRef.current && this.lastRef.current.value); };
-  submitReplyName = () => { this.commitName(this.replyFirstRef.current && this.replyFirstRef.current.value, this.replyLastRef.current && this.replyLastRef.current.value); };
-
-  // ---- discourse: posts/deletes go to the shared backend and persist for everyone ----
-  _sendComment(inputEl, parentId){
-    if (!this.state.userName || !inputEl) return;
-    const v = inputEl.value.trim(); if (!v) return;
-    const f = this.state.focus; if (f == null || !this.pts[f]) return;
-    const p = this.pts[f];
-    inputEl.value = '';
-    this._discBusy = true; this._discMsg = ''; this.forceUpdate();
-    M26Discourse.post({ sub: p.subKey, parent: parentId || '', author: this.state.userName, text: v })
-      .then(() => { this._discBusy = false; this.forceUpdate(); })
-      .catch(err => { this._discBusy = false; this._discMsg = err.message; inputEl.value = v; this.forceUpdate(); });
-  }
-  postComment = () => this._sendComment(this.expandInputRef.current, '');
-  postReply = (id) => this._sendComment(this.replyInputRef.current, id);
-  delComment = (id) => {
-    M26Discourse.remove(id)
-      .then(() => this.forceUpdate())
-      .catch(err => { this._discMsg = err.message; this.forceUpdate(); });
-  };
-
-  renderVals(){
-    this.build();
-    const f = this.state.focus;
-    const uName = this.state.userName;
-    let v = { wrapRef:this.wrapRef, canvasRef:this.canvasRef, phRef:this.phRef, phCapRef:this.phCapRef, cohortCount: (this.students ? this.students.length : 0), landingRef:this.landingRef, previewRef:this.previewRef, previewAuthorRef:this.previewAuthorRef, previewTextRef:this.previewTextRef, expandInputRef:this.expandInputRef, replyInputRef:this.replyInputRef, firstRef:this.firstRef, lastRef:this.lastRef, replyFirstRef:this.replyFirstRef, replyLastRef:this.replyLastRef, mediaRef:this.mediaRef, dataStatusRef:this.dataStatusRef, rotReadRef:this.rotReadRef, ptsReadRef:this.ptsReadRef, nextArrowRef:this.nextArrowRef, prevArrowRef:this.prevArrowRef, titleRef:this.titleRef, subRef:this.subRef, subInnerRef:this.subInnerRef, cohortRef:this.cohortRef, expand:this.expand, closeExpand:this.closeExpand, exitFocus:this.exitFocus, postComment:this.postComment, postReply:this.postReply, goNext:this.goNext, goPrev:this.goPrev, submitName:this.submitName, submitReplyName:this.submitReplyName, showCard: f!=null && !this.state.expanded, expanded: this.state.expanded, hasName: !!uName, needName: !uName, userName: uName, postingAs: uName ? ('posting as ' + uName) : '' };
-    if (!this._titleData){ const mk=s=>Array.prototype.map.call(s,ch=>({ch,color:ch==='/'?'#8a5a34':'#1d1b17'})); this._titleData={ titleL1:mk('IMAGINATION//'), titleL2:mk('INFRASTRUCTURE') }; }
-    v.titleL1=this._titleData.titleL1; v.titleL2=this._titleData.titleL2;
-    if (f != null && this.pts[f]){
-      const p = this.pts[f];
-      const all = M26Discourse.forSub(p.subKey);
-      const tops = all.filter(c => !c.parent).sort((a,b) => a.ts < b.ts ? 1 : -1);   // newest first
-      const kidsOf = id => all.filter(c => c.parent === id).sort((a,b) => a.ts > b.ts ? 1 : -1);
-      const ot = this.state.openThread;
-      const mapC = c => {
-        const replies = kidsOf(c.id).map(r => ({ author:r.author, text:r.text,
-          del: () => this.delComment(r.id), delDisplay: r.mine ? 'inline-flex' : 'none' }));
-        return { id:c.id, author:c.author, text:c.text, replies, count: replies.length, open: ot===c.id,
-          ringColor: ot===c.id ? '#1d1b17' : 'rgba(29,27,23,.4)', ringText: ot===c.id ? '#f6f4ee' : '#6c685f', ringBg: ot===c.id ? '#1d1b17' : 'transparent',
-          toggle: () => this.setState(s => ({ openThread: s.openThread===c.id ? null : c.id })),
-          postReply: () => this.postReply(c.id),
-          del: () => this.delComment(c.id), delDisplay: c.mine ? 'flex' : 'none' };
-      };
-      v.focusName = p.name; v.focusKind = p.kind; v.focusDate = p.dateStr; v.focusType = p.subType; v.focusText = p.subText;
-      v.focusSym = this._stg(p.student);
-      v.focusColor = this.hue(p.student, 72);
-      v.focusWeek = p.week;
-      const _rt = this.routes[p.student] || [], _ri = this.routeIdx[p.id];
-      v.focusPos = (_ri != null ? (_ri + 1) : 1) + ' of ' + Math.max(1, _rt.length);
-      v.focusComments = tops.map(mapC);
-      v.focusCommentCount = all.length;
-      const tparts = tops.map(c => '“' + c.text + '” — ' + c.author);
-      v.tickerText = '░▒▓ ' + p.name.toUpperCase() + ' · W' + p.week + ' · ' + (p.kind || '').toUpperCase() + ' · ' + p.dateStr.toUpperCase() + ' ▓▒░  ' + (tparts.length ? 'DISCOURSE ' + all.length + '  ░▒▓  ' + tparts.join('  ░▒▓  ') : 'NO DISCOURSE YET — EXPAND AND START IT') + '  ';
-      v.discourseEmpty = all.length === 0 && M26Discourse.state.connected && !M26Discourse.state.error;
-      v.discourseStatus = !M26Discourse.state.connected ? 'discourse not connected yet — comments can’t be saved'
-        : M26Discourse.state.error ? 'discourse unreachable — ' + M26Discourse.state.error
-        : this._discBusy ? 'saving…'
-        : (this._discMsg || '');
-    } else {
-      v.focusName=''; v.focusKind=''; v.focusDate=''; v.focusType=''; v.focusText=''; v.focusComments=[]; v.focusCommentCount=0; v.focusSym='';
-      v.focusColor=''; v.focusWeek=''; v.focusPos='';
-      v.discourseEmpty=false; v.discourseStatus=''; v.tickerText='';
-    }
-    return v;
-  }
-}
-</script>
+<script src="./js/m26-core.js"></script>
+<script src="./js/viewer.js"></script>
+<script src="./js/aa-work.js"></script>
+<script src="./js/aa-app.js"></script>
+<script>AAApp.init();</script>
 </body>
 </html>

@@ -461,6 +461,17 @@
 
     container.appendChild(wrap);
 
+    /* deep link — #<slug> in the URL opens that student's dossier directly
+       (used by the institution pages: people.html#kiara). openDossier is a
+       hoisted declaration below, so calling it here is safe. */
+    if (!opts.embedded && location.hash.length > 1) {
+      var wantSlug = decodeURIComponent(location.hash.slice(1));
+      var list0 = sorted();
+      for (var di = 0; di < list0.length; di++) {
+        if (M26.slugFor(list0[di].name) === wantSlug) { openDossier(list0[di], di + 1); break; }
+      }
+    }
+
     /* ---------------------------------------------------------------- dossier */
     var openEl = null, prevOverflow = '';
     function closeDossier() {
