@@ -25,7 +25,7 @@
     return n;
   };
 
-  var PANELS = ['studio', 'work', 'cohort'];
+  var PANELS = ['studio', 'work', 'people'];
   var openKey = null;
   var _data = null;
   function data() { return _data || (_data = M26.loadAll()); }
@@ -72,11 +72,13 @@
       if (e.key === 'Escape' && openKey) shut(openKey);
     });
     // hash routing — #work=zoya opens the work panel filtered to a student
+    // (#cohort survives as an alias for #people)
     function route() {
       var h = decodeURIComponent(location.hash.slice(1));
       if (!h) return;
-      var m = /^(studio|work|cohort)(?:=(.+))?$/.exec(h);
+      var m = /^(studio|work|people|cohort)(?:=(.+))?$/.exec(h);
       if (!m) return;
+      if (m[1] === 'cohort') m[1] = 'people';
       open(m[1], true);
       if (m[1] === 'work' && m[2]) {
         data().then(function (d) {
@@ -138,14 +140,14 @@
     });
   }
 
-  /* ------------------------------------------------------------ the cohort */
-  function paintCohort(d) {
-    var host = document.getElementById('aa-cohort-host');
+  /* ----------------------------------------------------------- the students */
+  function paintStudents(d) {
+    var host = document.getElementById('aa-students-host');
     if (!host) return;
     if (!d.roster.length) {
       var e = el('div', 'aa-empty');
       e.appendChild(el('div', 'glyph', '◇ ◇ ◇'));
-      e.appendChild(el('p', null, 'The cohort appears here as the roster is filled in — this is week zero.'));
+      e.appendChild(el('p', null, 'The student roster appears here as the semester begins — this is week zero.'));
       e.appendChild(el('span', 'aa-kicker', 'Roster pending'));
       host.appendChild(e);
       return;
@@ -244,7 +246,7 @@
     fillCounters();
     fixLinks();
     AAWork.init();
-    data().then(paintCohort);
+    data().then(paintStudents);
     mountPanels();
   }
 

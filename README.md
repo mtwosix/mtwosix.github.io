@@ -5,12 +5,12 @@ A live studio website built as **static HTML/CSS/JS** — no build step, no fram
 - **The stage** — `canvas.html?embed` in a frameless iframe: the cloud opens directly on the settled iso structure (the title landing was removed) and the journey ends at the last submissions (the quote outro and embedded ledger were removed). Scroll to travel, drag to orbit, click a point.
 - **01 · STUDIO** (left edge) — the brief, how the pipeline works, the 18-week calendar, one attributed voice per visit.
 - **02 · WORK** (right edge) — every submission as a filterable wall (week / type / student); click a plate for a full-width detail fold with the media rendered in place.
-- **03 · THE COHORT** (bottom edge) — the roster as an index; clicking a student opens WORK filtered to them.
+- **03 · PEOPLE** (bottom edge) — studio leads and guest lecturers (portraits under `uploads/people/`), then the student roster as an index; clicking a student opens WORK filtered to them, with a placeholder headshot header.
 - **Top strip** — brand, a ticker of the latest submissions, the week counter, SUBMIT.
 
-Deep links: `#studio` / `#work` / `#cohort` open a panel; `#work=<slug>` opens WORK filtered to one student. On phones the side bars fold into a bottom tab row and every panel becomes a rising sheet.
+Deep links: `#studio` / `#work` / `#people` (alias `#cohort`) open a panel; `#work=<slug>` opens WORK filtered to one student. On phones the side bars fold into a bottom tab row and every panel becomes a rising sheet.
 
-Auxiliary pages: **`people.html`** keeps THE LEDGER (full register + dossiers, deep link `#<slug>`) as a plain page linked from the cohort panel; `canvas.html` is the cloud standalone; `archive.html`, `studio.html`, `work.html` are redirect stubs so old links keep working (`?sandbox` preserved).
+Auxiliary pages: **`people.html`** keeps THE LEDGER (full register + dossiers, deep link `#<slug>`) as a plain page linked from the People panel; `canvas.html` is the cloud standalone; `archive.html`, `studio.html`, `work.html` are redirect stubs so old links keep working (`?sandbox` preserved).
 
 Everything on the site derives from data. Until the CSVs are filled, the site is honestly empty (the cloud shows `PTS 000`, the ledger says "No students on the roster yet"). Nothing is fabricated.
 
@@ -41,7 +41,7 @@ Push `site/` to any static host — **GitHub Pages**, Netlify, Vercel, Cloudflar
 
 ```
 site/
-├── index.html            THE ONE-SCREEN SITE — canvas stage + edge bars + sliding panels (studio/work/cohort)
+├── index.html            THE ONE-SCREEN SITE — canvas stage + edge bars + sliding panels (studio/work/people)
 ├── canvas.html           THE CANVAS — 3D experience (a Design Component; opens on the iso structure, ends at the last submissions; ?embed hides links that would navigate the stage iframe)
 ├── people.html           THE LEDGER — full register + dossiers, plain page (deep link #<slug>)
 ├── studio.html           redirect stub → ./#studio
@@ -52,7 +52,7 @@ site/
 │   └── aa.css             THE ONE-SCREEN INSTITUTION — top strip, edge bars, panels, grain, grids, index, calendar
 ├── js/
 │   ├── m26-core.js        CONFIG + CSV parsing + row interpretation + the ?sandbox switch (window.M26). SHARED by every page.
-│   ├── aa-app.js          The room: edge bars + sliding panels + hash routing + ticker + cohort + studio extras (window.AAApp).
+│   ├── aa-app.js          The room: edge bars + sliding panels + hash routing + ticker + people/students + studio extras (window.AAApp).
 │   ├── aa-work.js         The work wall: filters, plates, detail folds, filterStudent API (window.AAWork).
 │   ├── archive-ledger.js  The ledger table + the dossier panel (window.M26ArchiveLedger). #slug deep link.
 │   ├── discourse.js       Persistent comments via a Google-Sheet-backed Apps Script (window.M26Discourse).
@@ -123,9 +123,9 @@ To point at your own backend, edit the three values in `CONFIG` (`m26-core.js`):
 
 ## What changed in this session (the one-screen institution)
 
-The site became a single fixed screen — no page scroll. `index.html` (the cloud) had already moved to `canvas.html`; the new `index.html` is a room: the cloud fills the middle as a frameless, always-on iframe stage, and STUDIO / WORK / THE COHORT are docked as bars on the left / right / bottom edges (top strip: brand, live ticker, week, SUBMIT). Clicking a bar slides its panel over the canvas (`js/aa-app.js` + `css/aa.css`); panels scroll internally; `#studio` / `#work` / `#cohort` / `#work=<slug>` deep-link. On phones the bars fold into a bottom tab row and panels rise as sheets.
+The site became a single fixed screen — no page scroll. `index.html` (the cloud) had already moved to `canvas.html`; the new `index.html` is a room: the cloud fills the middle as a frameless, always-on iframe stage, and STUDIO / WORK / PEOPLE are docked as bars on the left / right / bottom edges (top strip: brand, live ticker, week, SUBMIT). Clicking a bar slides its panel over the canvas (`js/aa-app.js` + `css/aa.css`); panels scroll internally; `#studio` / `#work` / `#cohort` / `#work=<slug>` deep-link. On phones the bars fold into a bottom tab row and panels rise as sheets.
 
-The cloud itself was recut in `canvas.html`: it now opens directly on the settled iso structure (`minScroll()` — the title landing is unreachable) and the journey stops just short of the dive's dark run-out (`maxScroll() = cloudEnd() − 420`); the quote outro and the embedded end-of-dive ledger were removed along with their controller script. THE LEDGER survives as the plain `people.html` (linked from the cohort panel; `#<slug>` deep link).
+The cloud itself was recut in `canvas.html`: it now opens directly on the settled iso structure (`minScroll()` — the title landing is unreachable) and the journey stops just short of the dive's dark run-out (`maxScroll() = cloudEnd() − 420`); the quote outro and the embedded end-of-dive ledger were removed along with their controller script. THE LEDGER survives as the plain `people.html` (linked from the People panel; `#<slug>` deep link). The studio panel carries the real brief from the Lagori "Imagination Infrastructure" studio pitch; the People panel lists the studio leads and guest lecturers.
 
 The look: Archivo grotesque colliding with italic Spectral in panel titles, ghost outline numerals behind each page, film grain over the whole room, slow panel choreography. All data rules hold: strict 1:1 mirror of the CSVs, honest empty states, `textContent` only for untrusted values, `?sandbox` preserved everywhere.
 

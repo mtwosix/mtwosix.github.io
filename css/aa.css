@@ -224,23 +224,14 @@ a.aa-top-cta:hover { background: var(--rust); }
 .aa-edge-left:hover .edge-arr { transform: rotate(180deg) translateY(-4px); }
 .aa-edge-right:hover .edge-arr { transform: translateY(4px); }
 
+/* the bottom bar runs the FULL width so its top rule is one unbroken line —
+   the side bars stand on it, and every edge line meets cleanly */
 .aa-edge-bottom {
-  left: var(--edge-w); right: var(--edge-w); bottom: 0; height: var(--bot-h);
+  left: 0; right: 0; bottom: 0; height: var(--bot-h);
   border-top: 1px solid var(--ink);
-  gap: 16px; padding: 0 18px;
+  gap: 16px; padding: 0 18px 0 calc(var(--edge-w) + 18px);
 }
 .aa-edge-bottom:hover .edge-arr { transform: translateY(-3px); }
-
-/* corner squares where the edges meet — the room's joints */
-.aa-edge-left::after, .aa-edge-right::after {
-  content: ''; position: absolute; bottom: calc(-1 * var(--bot-h)); left: 0; right: 0;
-  height: var(--bot-h);
-  background: var(--paper);
-  border-top: 1px solid var(--ink);
-  pointer-events: none;
-}
-.aa-edge-left::after  { border-right: 1px solid var(--ink); }
-.aa-edge-right::after { border-left: 1px solid var(--ink); }
 
 /* ---- the panels — pages sliding in over the canvas --------------------------- */
 
@@ -520,6 +511,101 @@ a.aa-top-cta:hover { background: var(--rust); }
 }
 .aa-index-row .arrow { font: 400 16px var(--mono); color: var(--ink-40); transition: transform var(--dur) var(--ease), color var(--dur) var(--ease); }
 .aa-index-row:hover .arrow { transform: translateX(6px); color: var(--rust); }
+
+/* ---- the people — leads & guests ---------------------------------------------------- */
+
+.aa-people {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 235px));
+  margin-bottom: 6px;
+}
+@media (max-width: 560px) { .aa-people { grid-template-columns: repeat(2, 1fr); } }
+.aa-person {
+  margin: 0; background: var(--paper);
+  border: 1px solid var(--hairline);
+  padding: 12px 12px 14px;
+  display: flex; flex-direction: column; gap: 11px;
+}
+.aa-person .ph {
+  display: block; aspect-ratio: 4 / 5; overflow: hidden;
+  background: var(--paper-3);
+  border: 1px solid var(--hairline-2);
+}
+.aa-person .ph img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  filter: grayscale(1) contrast(1.04);
+  transition: filter var(--dur-slow) var(--ease);
+}
+.aa-person:hover .ph img { filter: none; }
+.aa-person figcaption { display: flex; flex-direction: column; gap: 5px; }
+.aa-person figcaption b {
+  font: 800 14px var(--grot); letter-spacing: .04em; text-transform: uppercase;
+}
+.aa-person figcaption span {
+  font: 400 9px var(--mono2); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-60); line-height: 1.7;
+}
+
+/* ---- studio panel instruments ---------------------------------------------------- */
+
+/* the studio's four questions — an index of inquiries */
+.aa-qs { list-style: none; margin: 0 0 6px; padding: 0; }
+.aa-qs li {
+  padding: 13px 2px;
+  border-bottom: 1px solid var(--hairline);
+  font: 300 clamp(16px, 1.8vw, 21px)/1.45 var(--serif);
+}
+.aa-qs li:first-child { border-top: 1px solid var(--ink); }
+.aa-qs li em { font-style: italic; color: var(--rust); }
+
+/* the semester arc — six numbered stations */
+.aa-arc {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  margin-bottom: 6px;
+}
+
+/* what you'll make — plates of possibility */
+.aa-make { display: flex; flex-wrap: wrap; gap: 8px; }
+.aa-make span {
+  border: 1px solid var(--ink);
+  padding: 9px 14px;
+  font: 700 10px var(--mono2); letter-spacing: .16em; text-transform: uppercase;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.aa-make span:hover { background: var(--ink); color: var(--paper); }
+
+/* ---- the student workspace header (work panel, filtered) -------------------------- */
+
+.aa-workstu {
+  display: flex; align-items: center; gap: 18px;
+  border: 1px solid var(--ink);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  background: var(--paper-2);
+}
+.aa-workstu .ph {
+  flex: none; width: 76px; height: 92px; overflow: hidden;
+  border: 2px solid var(--ink);
+  border-left-width: 5px; /* the student's colour, set inline */
+  background: var(--paper-3);
+}
+.aa-workstu .ph canvas { display: block; width: 100%; height: 100%; }
+.aa-workstu .who { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.aa-workstu .who b {
+  font: 800 clamp(20px, 2.6vw, 30px)/1 var(--grot);
+  letter-spacing: .01em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.aa-workstu .who span {
+  font: 400 9.5px var(--mono2); letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-60);
+}
+.aa-workstu .aa-btn { margin-left: auto; flex: none; }
+@media (max-width: 560px) {
+  .aa-workstu { flex-wrap: wrap; }
+  .aa-workstu .aa-btn { margin-left: 0; }
+}
 
 /* ---- calendar strip --------------------------------------------------------------- */
 

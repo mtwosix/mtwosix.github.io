@@ -192,8 +192,48 @@
     openX = x;
   }
 
+  /* ------------------------------------------------- student workspace header
+     When the wall is filtered to one student, their headshot (a quiet grey
+     placeholder until real portraits arrive) and name sit above the filters. */
+  function silhouette(W, H) {
+    var cv = document.createElement('canvas');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = W * dpr; cv.height = H * dpr;
+    var g = cv.getContext('2d'); g.scale(dpr, dpr);
+    g.fillStyle = '#eceae2'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#b9b5aa';
+    g.beginPath(); g.arc(W / 2, H * 0.40, W * 0.20, 0, 6.2832); g.fill();
+    g.beginPath(); g.ellipse(W / 2, H * 1.02, W * 0.36, H * 0.30, 0, Math.PI, 0); g.fill();
+    return cv;
+  }
+  function studentHeader() {
+    var host = document.getElementById('aa-work-student');
+    if (!host) return;
+    host.textContent = '';
+    if (!D || state.student === 'all' || !D.roster[state.student]) return;
+    var i = state.student, name = D.roster[i];
+    var count = D.submissions.filter(function (s) { return s.studentIndex === i; }).length;
+
+    var box = el('div', 'aa-workstu');
+    var ph = el('span', 'ph');
+    ph.style.borderLeftColor = M26.colorFor(i, D.roster.length, 46);
+    ph.appendChild(silhouette(76, 92));
+    box.appendChild(ph);
+    var side = el('div', 'who');
+    side.appendChild(el('b', null, name));
+    side.appendChild(el('span', null,
+      'Student ' + ('0' + (i + 1)).slice(-2) + ' · ' + count + (count === 1 ? ' submission' : ' submissions') + ' on record'));
+    box.appendChild(side);
+    var all = el('button', 'aa-btn', 'View everyone →');
+    all.type = 'button';
+    all.addEventListener('click', function () { filterStudent('all'); });
+    box.appendChild(all);
+    host.appendChild(box);
+  }
+
   /* -------------------------------------------------------------------- paint */
   function paint() {
+    studentHeader();
     var host = document.getElementById('aa-work-grid');
     if (!host) return;
     host.textContent = '';
