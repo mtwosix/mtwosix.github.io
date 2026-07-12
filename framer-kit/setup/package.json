@@ -1,0 +1,12 @@
+{
+  "name": "m26-framer-setup",
+  "private": true,
+  "type": "module",
+  "description": "One-shot setup of the M26 Studio Framer project: CMS collections + items, code components, publish.",
+  "dependencies": {
+    "framer-api": "latest"
+  },
+  "scripts": {
+    "setup": "node setup.mjs"
+  }
+}
